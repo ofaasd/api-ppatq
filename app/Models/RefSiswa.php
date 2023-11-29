@@ -5,18 +5,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class User extends Model
+class RefSiswa extends Model
 {
     use HasFactory;
-    protected $table = 'uers_ci';
+
+    protected $table = 'ref_siswa';
     protected $primaryKey = 'id';
     protected $keyType = "int";
     public $timestamp = true;
     public $incrementing = true;
 
     protected $fillable = [
-        'password',
-        'name',
-        'email',
+        'kode', //Kelas
+        'nama',  //Nama lengkap
+        'no_induk', //No Induk Siswa
+        'password', //menggunakan enkripsi md5 dari tahun
     ];
 }
