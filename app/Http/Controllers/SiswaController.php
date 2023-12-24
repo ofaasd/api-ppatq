@@ -95,7 +95,7 @@ class SiswaController extends Controller
     public function get_siswa(Request $request){
         $hasil = $this->verifikasi($request);
         if($hasil){
-            echo json_encode($hasil);
+            return (new SiswaResource($hasil))->response()->setStatusCode(201);
         }else{
             echo "gagal";
         }
