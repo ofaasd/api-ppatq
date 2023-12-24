@@ -92,12 +92,18 @@ class SiswaController extends Controller
             ], 400));
         }
     }
-    public function get_siswa(Request $request){
+    public function get_siswa(Request $request): JsonResponse{
         $hasil = $this->verifikasi($request);
         if($hasil){
             return (new SiswaResource($hasil))->response()->setStatusCode(201);
         }else{
-            echo "gagal";
+            throw new HttpResponseException(response([
+                "errors" => [
+                    'Verifikasi' => [
+                        'Verifikasi gagal. Harap Login kembali'
+                    ]
+                ]
+            ], 400));
         }
     }
 }
