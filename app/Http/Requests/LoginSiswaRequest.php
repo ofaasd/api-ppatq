@@ -6,7 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Contracts\Validation\Validator;
 
-class VerifikasiSiswaRequest extends FormRequest
+class LoginSiswaRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,8 +25,9 @@ class VerifikasiSiswaRequest extends FormRequest
     {
         return [
             //
+            'kode' => ['required','max:100'], //Kelas
             'no_induk'=> ['required','max:100'], //No Induk Siswa
-            'token' => ['required','max:100']
+            'password' => ['required','max:100'] // password required
         ];
     }
 

@@ -1,0 +1,773 @@
+{
+    "openapi":"3.0.2",
+    "info": {
+      "title":"API Title",
+      "version":"1.0"
+    },
+    "servers": [
+      {"url":"https://api.ppatq-rf.id/api"}
+    ],
+    "paths": {
+        "/siswa/verifikasi" : {
+            "post" : {
+                "description" : "Verifikasi siswa untuk melakukan pembayaran",
+                "requestBody" : {
+                    "content": {
+                        "application/json" : {
+                            "examples": {
+                                "syauqi" : {
+                                    "description": "Verifikasi User Syauqi",
+                                    "value" : {
+                                        "no_induk" : "803",
+                                        "kode" : "5a"
+                                    }
+                                }
+                            },
+                            "schema" : {
+                                "type": "object",
+                                "required": [
+                                    "no_induk","kode"
+                                ],
+                                "properties": {
+                                    "no_induk" : {
+                                        "type": "string"
+                                    },
+                                    "kode" : {
+                                        "type" : "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200":{
+                        "description": "Success Verifikasi Siswa",
+                        "content": {
+                            "application/json" : {
+                                "schema" :{
+                                    "type": "object",
+                                    "properties": {
+                                        "data" : {
+                                            "type" : "object",
+                                            "properties": {
+                                                "id" : {
+                                                    "type": "number"
+                                                },
+                                                "kode" : {
+                                                    "type": "string"
+                                                },
+                                                "kode_murroby" : {
+                                                    "type": "number"
+                                                },
+                                                "nama" : {
+                                                    "type": "string"
+                                                },
+                                                "no_induk" : {
+                                                    "type": "string"
+                                                },
+                                                "status" : {
+                                                    "type": "number"
+                                                }
+                                            }
+                                        },
+                                        "errors" : {
+                                            "type": "object"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400" : {
+                        "description": "Verifikasi Gagal no induk dan kelas tidak sesuai",
+                        "content": {
+                            "application/json" : {
+                                "examples": {
+                                    "validationerror" : {
+                                        "description": "Validation Error",
+                                        "value" : {
+                                            "errors" : {
+                                                "no_induk" : [
+                                                    "No Induk Tidak boleh kosong"
+                                                ],
+                                                "kode" : [
+                                                    "Kode kelas Tidak boleh kosong"
+                                                ],
+                                                "validation" : [
+                                                    "no_induk dan kode tidak terdaftar "
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/siswa/login" : {
+            "post" : {
+                "description": "Login Siswa Untuk Update data pribady",
+                "requestBody" : {
+                    "content" : {
+                        "application/json" : {
+                            "examples": {
+                                "syauqi" : {
+                                    "description": "Login User Syauqi",
+                                    "value" : {
+                                        "no_induk" : "803",
+                                        "kode" : "5a",
+                                        "password" : "310512L"
+                                    }
+                                }
+                            },
+                            "schema" : {
+                                "type": "object",
+                                "required": [
+                                    "no_induk","kode"
+                                ],
+                                "properties": {
+                                    "no_induk" : {
+                                        "type": "string"
+                                    },
+                                    "kode" : {
+                                        "type" : "string"
+                                    },
+                                    "token" : {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200":{
+                        "description": "Success Login Siswa",
+                        "content": {
+                            "application/json" : {
+                                "schema" :{
+                                    "type": "object",
+                                    "properties": {
+                                        "data" : {
+                                            "type" : "object",
+                                            "properties": {
+                                                "id" : {
+                                                    "type": "number"
+                                                },
+                                                "kode" : {
+                                                    "type": "string"
+                                                },
+                                                "nama" : {
+                                                    "type": "string"
+                                                },
+                                                "no_induk" : {
+                                                    "type": "string"
+                                                },
+                                                "token" : {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "errors" : {
+                                            "type": "object"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/siswa" : {
+            "get" : {
+                "description" : "Mengambil semua data siswa",
+                "responses": {
+                    "200" : {
+                        "description": "Berhasil Mendapat Data Siswa",
+                        "content": {
+                            "application/json" : {
+                                "schema" : {
+                                    "type": "object",
+                                    "properties": {
+                                        "data" : {
+                                            "type": "object",
+                                            "properties": {
+                                                "id" : {
+                                                    "type": "number"
+                                                },
+                                                "kode" : {
+                                                    "type": "string"
+                                                },
+                                                "kode_murroby" : {
+                                                    "type": "number"
+                                                },
+                                                "nama" : {
+                                                    "type": "string"
+                                                },
+                                                "no_induk" : {
+                                                    "type": "string"
+                                                },
+                                                "status" : {
+                                                    "type": "number"
+                                                }
+                                            }
+                                        },
+                                        "errors" : {
+                                            "type" : "object"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/siswa/detail" : {
+            "get" : {
+                "description" : "Mengambil detail informasi siswa",
+                "parameters": [
+                    {
+                        "name" : "Authorization",
+                        "in" :"header"
+                    }
+                ],
+                "responses": {
+                    "200" : {
+                        "description": "Success Get Current User",
+                        "content": {
+                            "application/json" : {
+                                "schema" : {
+                                    "type": "object",
+                                    "properties": {
+                                        "data" : {
+                                            "type": "object",
+                                            "properties": {
+                                                "id" : {
+                                                    "type": "integer"
+                                                },
+                                                "nama" : {
+                                                    "type": "string"
+                                                },
+                                                "nisn" : {
+                                                    "type": "string"
+                                                },
+                                                "nik" : {
+                                                    "type": "string"
+                                                },
+                                                "anak_ke" : {
+                                                    "type": "string"
+                                                },
+                                                "tempat_lahir" : {
+                                                    "type": "string"
+                                                },
+                                                "tanggal_lahir" : {
+                                                    "type": "string"
+                                                },
+                                                "usia" : {
+                                                    "type": "string"
+                                                },
+                                                "jenis_kelamin" : {
+                                                    "type": "string"
+                                                },
+                                                "alamat" : {
+                                                    "type": "string"
+                                                },
+                                                "provinsi" : {
+                                                    "type": "integer"
+                                                },
+                                                "kota" : {
+                                                    "type": "integer"
+                                                },
+                                                "kelurahan" : {
+                                                    "type": "string"
+                                                },
+                                                "kecamatan" : {
+                                                    "type": "string"
+                                                },
+                                                "kode_pos" : {
+                                                    "type": "string"
+                                                },
+                                                "nik_kk" : {
+                                                    "type": "string"
+                                                },
+                                                "nama_ayah" : {
+                                                    "type": "string"
+                                                },
+                                                "pendidikan_ayah" : {
+                                                    "type": "string"
+                                                },
+                                                "pekerjaan_ayah" : {
+                                                    "type": "string"
+                                                },
+                                                "nama_ibu" : {
+                                                    "type": "string"
+                                                },
+                                                "pendidikan_ibu" : {
+                                                    "type": "string"
+                                                },
+                                                "pekerjaan_ibu" : {
+                                                    "type": "string"
+                                                },
+                                                "no_hp" : {
+                                                    "type": "string"
+                                                },
+                                                "foto" : {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "errors" : {
+                                            "type" : "object"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch" : {
+                "description" : "update data siswa",
+                "parameters": [
+                    {
+                        "name" : "Authorization",
+                        "in" :"header"
+                    }
+                ],
+                "requestBody" : {
+                    "description" : "Update Current User",
+                    "content": {
+                        "application/json" : {
+                            "schema" : {
+                                "type": "object",
+                                "properties": {
+                                    "id" : {
+                                        "type": "integer"
+                                    },
+                                    "nama" : {
+                                        "type": "string"
+                                    },
+                                    "nisn" : {
+                                        "type": "string"
+                                    },
+                                    "nik" : {
+                                        "type": "string"
+                                    },
+                                    "anak_ke" : {
+                                        "type": "string"
+                                    },
+                                    "tempat_lahir" : {
+                                        "type": "string"
+                                    },
+                                    "tanggal_lahir" : {
+                                        "type": "string"
+                                    },
+                                    "usia" : {
+                                        "type": "string"
+                                    },
+                                    "jenis_kelamin" : {
+                                        "type": "string"
+                                    },
+                                    "alamat" : {
+                                        "type": "string"
+                                    },
+                                    "provinsi" : {
+                                        "type": "integer"
+                                    },
+                                    "kota" : {
+                                        "type": "integer"
+                                    },
+                                    "kelurahan" : {
+                                        "type": "string"
+                                    },
+                                    "kecamatan" : {
+                                        "type": "string"
+                                    },
+                                    "kode_pos" : {
+                                        "type": "string"
+                                    },
+                                    "nik_kk" : {
+                                        "type": "string"
+                                    },
+                                    "nama_ayah" : {
+                                        "type": "string"
+                                    },
+                                    "pendidikan_ayah" : {
+                                        "type": "string"
+                                    },
+                                    "pekerjaan_ayah" : {
+                                        "type": "string"
+                                    },
+                                    "nama_ibu" : {
+                                        "type": "string"
+                                    },
+                                    "pendidikan_ibu" : {
+                                        "type": "string"
+                                    },
+                                    "pekerjaan_ibu" : {
+                                        "type": "string"
+                                    },
+                                    "no_hp" : {
+                                        "type": "string"
+                                    },
+                                    "foto" : {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200" : {
+                        "description": "Success Update Current User",
+                        "content": {
+                            "application/json" : {
+                                "schema" : {
+                                    "type": "object",
+                                    "properties": {
+                                        "data" : {
+                                            "type": "object",
+                                            "properties": {
+                                                "id" : {
+                                                    "type": "integer"
+                                                },
+                                                "nama" : {
+                                                    "type": "string"
+                                                },
+                                                "nisn" : {
+                                                    "type": "string"
+                                                },
+                                                "nik" : {
+                                                    "type": "string"
+                                                },
+                                                "anak_ke" : {
+                                                    "type": "string"
+                                                },
+                                                "tempat_lahir" : {
+                                                    "type": "string"
+                                                },
+                                                "tanggal_lahir" : {
+                                                    "type": "string"
+                                                },
+                                                "usia" : {
+                                                    "type": "string"
+                                                },
+                                                "jenis_kelamin" : {
+                                                    "type": "string"
+                                                },
+                                                "alamat" : {
+                                                    "type": "string"
+                                                },
+                                                "provinsi" : {
+                                                    "type": "integer"
+                                                },
+                                                "kota" : {
+                                                    "type": "integer"
+                                                },
+                                                "kelurahan" : {
+                                                    "type": "string"
+                                                },
+                                                "kecamatan" : {
+                                                    "type": "string"
+                                                },
+                                                "kode_pos" : {
+                                                    "type": "string"
+                                                },
+                                                "nik_kk" : {
+                                                    "type": "string"
+                                                },
+                                                "nama_ayah" : {
+                                                    "type": "string"
+                                                },
+                                                "pendidikan_ayah" : {
+                                                    "type": "string"
+                                                },
+                                                "pekerjaan_ayah" : {
+                                                    "type": "string"
+                                                },
+                                                "nama_ibu" : {
+                                                    "type": "string"
+                                                },
+                                                "pendidikan_ibu" : {
+                                                    "type": "string"
+                                                },
+                                                "pekerjaan_ibu" : {
+                                                    "type": "string"
+                                                },
+                                                "no_hp" : {
+                                                    "type": "string"
+                                                },
+                                                "foto" : {
+                                                    "type": "string"
+                                                }
+                                            }
+                                        },
+                                        "errors" : {
+                                            "type" : "object"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+        },
+        "siswa/logout" :{
+            "delete" : {
+                "description"  :"Logout Current Siswa",
+                "parameters": [
+                    {
+                        "name" : "Authorization",
+                        "in" :"header"
+                    }
+                ],
+                "responses" : {
+                    "200" : {
+                        "description": "Success Update Current User",
+                        "content": {
+                            "application/json" : {
+                                "schema" : {
+                                    "type": "object",
+                                    "properties": {
+                                        "data" : {
+                                            "type": "string"
+                                        },
+                                        "errors" : {
+                                            "type" : "object"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/jenis_pembayaran": {
+            "get": {
+                "description": "",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json" : {
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "id" : {
+                                            "type": "integer"
+                                        },
+                                        "jenis" :{
+                                            "type": "string"
+                                        },
+                                        "urutan" :{
+                                            "type": "integer"
+                                        },
+                                        "harga" :{
+                                            "type": "number"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/pembayaran": {
+            "get": {
+                "description": "get history pembayaran",
+                "requestBody" : {
+                    "content": {
+                        "application/json" : {
+                            "examples": {
+                                "syauqi" : {
+                                    "description": "Get History Pembayaran Syauqi",
+                                    "value" : {
+                                        "no_induk" : "803",
+                                        "token" : "7128317a78az897",
+                                        "periode" : "0",
+                                        "tahun" : "2023"
+                                    }
+                                }
+                            },
+                            "schema" : {
+                                "type": "object",
+                                "required": [
+                                    "no_induk","token","tahun"
+                                ],
+                                "properties": {
+                                    "no_induk" : {
+                                        "type": "string"
+                                    },
+                                    "token" : {
+                                        "type" : "string"
+                                    },
+                                    "periode" : {
+                                        "type": "integer"
+                                    },
+                                    "tahun" :{
+                                        "type": "number"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json" : {
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "id" : {
+                                            "type": "integer"
+                                        },
+                                        "nama_santri" :{
+                                            "type": "string"
+                                        },
+                                        "tanggal_bayar" :{
+                                            "type": "string"
+                                        },
+                                        "periode" :{
+                                            "type": "integer"
+                                        },
+                                        "tahun" :{
+                                            "type": "integer"
+                                        },
+                                        "validasi" : {
+                                            "type": "integer"
+                                        },
+                                        "jumlah" :{
+                                            "type": "integer"
+                                        },
+                                        "bank_pengirim" : {
+                                            "type": "string"
+                                        },
+                                        "atas_nama" :{
+                                            "type": "string"
+                                        },
+                                        "catatan" :{
+                                            "type": "string"
+                                        },
+                                        "no_wa" :{
+                                            "type": "string"
+                                        },
+                                        "bukti" :{
+                                            "type": "string"
+                                        },
+                                        "input_by":{
+                                            "type": "integer"
+                                        },
+                                        "detail_bayar" : {
+                                            "type": "object",
+                                            "properties": {
+                                                "id_jenis_bayar" : {
+                                                    "type": "integer"
+                                                },
+                                                "jenis" : {
+                                                    "type": "string"
+                                                },
+                                                "jumlah" :{
+                                                    "type": "jenis"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        },
+        "/detail_bayar": {
+            "get": {
+                "description": "Get Detail bayar",
+                "requestBody" : {
+                    "content": {
+                        "application/json" : {
+                            "examples": {
+                                "syauqi" : {
+                                    "description": "Get Detail Pembayaran",
+                                    "value" : {
+                                        "id_pembayaran" : "21",
+                                        "no_induk" : "803",
+                                        "token" : "7128317a78az897"
+                                    }
+                                }
+                            },
+                            "schema" : {
+                                "type": "object",
+                                "required": [
+                                    "no_induk","token","id_pembayaran"
+                                ],
+                                "properties": {
+                                    "id_pembayaran":{
+                                        "type": "integer"
+                                    },
+                                    "no_induk" : {
+                                        "type": "string"
+                                    },
+                                    "token" : {
+                                        "type" : "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json" : {
+                                "schema":{
+                                    "type": "object",
+                                    "properties": {
+                                        "id" : {
+                                            "type": "integer"
+                                        },
+                                        "id_pembayaran" :{
+                                            "type": "integer"
+                                        },
+                                        "id_jenis_pembayaran" :{
+                                            "type": "integer"
+                                        },
+                                        "jenis" :{
+                                            "type": "string"
+                                        },
+                                        "jumlah" :{
+                                            "type": "number"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+  }
+

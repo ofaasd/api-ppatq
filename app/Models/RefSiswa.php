@@ -12,6 +12,8 @@ class RefSiswa extends Model
     protected $table = 'ref_siswa';
     protected $primaryKey = 'id';
     protected $keyType = "int";
+    protected $dateFormat = 'U';
+
     public $timestamp = true;
     public $incrementing = true;
 
