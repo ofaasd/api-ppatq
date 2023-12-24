@@ -62,7 +62,7 @@ class SiswaController extends Controller
             $siswa = RefSiswa::where(['no_induk'=>$data['no_induk'], 'token'=>$data['token']]);
             if($siswa->count() > 0){
                 $hasil = $siswa->first();
-                return true;
+                return $hasil;
             }else{
                 return false;
             }
@@ -94,9 +94,8 @@ class SiswaController extends Controller
     }
     public function get_siswa(Request $request){
         $hasil = $this->verifikasi($request);
-        print_r($hasil);
         if($hasil){
-            echo "berhasil";
+            echo json_encode($hasil);
         }else{
             echo "gagal";
         }
