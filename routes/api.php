@@ -19,6 +19,7 @@ Route::get('siswa',[\App\Http\Controllers\SiswaController::class, 'get_siswa']);
 Route::get('siswa/detail',[\App\Http\Controllers\SiswaController::class, 'get_siswa_detail']);
 Route::get('siswa/verifikasi',[\App\Http\Controllers\SiswaController::class, 'verifikasi_api']);
 Route::post('siswa/login',[\App\Http\Controllers\SiswaController::class, 'login']);
+Route::post('siswa/logout',[\App\Http\Controllers\SiswaController::class, 'logout']);
 
 
 //Jenis Pembayaran

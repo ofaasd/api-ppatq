@@ -123,4 +123,27 @@ class SiswaController extends Controller
             ], 400));
         }
     }
+    public function logout(Request $request): JsonResponse{
+        $hasil = $this->verifikasi($request);
+        if($hasil){
+            $siswa = RefSiswa::find($hasil->id);
+            $siswa->token = '';
+            $iswa->save();
+            throw new HttpResponseException(response([
+                "success" => [
+                    'Logout' => [
+                        'Logout berhasil'
+                    ]
+                ]
+            ], 201));
+        }else{
+            throw new HttpResponseException(response([
+                "errors" => [
+                    'Verifikasi' => [
+                        'Verifikasi gagal. Harap Login kembali'
+                    ]
+                ]
+            ], 400));
+        }
+    }
 }
