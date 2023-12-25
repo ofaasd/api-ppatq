@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 //Route untuk user
 Route::post('/users',[\App\Http\Controllers\UserController::class, 'register']);
 Route::get('siswa',[\App\Http\Controllers\SiswaController::class, 'get_siswa']);
+Route::get('siswa/detail',[\App\Http\Controllers\SiswaController::class, 'get_siswa_detail']);
 Route::get('siswa/verifikasi',[\App\Http\Controllers\SiswaController::class, 'verifikasi_api']);
 Route::post('siswa/login',[\App\Http\Controllers\SiswaController::class, 'login']);
 

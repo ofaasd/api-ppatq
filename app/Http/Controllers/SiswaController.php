@@ -6,7 +6,9 @@ use App\Http\Requests\VerifikasiSiswaRequest;
 use App\Http\Requests\LoginSiswaRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use App\Models\RefSiswa;
+use App\Models\SantriDetail;
 use App\Http\Resources\SiswaResource;
+use App\Http\Resources\SiswaDetailResource;
 use Illuminate\Support\Str;
 
 use Illuminate\Http\Request;
@@ -96,6 +98,21 @@ class SiswaController extends Controller
         $hasil = $this->verifikasi($request);
         if($hasil){
             return (new SiswaResource($hasil))->response()->setStatusCode(201);
+        }else{
+            throw new HttpResponseException(response([
+                "errors" => [
+                    'Verifikasi' => [
+                        'Verifikasi gagal. Harap Login kembali'
+                    ]
+                ]
+            ], 400));
+        }
+    }
+    public function get_siswa_detail(Request $request): JsonResponse{
+        $hasil = $this->verifikasi($request);
+        if($hasil){
+            $siswa_detail = SantriDetail::where("no_induk",$hasil->no_induk)->first();
+            return (new SiswaDetailResource($siswa_detail))->response()->setStatusCode(201);
         }else{
             throw new HttpResponseException(response([
                 "errors" => [
