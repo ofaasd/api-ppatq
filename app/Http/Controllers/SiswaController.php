@@ -128,7 +128,7 @@ class SiswaController extends Controller
         if($hasil){
             $siswa = RefSiswa::find($hasil->id);
             $siswa->token = '';
-            $iswa->save();
+            $siswa->save();
             throw new HttpResponseException(response([
                 "success" => [
                     'Logout' => [
