@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\KesehatanSantriController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -25,3 +27,6 @@ Route::post('pembayaran',[\App\Http\Controllers\PembayaranController::class, 'st
 
 //Jenis Pembayaran
 Route::get('/jenis_pembayaran',[\App\Http\Controllers\JenisPembayaranController::class, 'index']);
+
+// Kesehatan Santri
+Route::get('/kesehatan-santri', [KesehatanSantriController::class, 'index']);
