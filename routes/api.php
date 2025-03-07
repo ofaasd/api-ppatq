@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BeritaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -30,3 +31,6 @@ Route::get('/jenis_pembayaran',[\App\Http\Controllers\JenisPembayaranController:
 
 // Kesehatan Santri
 Route::get('/kesehatan-santri', [KesehatanSantriController::class, 'index']);
+
+// Berita
+Route::get('/berita', [BeritaController::class, 'index']);
