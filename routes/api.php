@@ -1,10 +1,16 @@
 <?php
 
+use App\Http\Controllers\AboutController;
+use App\Http\Controllers\AgendaController;
 use App\Http\Controllers\BeritaController;
+use App\Http\Controllers\GaleriController;
+use App\Http\Controllers\KelasKamarController;
+use App\Http\Controllers\KesantrianController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\KesehatanSantriController;
+use App\Http\Controllers\StaffPengasuhController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,3 +40,25 @@ Route::get('/kesehatan-santri', [KesehatanSantriController::class, 'index']);
 
 // Berita
 Route::get('/berita', [BeritaController::class, 'index']);
+
+// Agenda
+Route::get('/agenda', [AgendaController::class, 'index']);
+
+// About
+Route::get('/about', [AboutController::class, 'index']);
+
+// Galeri
+Route::get('/galeri', [GaleriController::class, 'index']);
+
+// Staff Dan Pengasuh
+Route::get('/get-ustadz', [StaffPengasuhController::class, 'getUstadz']);
+Route::get('/get-murroby', [StaffPengasuhController::class, 'getMurroby']);
+Route::get('/get-staff', [StaffPengasuhController::class, 'getStaff']);
+
+// Kesantrian
+Route::get('/kesantrian', [KesantrianController::class, 'index']);
+
+// Kesantrian
+Route::get('/kelas-kamar', [KelasKamarController::class, 'index']);
+Route::get('/kelas/{id}', [KelasKamarController::class, 'showKelas']);
+Route::get('/kamar/{id}', [KelasKamarController::class, 'showKamar']);
