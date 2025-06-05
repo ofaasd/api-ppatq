@@ -10,7 +10,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\KesehatanSantriController;
+use App\Http\Controllers\MurrobyController;
 use App\Http\Controllers\StaffPengasuhController;
+use App\Http\Controllers\UangSakuController;
 
 /*
 |--------------------------------------------------------------------------
@@ -63,3 +65,12 @@ Route::get('/kesantrian', [KesantrianController::class, 'index']);
 Route::get('/kelas-kamar', [KelasKamarController::class, 'index']);
 Route::get('/kelas/{id}', [KelasKamarController::class, 'showKelas']);
 Route::get('/kamar/{id}', [KelasKamarController::class, 'showKamar']);
+
+// Murroby
+Route::get('/murroby/santri/{idUser}', [MurrobyController::class, 'index']);
+
+// Uang Saku
+Route::get('/murroby/uang-saku/{idUser}', [UangSakuController::class, 'index']);
+Route::get('/murroby/uang-masuk/{noInduk}', [UangSakuController::class, 'uangMasuk']);
+Route::post('/murroby/uang-masuk/{noInduk}', [UangSakuController::class, 'storeUangMasuk']);
+Route::get('/murroby/uang-keluar/{noInduk}', [UangSakuController::class, 'uangKeluar']);

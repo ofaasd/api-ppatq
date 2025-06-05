@@ -9,7 +9,6 @@ class AboutController extends Controller
 {
    public function index(){
         try{
-
             $data = DB::table('about')
                 ->select(
                     'tentang',
