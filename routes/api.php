@@ -67,10 +67,13 @@ Route::get('/kelas/{id}', [KelasKamarController::class, 'showKelas']);
 Route::get('/kamar/{id}', [KelasKamarController::class, 'showKamar']);
 
 // Murroby
+Route::post('/murroby/login', [MurrobyController::class, 'login']);
 Route::get('/murroby/santri/{idUser}', [MurrobyController::class, 'index']);
 
 // Uang Saku
 Route::get('/murroby/uang-saku/{idUser}', [UangSakuController::class, 'index']);
-Route::get('/murroby/uang-masuk/{noInduk}', [UangSakuController::class, 'uangMasuk']);
-Route::post('/murroby/uang-masuk/{noInduk}', [UangSakuController::class, 'storeUangMasuk']);
-Route::get('/murroby/uang-keluar/{noInduk}', [UangSakuController::class, 'uangKeluar']);
+
+Route::get('/murroby/saku-masuk/{noInduk}', [UangSakuController::class, 'uangMasuk']);
+Route::post('/murroby/saku-masuk', [UangSakuController::class, 'storeUangMasuk']);
+Route::get('/murroby/saku-keluar/{noInduk}', [UangSakuController::class, 'uangKeluar']);
+Route::post('/murroby/saku-keluar', [UangSakuController::class, 'storeUangKeluar']);

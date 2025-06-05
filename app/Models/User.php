@@ -8,15 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 class User extends Model
 {
     use HasFactory;
-    protected $table = 'uers_ci';
+    protected $table = 'users';
     protected $primaryKey = 'id';
     protected $keyType = "int";
     public $timestamp = true;
     public $incrementing = true;
-
-    protected $fillable = [
-        'password',
-        'name',
-        'email',
-    ];
+    
+    protected $guarded = ["id"];
+    // protected $fillable = [
+    //     'password',
+    //     'name',
+    //     'email',
+    // ];
 }

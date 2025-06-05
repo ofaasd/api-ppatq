@@ -5,13 +5,56 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
+use App\Http\Requests\LoginMurrobyRequest;
+use App\Http\Resources\MurrobyResource;
+use App\Models\EmployeeNew;
+use App\Models\RefKamar;
+use App\Models\RefTahunAjaran;
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Exceptions\HttpResponseException;
+
+use Illuminate\Support\Facades\Hash;
+
 class MurrobyController extends Controller
 {
+    public function login(LoginMurrobyRequest $request): JsonResponse
+    {
+        $data = $request->validated();
+
+        // Ambil user berdasarkan email
+        $user = User::where('email', $data['email'])->first();
+
+        // Cek jika user ditemukan dan password cocok
+        if ($user && Hash::check($data['password'], $user->password)) {
+            // Ambil data pegawai terkait
+            $pegawai = EmployeeNew::where('employee_new.id', $user->pegawai_id)
+                ->select([
+                    'users.id AS idUser',
+                    'employee_new.nama AS namaMurroby',
+                    'employee_new.photo',
+                ])
+                ->leftJoin('users', 'users.pegawai_id', '=', 'employee_new.id')
+                ->first();
+
+            // Return resource dengan data pegawai
+            return (new MurrobyResource($pegawai))->response()->setStatusCode(201);
+        } else {
+            // Jika gagal
+            throw new HttpResponseException(response([
+                "errors" => [
+                    'Verifikasi' => [
+                        'Login gagal. Harap pastikan data yang dimasukkan sudah benar'
+                    ]
+                ]
+            ], 400));
+        }
+    }
+    
     public function index($idUser)
     {
-        $ta = DB::table('ref_tahun_ajaran')->where('is_aktif', 1)->first();
-        $dataUser = DB::table('users')
-            ->select([
+        $ta = RefTahunAjaran::where('is_aktif', 1)->first();
+        $dataUser = User::select([
                 'employee_new.nama AS namaMurroby',
                 'employee_new.photo AS fotoMurroby',
                 'ref_kamar.code AS kodeKamar'
@@ -29,8 +72,7 @@ class MurrobyController extends Controller
             ], 404);
         }
 
-        $listSantri = DB::table('ref_kamar')
-            ->select([
+        $listSantri = RefKamar::select([
                 'santri_detail.no_induk AS noIndukSantri',
                 'santri_detail.nama AS namaSantri',
                 'santri_detail.kelas AS kelasSantri',
