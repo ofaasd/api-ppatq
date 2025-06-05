@@ -16,13 +16,8 @@ class MurrobyResource extends JsonResource
     {
         return [
             'id' => $this->idUser,
-            // 'idPegawai' => $this->idPegawai,
-            // 'kode' => $this->kode,
-            // 'kode_murroby' => $this->kode_murroby,
             'nama' => $this->namaMurroby,
             'photo' => $this->photo,
-            // 'no_induk' => $this->no_induk,
-            // 'status' => $this->status,
             // 'token' => $this->token,
         ];
     }
