@@ -31,7 +31,7 @@ class MurrobyController extends Controller
             $pegawai = EmployeeNew::where('employee_new.id', $user->pegawai_id)
                 ->select([
                     'users.id AS idUser',
-                    'employee_new.nama AS namaMurroby',
+                    'employee_new.nama',
                     'employee_new.photo',
                 ])
                 ->leftJoin('users', 'users.pegawai_id', '=', 'employee_new.id')
