@@ -53,6 +53,9 @@ Route::get('/kesehatan-santri', [KesehatanSantriController::class, 'index']);
 // Berita
 Route::get('/berita', [BeritaController::class, 'index']);
 
+// Dakwah
+Route::get('/dakwah', [DakwahController::class, 'index']);
+
 // Agenda
 Route::get('/agenda', [AgendaController::class, 'index']);
 
