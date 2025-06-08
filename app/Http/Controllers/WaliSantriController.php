@@ -11,6 +11,8 @@ use App\Models\RefSiswa;
 use App\Models\SantriDetail;
 use App\Models\TbPemeriksaan;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
+
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -21,10 +23,14 @@ class WaliSantriController extends Controller
     {
         $reqData = $request->validated();
 
+        $tanggalLahir = Carbon::parse($reqData['tanggalLahir'])->format('Y-m-d');
+
         $siswa = RefSiswa::where([
-            'no_induk'=>$reqData['no_induk'], 
-            'kode'=>$reqData['kode']
-        ]);
+            'ref_siswa.no_induk'=>$reqData['no_induk'], 
+            'ref_siswa.kode'=>$reqData['kode'],
+            'santri_detail.tanggal_lahir'=>$tanggalLahir
+        ])
+        ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'ref_siswa.no_induk');
 
         if($siswa->count() > 0){
             $hasil = $siswa->first();
@@ -134,7 +140,7 @@ class WaliSantriController extends Controller
 
             $data['detailSantri'] = SantriDetail::select([
                 'santri_detail.nama',
-                'santri_detail.nisn',
+                'santri_detail.no_induk AS noInduk',
             ])->where('no_induk', $noInduk)->get();
 
             $data['ketahfidzan'] = $groupedData;
