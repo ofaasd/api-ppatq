@@ -43,6 +43,7 @@ Route::post('pembayaran',[\App\Http\Controllers\PembayaranController::class, 'st
 // Get Santri
 Route::prefix('get')->group(function () {
     Route::get('/santri', [GetDataController::class, 'siswa']);
+    Route::get('/kelas', [GetDataController::class, 'kelas']);
     Route::get('/kode-juz', [GetDataController::class, 'kodeJuz']);
 });
 
