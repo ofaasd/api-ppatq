@@ -91,6 +91,12 @@ Route::post('/ustad/login', [MurrobyController::class, 'login']);
 Route::prefix('murroby')->group(function () {
     Route::get('/santri/{idUser}', [MurrobyController::class, 'index']);
 
+    Route::get('/santri/pemeriksaan/{idUser}', [MurrobyController::class, 'pemeriksaan']);
+    Route::get('/santri/pemeriksaan/detail/{noInduk}', [MurrobyController::class, 'detailPemeriksaan']);
+    Route::get('/santri/pemeriksaan/{idPemeriksaan}', [MurrobyController::class, 'editPemeriksaan']);
+    Route::put('/santri/pemeriksaan/update/{idPemeriksaan}', [MurrobyController::class, 'updatePemeriksaan']);
+    Route::delete('/santri/pemeriksaan/{idPemeriksaan}', [MurrobyController::class, 'deletePemeriksaan']);
+
     // Uang Saku
     Route::get('/uang-saku/{idUser}', [UangSakuController::class, 'index']);
 
@@ -109,6 +115,7 @@ Route::prefix('ustad-tahfidz')->group(function () {
     Route::put('/tahfidz/update/{idDetailTahfidz}', [UstadTahfidzController::class, 'update']);
     Route::post('/tahfidz', [UstadTahfidzController::class, 'store']);
     Route::get('/tahfidz/show/{noInduk}', [UstadTahfidzController::class, 'detailSantri']);
+    Route::delete('/tahfidz/{idDetailTahfidz}', [UstadTahfidzController::class, 'delete']);
 });
  
 // Wali Santri

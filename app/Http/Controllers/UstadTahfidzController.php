@@ -302,7 +302,7 @@ class UstadTahfidzController extends Controller
     //     }
     // }
 
-    public function destroy(string $id)
+    public function delete(string $id)
     {
         try{
             $data = DetailSantriTahfidz::where('id', $id)->delete();
