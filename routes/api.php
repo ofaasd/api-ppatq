@@ -6,12 +6,14 @@ use App\Http\Controllers\AboutController;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\AgendaController;
 use App\Http\Controllers\BeritaController;
+use App\Http\Controllers\DakwahController;
 use App\Http\Controllers\GaleriController;
 use App\Http\Controllers\GetDataController;
 
 use App\Http\Controllers\MurrobyController;
 use App\Http\Controllers\UangSakuController;
 use App\Http\Controllers\KelasKamarController;
+use App\Http\Controllers\KeluhanController;
 use App\Http\Controllers\KesantrianController;
 use App\Http\Controllers\WaliSantriController;
 use App\Http\Controllers\UstadTahfidzController;
@@ -65,6 +67,9 @@ Route::get('/about', [AboutController::class, 'index']);
 // Galeri
 Route::get('/galeri', [GaleriController::class, 'index']);
 
+// Keluhan
+Route::post('/keluhan', [KeluhanController::class, 'store']);
+
 // Staff Dan Pengasuh
 Route::get('/get-ustadz', [StaffPengasuhController::class, 'getUstadz']);
 Route::get('/get-murroby', [StaffPengasuhController::class, 'getMurroby']);
@@ -73,7 +78,6 @@ Route::get('/get-staff', [StaffPengasuhController::class, 'getStaff']);
 // Kesantrian
 Route::get('/kesantrian', [KesantrianController::class, 'index']);
 
-// Kesantrian
 Route::get('/kelas-kamar', [KelasKamarController::class, 'index']);
 Route::get('/kelas/{id}', [KelasKamarController::class, 'showKelas']);
 Route::get('/kamar/{id}', [KelasKamarController::class, 'showKamar']);
