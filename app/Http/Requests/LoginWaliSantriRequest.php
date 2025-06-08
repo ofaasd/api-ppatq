@@ -24,8 +24,9 @@ class LoginWaliSantriRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'no_induk' => ['required','max:100'],
-            'kode' => ['required','max:100']
+            'noInduk' => ['required','max:100'],
+            'kode' => ['required','max:100'],
+            'tanggalLahir' => ['required','max:100']
         ];
     }
 

@@ -26,7 +26,7 @@ class WaliSantriController extends Controller
         $tanggalLahir = Carbon::parse($reqData['tanggalLahir'])->format('Y-m-d');
 
         $siswa = RefSiswa::where([
-            'ref_siswa.no_induk'=>$reqData['no_induk'], 
+            'ref_siswa.no_induk'=>$reqData['noInduk'], 
             'ref_siswa.kode'=>$reqData['kode'],
             'santri_detail.tanggal_lahir'=>$tanggalLahir
         ])
@@ -35,11 +35,11 @@ class WaliSantriController extends Controller
         if($siswa->count() > 0){
             $hasil = $siswa->first();
             // $token = Str::random(40);
-            $update = RefSiswa::find($hasil->id);
+            // $update = RefSiswa::find($hasil->id);
             // $update->token = $token;
             // $update->save();
             // $update->refresh();
-            return (new WaliSantriResource($update))->response()->setStatusCode(201);
+            return (new WaliSantriResource($hasil))->response()->setStatusCode(201);
         }else{
             throw new HttpResponseException(response([
                 "errors" => [
