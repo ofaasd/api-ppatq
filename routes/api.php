@@ -92,6 +92,7 @@ Route::prefix('murroby')->group(function () {
     Route::get('/santri/{idUser}', [MurrobyController::class, 'index']);
 
     Route::get('/santri/pemeriksaan/{idUser}', [MurrobyController::class, 'pemeriksaan']);
+    Route::post('/santri/pemeriksaan', [MurrobyController::class, 'storePemeriksaan']);
     Route::get('/santri/pemeriksaan/detail/{noInduk}', [MurrobyController::class, 'detailPemeriksaan']);
     Route::get('/santri/pemeriksaan/{idPemeriksaan}', [MurrobyController::class, 'editPemeriksaan']);
     Route::put('/santri/pemeriksaan/update/{idPemeriksaan}', [MurrobyController::class, 'updatePemeriksaan']);
