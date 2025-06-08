@@ -42,9 +42,10 @@ Route::post('pembayaran',[\App\Http\Controllers\PembayaranController::class, 'st
 
 // Get Santri
 Route::prefix('get')->group(function () {
-    Route::get('/santri', [GetDataController::class, 'siswa']);
+    Route::get('/santri/{search?}', [GetDataController::class, 'siswa']);
     Route::get('/kelas', [GetDataController::class, 'kelas']);
     Route::get('/kode-juz', [GetDataController::class, 'kodeJuz']);
+    Route::get('/kategori-keluhan', [GetDataController::class, 'kategoriKeluhan']);
 });
 
 //Jenis Pembayaran
@@ -101,8 +102,12 @@ Route::prefix('murroby')->group(function () {
 });
 
 // Ustad Tahfidz
-Route::get('/ustad-tahfidz/santri/{idUser}', [UstadTahfidzController::class, 'index']);
-
+Route::prefix('ustad-tahfidz')->group(function () {
+    Route::get('/santri/{idUser}', [UstadTahfidzController::class, 'listSantri']);
+    Route::get('/tahfidz/{idUser}', [UstadTahfidzController::class, 'index']);
+    Route::get('/tahfidz/show/{noInduk}', [UstadTahfidzController::class, 'detailSantri']);
+});
+ 
 // Wali Santri
 Route::prefix('wali-santri')->group(function () {
     Route::post('/login', [WaliSantriController::class, 'login']);
