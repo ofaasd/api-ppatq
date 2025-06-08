@@ -38,7 +38,7 @@ class UstadTahfidzController extends Controller
         }catch (\Exception $e) {
             return response()->json([
                 "status"  => 500,
-                "message" => "Terjadi kesalahan saat mengambil data. Hubungi Faiz ganteng",
+                "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
                 // "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
             ], 500);
         }
@@ -61,7 +61,7 @@ class UstadTahfidzController extends Controller
         }catch (\Exception $e) {
             return response()->json([
                 "status"  => 500,
-                "message" => "Terjadi kesalahan saat mengambil data. Hubungi Faiz ganteng",
+                "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
                 // "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
             ], 500);
         }
@@ -89,7 +89,7 @@ class UstadTahfidzController extends Controller
         }catch (\Exception $e) {
             return response()->json([
                 "status"  => 500,
-                "message" => "Terjadi kesalahan saat mengambil data. Hubungi Faiz ganteng",
+                "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
                 // "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
             ], 500);
         }
@@ -169,7 +169,7 @@ class UstadTahfidzController extends Controller
     //     }catch (\Exception $e) {
     //         return response()->json([
     //             "status"  => 500,
-    //             "message" => "Terjadi kesalahan saat mengambil data. Hubungi Faiz ganteng",
+    //             "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
     //             // "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
     //         ], 500);
     //     }
