@@ -246,7 +246,7 @@ class UangSakuController extends Controller
           DB::rollback();
           return response()->json([
                 "status"  => 500,
-                "message" => "Terjadi kesalahan saat mencatat saku keluar. Hubungi Faiz ganteng",
+                "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
                 // "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
             ], 500);
         }
