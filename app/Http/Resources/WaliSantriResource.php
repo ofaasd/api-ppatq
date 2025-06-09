@@ -37,6 +37,11 @@ class WaliSantriResource extends JsonResource
             'fotoMurroby' => $this->fotoMurroby,
             'namaUstadTahfidz' => $this->namaTahfidz,
             'fotoUstadTahfidz' => $this->fotoTahfidz,
+            'keuangan'  => [
+                'saldo' => $this->saldo,
+                'sakuMasuk' => $this->saku_masuk,
+                'sakuKeluar' => $this->saku_keluar,
+            ]
         ];
     }
 }

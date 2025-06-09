@@ -2,19 +2,24 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\LoginWaliSantriRequest;
-use App\Http\Resources\WaliSantriResource;
-use App\Models\DetailSantriTahfidz;
+use Carbon\Carbon;
+use App\Models\RefSiswa;
 use App\Models\Kesehatan;
 use App\Models\RawatInap;
-use App\Models\RefSiswa;
+use App\Models\SakuMasuk;
+use App\Models\pembayaran;
+use App\Models\SakuKeluar;
 use App\Models\SantriDetail;
-use App\Models\TbPemeriksaan;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
-
-
+use App\Models\TbPemeriksaan;
 use Illuminate\Http\JsonResponse;
+use App\Models\RefJenisPembayaran;
+use Illuminate\Support\Facades\DB;
+use App\Models\DetailSantriTahfidz;
+
+
+use App\Http\Resources\WaliSantriResource;
+use App\Http\Requests\LoginWaliSantriRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 class WaliSantriController extends Controller
@@ -56,16 +61,42 @@ class WaliSantriController extends Controller
             'murroby.photo AS fotoMurroby',
             'tahfidz.nama AS namaTahfidz',
             'tahfidz.photo AS fotoTahfidz',
+            'tb_uang_saku.jumlah AS saldo',
         ])
         ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'ref_siswa.no_induk')
         ->leftJoin('kota_kab_tbl', 'kota_kab_tbl.id_kota_kab', '=', 'santri_detail.kabkota')
         ->leftJoin('ref_kamar', 'ref_kamar.id', '=', 'santri_detail.kamar_id')
         ->leftJoin('ref_tahfidz', 'ref_tahfidz.id', '=', 'santri_detail.tahfidz_id')
+        ->leftJoin('tb_uang_saku', 'tb_uang_saku.no_induk', '=', 'ref_siswa.no_induk')
         ->leftJoin('employee_new AS murroby', 'murroby.id', '=', 'ref_kamar.employee_id')
-        ->leftJoin('employee_new AS tahfidz', 'tahfidz.id', '=', 'ref_tahfidz.employee_id');
+        ->leftJoin('employee_new AS tahfidz', 'tahfidz.id', '=', 'ref_tahfidz.employee_id');   
 
         if($siswa->count() > 0){
             $hasil = $siswa->first();
+            $sakuMasuk = SakuMasuk::select([
+                DB::raw("
+                    CASE tb_saku_masuk.dari
+                        WHEN 1 THEN 'Uang Saku'
+                        WHEN 2 THEN 'Kunjungan Walsan'
+                        WHEN 3 THEN 'Sisa Bulan Kemarin'
+                        ELSE 'Tidak Diketahui'
+                    END AS uangAsal
+                "),
+                'tb_saku_masuk.jumlah',
+                'tb_saku_masuk.tanggal'
+            ])
+            ->where('no_induk', $hasil->no_induk)->orderBy('tb_saku_masuk.tanggal', 'desc')->get();
+            $sakuKeluar = SakuKeluar::select([
+                'employee_new.nama',
+                'tb_saku_keluar.jumlah',
+                'tb_saku_keluar.note',
+                'tb_saku_keluar.tanggal',
+            ])
+            ->leftJoin('employee_new', 'employee_new.id', '=', 'tb_saku_keluar.pegawai_id')
+            ->where('no_induk', $hasil->no_induk)->orderBy('tb_saku_keluar.tanggal', 'desc')->get();
+             
+            $hasil->saku_masuk = $sakuMasuk;
+            $hasil->saku_keluar = $sakuKeluar;
             // $token = Str::random(40);
             // $update = RefSiswa::find($hasil->id);
             // $update->token = $token;
