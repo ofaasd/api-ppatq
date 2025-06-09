@@ -10,7 +10,10 @@ class KeluhanController extends Controller
     public function store(Request $request)
     {
         try{
+            $latestKeluhan = Keluhan::orderBy('id', 'desc')->first();
+            $newId = $latestKeluhan ? $latestKeluhan->id + 1 : 1; // Jika tidak ada data, mulai dengan id = 1
             $save = Keluhan::create([
+                'id' => $newId,
                 'nama_pelapor' => $request->namaPelapor,
                 'email' => $request->email,
                 'no_hp' => $request->noHp,
