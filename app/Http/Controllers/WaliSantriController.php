@@ -30,7 +30,39 @@ class WaliSantriController extends Controller
             'ref_siswa.kode'=>$reqData['kode'],
             'santri_detail.tanggal_lahir'=>$tanggalLahir
         ])
-        ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'ref_siswa.no_induk');
+        ->select([
+            'santri_detail.no_induk',
+            'ref_siswa.kode',
+            'santri_detail.tanggal_lahir',
+            'santri_detail.nama',
+            'santri_detail.photo',
+            'santri_detail.kelas',
+            'santri_detail.tempat_lahir',
+            'santri_detail.jenis_kelamin',
+            'santri_detail.alamat',
+            'santri_detail.kelurahan',
+            'santri_detail.kecamatan',
+            'kota_kab_tbl.nama_kota_kab',
+            'santri_detail.nama_lengkap_ayah',
+            'santri_detail.pendidikan_ayah',
+            'santri_detail.pekerjaan_ayah',
+            'santri_detail.nama_lengkap_ibu',
+            'santri_detail.pendidikan_ibu',
+            'santri_detail.pekerjaan_ibu',
+            'santri_detail.no_hp',
+            'ref_tahfidz.name AS kelasTahfidz',
+            'ref_kamar.name AS kamar',
+            'murroby.nama AS namaMurroby',
+            'murroby.photo AS fotoMurroby',
+            'tahfidz.nama AS namaTahfidz',
+            'tahfidz.photo AS fotoTahfidz',
+        ])
+        ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'ref_siswa.no_induk')
+        ->leftJoin('kota_kab_tbl', 'kota_kab_tbl.id_kota_kab', '=', 'santri_detail.kabkota')
+        ->leftJoin('ref_kamar', 'ref_kamar.id', '=', 'santri_detail.kamar_id')
+        ->leftJoin('ref_tahfidz', 'ref_tahfidz.id', '=', 'santri_detail.tahfidz_id')
+        ->leftJoin('employee_new AS murroby', 'murroby.id', '=', 'ref_kamar.employee_id')
+        ->leftJoin('employee_new AS tahfidz', 'tahfidz.id', '=', 'ref_tahfidz.employee_id');
 
         if($siswa->count() > 0){
             $hasil = $siswa->first();
