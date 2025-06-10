@@ -173,7 +173,6 @@ class WaliSantriController extends Controller
         try{
             $ketahfidzan = DetailSantriTahfidz::select([
                     'detail_santri_tahfidz.tanggal',
-                    'kode_juz.kode',
                     'kode_juz.nama as nmJuz'
                 ])
                 ->leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
