@@ -67,6 +67,9 @@ class MurrobyController extends Controller
             ->leftJoin('ref_kamar', 'ref_kamar.employee_id', '=', 'employee_new.id')
             ->where('users.id', $idUser)
             ->first();
+        if ($dataUser && $dataUser->kodeKamar) {
+            $dataUser->kodeKamar = strtoupper($dataUser->kodeKamar);
+        }
 
         if(!$dataUser)
         {
