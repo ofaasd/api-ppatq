@@ -58,6 +58,7 @@ class MurrobyController extends Controller
     {
         $ta = RefTahunAjaran::where('is_aktif', 1)->first();
         $dataUser = User::select([
+                'employee_new.id AS idPegawai',
                 'employee_new.nama AS namaMurroby',
                 'employee_new.photo AS fotoMurroby',
                 'ref_kamar.code AS kodeKamar'
@@ -83,6 +84,7 @@ class MurrobyController extends Controller
             ->leftJoin('santri_kamar', 'santri_kamar.kamar_id', '=', 'ref_kamar.id')
             ->leftJoin('santri_detail', 'santri_detail.id', '=', 'santri_kamar.santri_id')
             ->where('santri_kamar.tahun_ajaran_id', $ta->id)
+            ->where('ref_kamar.employee_id', $dataUser->idPegawai)
             ->get();
 
         if(!$listSantri)
