@@ -95,9 +95,9 @@ class WaliSantriController extends Controller
             ->leftJoin('employee_new', 'employee_new.id', '=', 'tb_saku_keluar.pegawai_id')
             ->where('no_induk', $hasil->no_induk)->orderBy('tb_saku_keluar.tanggal', 'desc')->get();
              
-            if ($siswa) {
-                $siswa->kelas = strtoupper($siswa->kelas);
-                $siswa->tanggal_lahir = Carbon::parse($siswa->tanggal_lahir)->translatedFormat('d F Y');
+            if ($hasil) {
+                $hasil->kelas = strtoupper($hasil->kelas);
+                $hasil->tanggal_lahir = Carbon::parse($hasil->tanggal_lahir)->translatedFormat('d F Y');
             }
             $hasil->saku_masuk = $sakuMasuk;
             $hasil->saku_keluar = $sakuKeluar;
