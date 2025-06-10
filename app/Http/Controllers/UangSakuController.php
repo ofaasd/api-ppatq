@@ -221,7 +221,8 @@ class UangSakuController extends Controller
                         $updateSaku->jumlah = $saku->jumlah - $jumlah;
                         $updateSaku->save();
                     }
-        
+                
+                DB::commit();
                 return response()->json("Semua uang saku santri telah dikurangi sebesar " . number_format($jumlah, 0, ',', '.'));
             }else
             {
@@ -238,10 +239,9 @@ class UangSakuController extends Controller
                 $updateSaku->save();
 
                 $sisaSaldo = $updateSaku->jumlah;
+                DB::commit();
                 return response()->json('Uang keluar sebesar Rp ' . number_format($jumlah, 0, ',', '.') . ', Sisa Saldo Rp ' . number_format($sisaSaldo, 0, ',', '.'));
             }
-
-            DB::commit();
         } catch (\Exception $e) {
           DB::rollback();
           return response()->json([
