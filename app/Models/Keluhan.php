@@ -9,5 +9,20 @@ class Keluhan extends Model
 {
     use HasFactory;
     protected $table = 'tb_keluhan';
-    protected $guarded = ['id'];
+    protected $fillable = [
+        'id',
+        'nama_pelapor',
+        'email',
+        'no_hp',
+        'id_santri',
+        'nama_wali_santri',
+        'id_kategori',
+        'masukan',
+        'saran',
+        'gambar',
+        'status',
+        'rating',
+        'jenis',
+        'is_hapus',
+    ];
 }
