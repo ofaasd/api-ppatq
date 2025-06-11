@@ -20,6 +20,8 @@ use App\Models\DetailSantriTahfidz;
 
 use App\Http\Resources\WaliSantriResource;
 use App\Http\Requests\LoginWaliSantriRequest;
+use App\Models\detailPembayaran;
+use App\Models\Tunggakan;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 class WaliSantriController extends Controller
@@ -228,5 +230,86 @@ class WaliSantriController extends Controller
                 // "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
             ], 500);
         }
+    }
+    public function riwayatBayar($noInduk)
+    {
+        $bulan = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
+
+        $refBayar = RefJenisPembayaran::orderBy('urutan', 'asc')->get();
+        $pembayaranList = pembayaran::where([
+            'nama_santri' => $noInduk,
+            'is_hapus' => 0
+            ])
+            ->orderBy('id','desc')
+            ->get();
+
+        $detailPembayaran = [];
+
+		foreach ($pembayaranList as $pembayaran) {
+            // Inisialisasi semua jenis pembayaran dengan 0
+            foreach ($refBayar as $jenis) {
+                $detailPembayaran[$pembayaran->id][$jenis->id] = 0;
+            }
+
+            // Ambil detail pembayaran dari tabel tb_detail_pembayaran
+            $detail = DetailPembayaran::where('id_pembayaran', $pembayaran->id)->get();
+
+            foreach ($detail as $row) {
+                $detailPembayaran[$pembayaran->id][$row->id_jenis_pembayaran] = $row->nominal;
+            }
+        }
+
+        $response = [];
+
+        foreach ($pembayaranList as $pem) {
+            $baris = [];
+
+            // Tombol cetak
+            // $baris['cetak'] = '<a href="' . url('pembayaran/print_bukti/' . $pem->id) . '" class="btn btn-success btn-sm"><i class="fa fa-print"></i></a>';
+
+            // Tanggal bayar
+            $baris['tanggalBayar'] = $pem->tanggal_bayar;
+
+            // Nama bulan dari periode
+            $baris['periode'] = $bulan[$pem->periode] ?? '-';
+
+            // Detail jenis pembayaran
+            foreach ($refBayar as $jenis) {
+                $nominal = $detailPembayaran[$pem->id][$jenis->id] ?? 0;
+                $baris['jenisPembayaran'][$jenis->id] = number_format($nominal, 0, ",", ".");
+            }
+
+            // Validasi
+            switch ($pem->validasi) {
+                case 0:
+                    $baris['validasi'] = "Belum di Validasi";
+                    break;
+                case 1:
+                    $baris['validasi'] = "Sudah di Validasi " . ($bulan[$pem->periode] ?? '') . "  klik tombol cetak ijo";
+                    break;
+                case 2:
+                    $baris['validasi'] = "Validasi Ditolak";
+                    break;
+                default:
+                    $baris['validasi'] = "";
+            }
+
+            $response[] = $baris;
+        }
+
+        $data = [
+            'jenisPembayaran'  => $refBayar,
+            'data'  => $response,
+        ];
+
+        return response()->json([
+            "status"  => 200,
+            "message" => "Berhasil mengambil data",
+            "data"    => $data
+        ], 200);
     }
 }   

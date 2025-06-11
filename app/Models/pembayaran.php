@@ -9,4 +9,5 @@ class pembayaran extends Model
 {
     use HasFactory;
     protected $table = 'tb_pembayaran';
+    protected $guarded = ['id'];
 }

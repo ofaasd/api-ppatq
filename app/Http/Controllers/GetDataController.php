@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\KodeJuz;
-
+use App\Models\RefBank;
 use App\Models\RefKelas;
 use App\Models\RefKategori;
 use App\Models\RefSiswa;
@@ -61,7 +61,6 @@ class GetDataController extends Controller
         }
     }
 
-
     public function kelas()
     {
         try{
@@ -105,5 +104,61 @@ class GetDataController extends Controller
                 // "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
             ], 500);
         }
+    }
+
+    public function bank()
+    {
+        try{
+            $data = RefBank::select([
+                'ref_kelas.id',
+                'ref_kelas.nama',
+            ])
+            ->get();
+
+            return response()->json([
+                "status"  => 200,
+                "message" => "Berhasil mengambil data",
+                "data"    => $data
+            ], 200);
+        }catch (\Exception $e) {
+            return response()->json([
+                "status"  => 500,
+                "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
+                // "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
+            ], 500);
+        }
+    }
+
+    public function bulan()
+    {
+        try {
+            $bulan = [
+                1 => 'Januari',
+                2 => 'Februari',
+                3 => 'Maret',
+                4 => 'April',
+                5 => 'Mei',
+                6 => 'Juni',
+                7 => 'Juli',
+                8 => 'Agustus',
+                9 => 'September',
+                10 => 'Oktober',
+                11 => 'November',
+                12 => 'Desember'
+            ];
+
+            return response()->json([
+                "status"  => 200,
+                "message" => "Berhasil mengambil data",
+                "data"    => $bulan
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                "status"  => 500,
+                "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
+                // "error" => $e->getMessage() // Hanya aktifkan saat debugging
+            ]);
+        }
+
     }
 }

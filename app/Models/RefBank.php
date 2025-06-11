@@ -5,9 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class detailPembayaran extends Model
+class RefBank extends Model
 {
     use HasFactory;
-    protected $table = 'tb_detail_pembayaran';
+
+    protected $table = 'ref_bank';
     protected $guarded = ['id'];
 }
