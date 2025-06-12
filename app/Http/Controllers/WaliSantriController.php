@@ -352,7 +352,7 @@ class WaliSantriController extends Controller
                 }
 
                 $dataSantri = DetailSantri::where('no_induk', $request->noInduk)->first();
-$message = '[ dari payment.ppatq-rf.id ]
+$message = '[ dari aplikasi mobile ppatq-rf ]
 
 Yth. Bp/Ibu *' . $request->atasNama . '*, Wali Santri *' . $dataSantri->nama . '* kelas *' . $dataSantri->kelas . '* telah melaporkan pembayaran bulan *' .   $this->getNamaBulan($request->periode) . '* 
 Rp. ' . $request->jumlah . ' rincian sbb : 
