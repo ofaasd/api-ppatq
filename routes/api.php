@@ -46,6 +46,7 @@ Route::prefix('get')->group(function () {
     Route::get('/kelas', [GetDataController::class, 'kelas']);
     Route::get('/kode-juz', [GetDataController::class, 'kodeJuz']);
     Route::get('/kategori-keluhan', [GetDataController::class, 'kategoriKeluhan']);
+    Route::get('/bank', [GetDataController::class, 'bank']);
 });
 
 //Jenis Pembayaran
@@ -124,5 +125,6 @@ Route::prefix('wali-santri')->group(function () {
     Route::post('/login', [WaliSantriController::class, 'login']);
     Route::get('/kesehatan/{noInduk}', [WaliSantriController::class, 'kesehatan']);
     Route::get('/ketahfidzan/{noInduk}', [WaliSantriController::class, 'ketahfidzan']);
+    Route::post('/lapor-bayar', [WaliSantriController::class, 'laporBayar']);
     Route::get('/riwayat-bayar/{noInduk}', [WaliSantriController::class, 'riwayatBayar']);
 });

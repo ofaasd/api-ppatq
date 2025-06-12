@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use Carbon\Carbon;
+use App\Http\Helpers\Helpers_wa;
+use Illuminate\Http\Request;
+
 use App\Models\RefSiswa;
 use App\Models\Kesehatan;
 use App\Models\RawatInap;
@@ -10,22 +12,48 @@ use App\Models\SakuMasuk;
 use App\Models\pembayaran;
 use App\Models\SakuKeluar;
 use App\Models\SantriDetail;
-use Illuminate\Http\Request;
 use App\Models\TbPemeriksaan;
-use Illuminate\Http\JsonResponse;
 use App\Models\RefJenisPembayaran;
-use Illuminate\Support\Facades\DB;
 use App\Models\DetailSantriTahfidz;
+use App\Models\detailPembayaran;
+use App\Models\Agenda;
+use App\Models\DetailSantri;
+use App\Models\SendWA;
 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\Rules\File;
+
+use Carbon\Carbon;
+use Intervention\Image\Facades\Image;
 
 use App\Http\Resources\WaliSantriResource;
+
 use App\Http\Requests\LoginWaliSantriRequest;
-use App\Models\detailPembayaran;
-use App\Models\Tunggakan;
-use Illuminate\Http\Exceptions\HttpResponseException;
 
 class WaliSantriController extends Controller
 {
+    private function getNamaBulan($angkaBulan)
+    {
+        $bulan = [
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember'
+        ];
+
+        return $bulan[(int)$angkaBulan] ?? 'Bulan tidak valid';
+    }
+
     public function login(LoginWaliSantriRequest $request): JsonResponse
     {
         $reqData = $request->validated();
@@ -231,6 +259,258 @@ class WaliSantriController extends Controller
             ], 500);
         }
     }
+
+    public function laporBayar(Request $request)
+    {
+        if($request->validate([
+            'bukti' => [
+                'required',
+                File::types(['jpg', 'jpeg', 'png', 'pdf'])->max(10 * 1024), // maks 10MB
+            ],
+        ]))
+        {
+            $data2 = array(
+                'nama_santri' => $request->noInduk,
+                'jumlah' => $request->jumlah,
+                'tanggal_bayar' => $request->tanggalBayar,
+                'periode' => $request->periode,
+                'tahun' => $request->tahun,
+                'bank_pengirim' => $request->bankPengirim,
+                'atas_nama' => $request->atasNama,
+                'no_wa' => $request->noWa,
+                'is_hapus' => 0,
+            );
+            $cek = pembayaran::where($data2)->count();
+            $data = [];
+            if($cek > 0){
+                throw new HttpResponseException(response([
+                    "errors" => [
+                        'Verifikasi' => [
+                            'Data Sudah pernah dimasukan'
+                        ]
+                    ]
+                ], 400));
+            }
+
+            if($request->file('bukti')){
+
+                $file = $request->file('bukti');
+                $ekstensi = $file->extension();
+                if(strtolower($ekstensi) == 'jpg' || strtolower($ekstensi) == 'png' || strtolower($ekstensi) == 'jpeg'){
+                    $filename = date('YmdHis') . $file->getClientOriginalName();
+
+                    $kompres = Image::make($file)
+                    ->resize(800, null, function ($constraint) {
+                        $constraint->aspectRatio();
+                    })
+                    ->save('assets/upload/bukti_bayar/' . $filename);
+
+                }else{
+                    $filename = date('YmdHis') . $file->getClientOriginalName();
+                    $file->move('assets/upload/bukti_bayar/',$filename);
+                }
+                $data = array(
+                    'nama_santri' => $request->noInduk,
+                    'jumlah' => $request->jumlah,
+                    'tanggal_bayar' => $request->tanggalBayar,
+                    'periode' => $request->periode,
+                    'tahun' => $request->tahun,
+                    'bank_pengirim' => $request->bankPengirim,
+                    'atas_nama' => $request->atasNama,
+                    'no_wa' => $request->noWa,
+                    'catatan' => $request->catatan,
+                    'created_at' => date('Y-m-d H:i:s'),
+                    'bukti' => $filename,
+                    'input_by' => 3, //input lewat api / aplikasi
+                );
+                $insertPembayaran = pembayaran::insert($data);
+                $id = DB::getPdo()->lastInsertId();
+                $jenisPembayaran = $request->jenisPembayaran;
+                $idJenisPembayaran = $request->idJenisPembayaran;
+                foreach($jenisPembayaran as $key=>$value){
+                    if($value != 0 && !empty($value)){
+
+                        $dataDetail = array(
+                            'id_pembayaran'=>$id,
+                            'id_jenis_pembayaran' => $idJenisPembayaran[$key],
+                            'nominal' => $value,
+                        );
+                        $query = detailPembayaran::insert($dataDetail);
+                    }
+
+                    if($idJenisPembayaran == 3){
+                        $data_saku = array(
+                            'dari' => 1,
+                            'jumlah' => $value,
+                            'tanggal' => $request->tanggalBayar,
+                            'no_induk' => $request->noInduk,
+                            'id_pembayaran' => $id,
+                            'status_pembayaran' => 0
+                        );
+                        $query2 = SakuMasuk::insert($data_saku);
+                    }
+                }
+
+                $dataSantri = DetailSantri::where('no_induk', $request->noInduk)->first();
+$message = '[ dari payment.ppatq-rf.id ]
+
+Yth. Bp/Ibu *' . $request->atasNama . '*, Wali Santri *' . $dataSantri->nama . '* kelas *' . $dataSantri->kelas . '* telah melaporkan pembayaran bulan *' .   $this->getNamaBulan($request->periode) . '* 
+Rp. ' . $request->jumlah . ' rincian sbb : 
+';
+$jenis = RefJenisPembayaran::orderBy('urutan', 'asc')->get();
+$listJenis = [];
+foreach($jenis as $row){
+	$listJenis[$row->id] = $row->jenis;
+}
+
+$detail = detailPembayaran::where('id_pembayaran', $id)->get();
+foreach($detail as $row){
+	$message .= '• ' . $listJenis[$row->id_jenis_pembayaran] .' sebesar Rp. ' . number_format($row->nominal,0,',','.') . ' 
+';
+
+}
+// $message .= '
+// Tunggu beberapa waktu, kami akan melakukan pencatatan & segera memberikan status pembayaran tersebut.
+// ';
+$message .= '
+Tunggu beberapa saat, pencatatan akan dilakukan & segera memberikan status pembayaran tersebut.
+';
+$message .= '
+Riwayat Pelaporan : 
+';
+					$bulan = (int)date('m');
+					$tanggal = [];
+					$jumlah = [];
+					for($i=($bulan-1); $i>=$bulan-5; $i--){
+						$bulanBaru = $i;
+						if($i <= 0 ){
+							$bulanBaru = (12 + $i);
+						}
+						$tahun = date('Y');
+						$pembayaran = pembayaran::whereMonth('tanggal_bayar', $bulanBaru)
+                        ->whereYear('tanggal_bayar', $tahun)
+                        ->where('validasi', 1)
+                        ->where('nama_santri', $request->noInduk)
+                        ->where('is_hapus', 0)
+                        ->get();
+						
+						foreach($pembayaran as $row){
+							$message .= '*' . $this->getNamaBulan($bulanBaru) .'* ';
+							$message .= $row->tanggal_bayar .' : Rp. ' . number_format($row->jumlah,0,',','.') . '
+';
+						}
+					}
+					$message .= '
+No. WA konfirmasi di +62877-6757-2025. 
+
+untuk penyampaian masukan melalui https://saran.ppatq-rf.id
+
+Informasi mengenai berita dan detail santri dapat diakses melalui https://ppatq-rf.id
+';
+//riwayat kesehatan
+
+$riwayat = Kesehatan::where('santri_id', $dataSantri->no_induk)
+    ->orderBy('id', 'desc')
+    ->limit(5)
+    ;
+
+if($riwayat){
+$message .= '
+----Riwayat Kesehatan----
+';
+foreach($riwayat as $rows){
+	$message .= $rows->sakit . " ( " . date('d-m-Y',$rows->tanggal_sakit) . " )
+";
+}
+}
+//riwayat ketahfidzan
+
+$tahfidz = DetailSantriTahfidz::select([
+    'detail_santri_tahfidz.*',
+    'kode_juz.nama as nama_juz'
+])
+->join('kode_juz','kode_juz.id', '=' ,'detail_santri_tahfidz.kode_juz_surah')
+->where('detail_santri_tahfidz.no_induk', $dataSantri->no_induk)
+->limit(5)
+;
+if($tahfidz){
+$message .= '
+----Riwayat Ketahfidzan----
+';
+foreach($tahfidz as $row){
+	$message .= $row->nama_juz . "  (" . $this->getNamaBulan($row->bulan) . " " . $row->tahun . " ) 
+";
+} 
+}
+$message .= '
+----agenda sampai akhir tahun----
+';
+$tanggal_start_agenda = date('Y-m-d');
+$agenda = Agenda::where('tanggal_mulai', '>=', $tanggal_start_agenda)
+    ->orderBy('tanggal_mulai', 'asc')
+    ->get();
+foreach($agenda as $rows){
+	$message .= $rows->judul .'
+';
+	$message .= date('d-m-Y',strtotime($rows->tanggal_mulai)) . ' - ' . date('d-m-Y',strtotime($rows->tanggal_selesai)) . '
+';
+}
+
+$message .= '
+Kami ucapkan banyak terima kasih kepada (Bp/Ibu) ' . $request->atasNama . ', salam kami kepada keluarga.
+
+Semoga pekerjaan dan usahanya diberikan kelancaran dan menghasilkan Rizqi yang banyak dan berkah, aamiin.
+';
+
+                
+                if($insertPembayaran){
+
+                    try {
+                        $data = [
+                            'id_pembayaran' => $id,
+                            'nama' => $request->atasNama,
+                            'no_wa' => $request->noWa,
+                            'pesan' => $message,
+                            'tanggal_kirim' => now(),
+                        ];
+
+                        $hasil = SendWA::create($data);
+                        $sendWa = Helpers_wa::send_wa($data);
+
+                        $responseDecoded = json_decode($sendWa, true);
+
+                        return response()->json([
+                            'status' => 201,
+                            'message' => 'Data berhasil dimasukkan',
+                            'data' => $responseDecoded
+                        ], 201);
+
+                    } catch (\Exception $e) {
+                        return response()->json([
+                            'status' => 500,
+                            'message' => 'Terjadi kesalahan saat mengirim pesan WA',
+                            'error' => $e->getMessage() // Boleh di-nonaktifkan di production untuk alasan keamanan
+                        ], 500);
+                    }
+                }else{
+                    return response()->json([
+                        'status' => 500,
+                        'message' => 'Terjadi kesalahan saat mengirim pesan WA',
+                    ], 500);
+                }
+            }else{
+                return response()->json([
+                    'status' => 500,
+                    'message' => 'File yang di upload tidak valid',
+                ], 500);
+            }
+        }else{
+            return response()->json([
+                'message'   => "masuk elsess"
+            ], 402);
+        }
+    }
+
     public function riwayatBayar($noInduk)
     {
         $bulan = [
