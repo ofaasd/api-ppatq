@@ -110,8 +110,8 @@ class GetDataController extends Controller
     {
         try{
             $data = RefBank::select([
-                'ref_kelas.id',
-                'ref_kelas.nama',
+                'ref_bank.id',
+                'ref_bank.nama',
             ])
             ->get();
 
