@@ -489,7 +489,7 @@ Semoga pekerjaan dan usahanya diberikan kelancaran dan menghasilkan Rizqi yang b
                         return response()->json([
                             'status' => 500,
                             'message' => 'Terjadi kesalahan saat mengirim pesan WA',
-                            'error' => $e->getMessage() // Boleh di-nonaktifkan di production untuk alasan keamanan
+                            // 'error' => $e->getMessage() // Boleh di-nonaktifkan di production untuk alasan keamanan
                         ], 500);
                     }
                 }else{

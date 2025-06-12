@@ -121,7 +121,7 @@ class KelasKamarController extends Controller
 
         } catch (\Exception $e) {
             // Mengembalikan pesan error jika terjadi exception
-            return response()->json(['error' => $e->getMessage()], 500);
+            // return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
@@ -193,7 +193,7 @@ class KelasKamarController extends Controller
 
         } catch (\Exception $e) {
             // Mengembalikan pesan error jika terjadi exception
-            return response()->json(['error' => $e->getMessage()], 500);
+            // return response()->json(['error' => $e->getMessage()], 500);
         }
 
     }
