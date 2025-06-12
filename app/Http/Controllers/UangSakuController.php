@@ -165,7 +165,7 @@ class UangSakuController extends Controller
                 'employee_new.nama AS namaMurroby',
             ])
             ->leftJoin('employee_new', 'employee_new.id', 'tb_saku_keluar.pegawai_id')
-            ->orderBy('tb_saku_keluar.tanggalTransaksi', 'desc')
+            ->orderBy('tanggalTransaksi', 'desc')
             ->where('no_induk', $noInduk)
             ->get();
         
