@@ -272,7 +272,7 @@ class WaliSantriController extends Controller
             // $baris['cetak'] = '<a href="' . url('pembayaran/print_bukti/' . $pem->id) . '" class="btn btn-success btn-sm"><i class="fa fa-print"></i></a>';
 
             // Tanggal bayar
-            $baris['tanggalBayar'] = $pem->tanggal_bayar;
+            $baris['tanggalBayar'] = Carbon::parse($pem->tanggal_bayar)->translatedFormat('d F Y');
 
             // Nama bulan dari periode
             $baris['periode'] = $bulan[$pem->periode] ?? '-';

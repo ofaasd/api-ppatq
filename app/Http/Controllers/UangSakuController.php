@@ -93,6 +93,7 @@ class UangSakuController extends Controller
                 'tb_saku_masuk.jumlah AS jumlahMasuk',
                 'tb_saku_masuk.tanggal AS tanggalTransaksi',
             ])
+            ->orderBy('tanggalTransaksi', 'desc')
             ->where('no_induk', $noInduk)
             ->get();
         
@@ -164,6 +165,7 @@ class UangSakuController extends Controller
                 'employee_new.nama AS namaMurroby',
             ])
             ->leftJoin('employee_new', 'employee_new.id', 'tb_saku_keluar.pegawai_id')
+            ->orderBy('tb_saku_keluar.tanggalTransaksi', 'desc')
             ->where('no_induk', $noInduk)
             ->get();
         
