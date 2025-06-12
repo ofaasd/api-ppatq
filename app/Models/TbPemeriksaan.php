@@ -12,6 +12,8 @@ class TbPemeriksaan extends Model
     protected $table = 'tb_pemeriksaan';
     protected $dateFormat = 'U';
 
+    protected $guarded = ['id'];
+
     protected $casts = [
         'tanggal_pemeriksaan' => 'int',
         'tinggi_badan' => 'int',
