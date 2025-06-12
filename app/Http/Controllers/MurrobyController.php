@@ -61,6 +61,7 @@ class MurrobyController extends Controller
                 'employee_new.id AS idPegawai',
                 'employee_new.nama AS namaMurroby',
                 'employee_new.photo AS fotoMurroby',
+                'employee_new.alamat AS alamatMurroby',
                 'ref_kamar.code AS kodeKamar'
             ])
             ->leftJoin('employee_new', 'employee_new.id', '=', 'users.pegawai_id')
@@ -83,9 +84,12 @@ class MurrobyController extends Controller
                 'santri_detail.no_induk AS noIndukSantri',
                 'santri_detail.nama AS namaSantri',
                 'santri_detail.kelas AS kelasSantri',
+                'santri_detail.no_hp AS noHpSantri',
+                DB::raw("CONCAT_WS(', ', santri_detail.alamat, santri_detail.kelurahan, santri_detail.kecamatan, kota_kab_tbl.nama_kota_kab) AS alamatLengkap"),
             ])
             ->leftJoin('santri_kamar', 'santri_kamar.kamar_id', '=', 'ref_kamar.id')
             ->leftJoin('santri_detail', 'santri_detail.id', '=', 'santri_kamar.santri_id')
+            ->leftJoin('kota_kab_tbl', 'kota_kab_tbl.id_kota_kab', '=', 'santri_detail.kabkota')
             ->where('santri_kamar.tahun_ajaran_id', $ta->id)
             ->where('ref_kamar.employee_id', $dataUser->idPegawai)
             ->get();
