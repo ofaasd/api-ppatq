@@ -269,7 +269,7 @@ class WaliSantriController extends Controller
             ],
         ]))
         {
-            $data2 = array(
+            $data2 = [
                 'nama_santri' => $request->noInduk,
                 'jumlah' => $request->jumlah,
                 'tanggal_bayar' => $request->tanggalBayar,
@@ -279,7 +279,7 @@ class WaliSantriController extends Controller
                 'atas_nama' => $request->atasNama,
                 'no_wa' => $request->noWa,
                 'is_hapus' => 0,
-            );
+            ];
             $cek = pembayaran::where($data2)->count();
             $data = [];
             if($cek > 0){
@@ -329,24 +329,24 @@ class WaliSantriController extends Controller
                 foreach($jenisPembayaran as $key=>$value){
                     if($value != 0 && !empty($value)){
 
-                        $dataDetail = array(
+                        $dataDetail = [
                             'id_pembayaran'=>$id,
                             'id_jenis_pembayaran' => $idJenisPembayaran[$key],
                             'nominal' => $value,
-                        );
+                        ];
                         $query = detailPembayaran::insert($dataDetail);
                         $totalRincian += $value;
                     }
 
                     if($idJenisPembayaran == 3){
-                        $data_saku = array(
+                        $data_saku = [
                             'dari' => 1,
                             'jumlah' => $value,
                             'tanggal' => $request->tanggalBayar,
                             'no_induk' => $request->noInduk,
                             'id_pembayaran' => $id,
                             'status_pembayaran' => 0
-                        );
+                        ];
                         $query2 = SakuMasuk::insert($data_saku);
                     }
                 }
