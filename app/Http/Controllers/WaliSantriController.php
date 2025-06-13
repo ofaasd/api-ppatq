@@ -351,16 +351,16 @@ class WaliSantriController extends Controller
                     }
                 }
 
-                if($totalRincian != $request->jumlah)
-                {
-                    return response()->json([
-                        'status'    => 422,
-                        'message'   => 'Total pembayaran dan rincian pembayaran tidak sama.',
-                    ], 422);
-                }
+                // if($totalRincian != $request->jumlah)
+                // {
+                //     return response()->json([
+                //         'status'    => 422,
+                //         'message'   => 'Total pembayaran dan rincian pembayaran tidak sama.',
+                //     ], 422);
+                // }
 
                 $dataSantri = DetailSantri::where('no_induk', $request->noInduk)->first();
-$message = '[ dari aplikasi PPATQ-RF ]
+$message = '[     dari mobile PPATQ-RF ku   ]
 
 Yth. Bp/Ibu *' . $request->atasNama . '*, Wali Santri *' . $dataSantri->nama . '* kelas *' . $dataSantri->kelas . '* telah melaporkan pembayaran bulan *' .   $this->getNamaBulan($request->periode) . '* 
 Rp. ' . $request->jumlah . ' rincian sbb : 
@@ -381,88 +381,23 @@ foreach($detail as $row){
 // Tunggu beberapa waktu, kami akan melakukan pencatatan & segera memberikan status pembayaran tersebut.
 // ';
 $message .= '
+
 Tunggu beberapa saat, pencatatan akan dilakukan & segera memberikan status pembayaran tersebut.
+
 ';
-$message .= '
-Riwayat Pelaporan : 
-';
-					$bulan = (int)date('m');
-					$tanggal = [];
-					$jumlah = [];
-					for($i=($bulan-1); $i>=$bulan-5; $i--){
-						$bulanBaru = $i;
-						if($i <= 0 ){
-							$bulanBaru = (12 + $i);
-						}
-						$tahun = date('Y');
-						$pembayaran = pembayaran::whereMonth('tanggal_bayar', $bulanBaru)
-                        ->whereYear('tanggal_bayar', $tahun)
-                        ->where('validasi', 1)
-                        ->where('nama_santri', $request->noInduk)
-                        ->where('is_hapus', 0)
-                        ->get();
-						
-						foreach($pembayaran as $row){
-							$message .= '*' . $this->getNamaBulan($bulanBaru) .'* ';
-							$message .= $row->tanggal_bayar .' : Rp. ' . number_format($row->jumlah,0,',','.') . '
-';
-						}
-					}
+
 					$message .= '
 No. WA konfirmasi di +62877-6757-2025. 
 
-untuk penyampaian masukan melalui https://saran.ppatq-rf.id
+gunakan dan manfaatkan aplikasi PPATQ-RF ku untuk media pendampingan antara lembaga / pondok dengan wali santri. Update informasi yang tersaji pada aplikasi. 
 
-Informasi mengenai berita dan detail santri dapat diakses melalui https://ppatq-rf.id
-';
-//riwayat kesehatan
+Mohon maaf, apabila ada kekurangan atau sedikit kekeliruan, karena app ini masih terus dikembangkan untuk disesuaikan dengan kebutuhan semua elemen lembaga civitas PPATQ-RF. 
 
-$riwayat = Kesehatan::where('santri_id', $dataSantri->no_induk)
-    ->orderBy('id', 'desc')
-    ->limit(5)
-    ;
+Untuk itu, maka kami berharap sumbang saran serta laporan temuan problem yang muncul selama penggunaan. Hubungi kami melalui menu saran pada aplikasi di dalam app atau kirim WA di  0818.24.0102
 
-if($riwayat){
-$message .= '
-----Riwayat Kesehatan----
-';
-foreach($riwayat as $rows){
-	$message .= $rows->sakit . " ( " . date('d-m-Y',$rows->tanggal_sakit) . " )
-";
-}
-}
-//riwayat ketahfidzan
+Informasi mengenai informasi, berita dan detail santri melalui media yang lebih luas, dapat melalui https: www.ppatq-rf.sch.id
 
-$tahfidz = DetailSantriTahfidz::select([
-    'detail_santri_tahfidz.*',
-    'kode_juz.nama as nama_juz'
-])
-->join('kode_juz','kode_juz.id', '=' ,'detail_santri_tahfidz.kode_juz_surah')
-->where('detail_santri_tahfidz.no_induk', $dataSantri->no_induk)
-->limit(5)
-;
-if($tahfidz){
-$message .= '
-----Riwayat Ketahfidzan----
 ';
-foreach($tahfidz as $row){
-	$message .= $row->nama_juz . "  (" . $this->getNamaBulan($row->bulan) . " " . $row->tahun . " ) 
-";
-} 
-}
-$message .= '
-----agenda sampai akhir tahun----
-';
-$tanggal_start_agenda = date('Y-m-d');
-$agenda = Agenda::where('tanggal_mulai', '>=', $tanggal_start_agenda)
-    ->orderBy('tanggal_mulai', 'asc')
-    ->get();
-foreach($agenda as $rows){
-	$message .= $rows->judul .'
-';
-	$message .= date('d-m-Y',strtotime($rows->tanggal_mulai)) . ' - ' . date('d-m-Y',strtotime($rows->tanggal_selesai)) . '
-';
-}
 
 $message .= '
 Kami ucapkan banyak terima kasih kepada (Bp/Ibu) ' . $request->atasNama . ', salam kami kepada keluarga.
