@@ -283,13 +283,10 @@ class WaliSantriController extends Controller
             $cek = pembayaran::where($data2)->count();
             $data = [];
             if($cek > 0){
-                throw new HttpResponseException(response([
-                    "errors" => [
-                        'Verifikasi' => [
-                            'Data Sudah pernah dimasukan'
-                        ]
-                    ]
-                ], 400));
+                return response()->json([
+                    'status'    => 409,
+                    'message'   => 'Data sudah ada.',
+                ], 409);
             }
 
             if($request->file('bukti')){
@@ -357,7 +354,7 @@ class WaliSantriController extends Controller
                 if($totalRincian != $request->jumlah)
                 {
                     return response()->json([
-                        'status'    => 402,
+                        'status'    => 422,
                         'message'   => 'Total pembayaran dan rincian pembayaran tidak sama.',
                     ], 422);
                 }
@@ -511,9 +508,9 @@ Semoga pekerjaan dan usahanya diberikan kelancaran dan menghasilkan Rizqi yang b
                 }
             }else{
                 return response()->json([
-                    'status' => 500,
+                    'status' => 400,
                     'message' => 'File yang di upload tidak valid',
-                ], 500);
+                ], 400);
             }
         }else{
             return response()->json([

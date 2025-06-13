@@ -81,9 +81,9 @@ class UstadTahfidzController extends Controller
             );
 
             return response()->json([
-                "status"  => 200,
+                "status"  => 201,
                 "message" => "Berhasil menambahkan tahfidz",
-            ], 200);
+            ], 201);
         }catch (\Exception $e) {
             return response()->json([
                 "status"  => 500,
@@ -211,7 +211,7 @@ class UstadTahfidzController extends Controller
 
             return response()->json([
                 "status"  => 200,
-                "message" => "Berhasil mengubah data",
+                "message" => "Berhasil mengubah data.",
             ], 200);
         }catch (\Exception $e) {
             return response()->json([

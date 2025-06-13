@@ -27,9 +27,9 @@ class KeluhanController extends Controller
             ]);
 
             return response()->json([
-                "status"  => 200,
-                "message" => "Berhasil mengirim keluhan/aduan",
-            ], 200);
+                "status"  => 201,
+                "message" => "Berhasil mengirim keluhan/aduan.",
+            ], 201);
         }catch (\Exception $e) {
             return response()->json([
                 "status"  => 500,

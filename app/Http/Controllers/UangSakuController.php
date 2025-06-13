@@ -54,13 +54,13 @@ class UangSakuController extends Controller
         {
             return response()->json([
                 'status'   => 404,
-                'message'   => 'Data santri tidak ditemukan',
+                'message'   => 'Data santri tidak ditemukan.',
             ], 404);
         }
 
         $data = [
             'status'   => 200,
-            'message'   => 'Berhasil mengambil data',
+            'message'   => 'Berhasil mengambil data.',
             'data'  =>  [
                 'dataUser' => $dataUser,
                 'listSantri'    =>  $listSantri

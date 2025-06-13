@@ -230,9 +230,9 @@ class MurrobyController extends Controller
             ]);
 
             return response()->json([
-                "status"  => 200,
-                "message" => "Berhasil menyimpan data pemeriksaan santri",
-            ], 200);
+                "status"  => 201,
+                "message" => "Berhasil menyimpan data pemeriksaan santri.",
+            ], 201);
         }catch (\Exception $e) {
             return response()->json([
                 "status"  => 500,
