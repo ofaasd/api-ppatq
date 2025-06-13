@@ -12,6 +12,6 @@ class JenisPembayaranController extends Controller
     //
     public function index(){
         $hasil = JenisPembayaran::all();
-        return (JenisPembayaranResource::collection($hasil))->response()->setStatusCode(201);
+        return (JenisPembayaranResource::collection($hasil))->response()->setStatusCode(200);
     }
 }
