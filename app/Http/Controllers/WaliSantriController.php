@@ -309,7 +309,7 @@ class WaliSantriController extends Controller
                     $filename = date('YmdHis') . $file->getClientOriginalName();
                     $file->move('assets/upload/bukti_bayar/',$filename);
                 }
-                $data = array(
+                $data = [
                     'nama_santri' => $request->noInduk,
                     'jumlah' => $request->jumlah,
                     'tanggal_bayar' => $request->tanggalBayar,
@@ -322,11 +322,13 @@ class WaliSantriController extends Controller
                     'created_at' => date('Y-m-d H:i:s'),
                     'bukti' => $filename,
                     'input_by' => 3, //input lewat api / aplikasi
-                );
+                ];
                 $insertPembayaran = pembayaran::insert($data);
                 $id = DB::getPdo()->lastInsertId();
                 $jenisPembayaran = $request->jenisPembayaran;
                 $idJenisPembayaran = $request->idJenisPembayaran;
+                $totalRincian = 0;
+
                 foreach($jenisPembayaran as $key=>$value){
                     if($value != 0 && !empty($value)){
 
@@ -336,6 +338,7 @@ class WaliSantriController extends Controller
                             'nominal' => $value,
                         );
                         $query = detailPembayaran::insert($dataDetail);
+                        $totalRincian += $value;
                     }
 
                     if($idJenisPembayaran == 3){
@@ -351,8 +354,16 @@ class WaliSantriController extends Controller
                     }
                 }
 
+                if($totalRincian != $request->jumlah)
+                {
+                    return response()->json([
+                        'status'    => 402,
+                        'message'   => 'Total pembayaran dan rincian pembayaran tidak sama.',
+                    ], 422);
+                }
+
                 $dataSantri = DetailSantri::where('no_induk', $request->noInduk)->first();
-$message = '[ dari aplikasi mobile ppatq-rf ]
+$message = '[ dari aplikasi PPATQ-RF ]
 
 Yth. Bp/Ibu *' . $request->atasNama . '*, Wali Santri *' . $dataSantri->nama . '* kelas *' . $dataSantri->kelas . '* telah melaporkan pembayaran bulan *' .   $this->getNamaBulan($request->periode) . '* 
 Rp. ' . $request->jumlah . ' rincian sbb : 
