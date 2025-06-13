@@ -377,26 +377,19 @@ foreach($detail as $row){
 ';
 
 }
-// $message .= '
-// Tunggu beberapa waktu, kami akan melakukan pencatatan & segera memberikan status pembayaran tersebut.
-// ';
-$message .= '
-
-Tunggu beberapa saat, pencatatan akan dilakukan & segera memberikan status pembayaran tersebut.
-
-';
 
 					$message .= '
+Tunggu beberapa saat, pencatatan akan dilakukan & segera memberikan status pembayaran tersebut.
+
 No. WA konfirmasi di +62877-6757-2025. 
 
 gunakan dan manfaatkan aplikasi PPATQ-RF ku untuk media pendampingan antara lembaga / pondok dengan wali santri. Update informasi yang tersaji pada aplikasi. 
 
 Mohon maaf, apabila ada kekurangan atau sedikit kekeliruan, karena app ini masih terus dikembangkan untuk disesuaikan dengan kebutuhan semua elemen lembaga civitas PPATQ-RF. 
 
-Untuk itu, maka kami berharap sumbang saran serta laporan temuan problem yang muncul selama penggunaan. Hubungi kami melalui menu saran pada aplikasi di dalam app atau kirim WA di  0818.24.0102
+Untuk itu, maka kami berharap sumbang saran serta laporan temuan problem yang muncul selama penggunaan. Hubungi kami melalui menu saran pada aplikasi di dalam app atau kirim WA di  0818-240-102
 
 Informasi mengenai informasi, berita dan detail santri melalui media yang lebih luas, dapat melalui https: www.ppatq-rf.sch.id
-
 ';
 
 $message .= '
