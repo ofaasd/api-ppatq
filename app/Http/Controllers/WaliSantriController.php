@@ -136,7 +136,7 @@ class WaliSantriController extends Controller
             // $update->token = $token;
             // $update->save();
             // $update->refresh();
-            return (new WaliSantriResource($hasil))->response()->setStatusCode(201);
+            return (new WaliSantriResource($hasil))->response()->setStatusCode(200);
         }else{
             throw new HttpResponseException(response([
                 "errors" => [

@@ -41,7 +41,7 @@ class MurrobyController extends Controller
                 ->first();
 
             // Return resource dengan data pegawai
-            return (new MurrobyResource($pegawai))->response()->setStatusCode(201);
+            return (new MurrobyResource($pegawai))->response()->setStatusCode(200);
         } else {
             // Jika gagal
             throw new HttpResponseException(response([
