@@ -19,6 +19,7 @@ use App\Http\Controllers\WaliSantriController;
 use App\Http\Controllers\UstadTahfidzController;
 use App\Http\Controllers\StaffPengasuhController;
 use App\Http\Controllers\KesehatanSantriController;
+use App\Http\Controllers\TutorialController;
 
 /*
 |--------------------------------------------------------------------------
@@ -72,6 +73,10 @@ Route::get('/galeri', [GaleriController::class, 'index']);
 
 // Keluhan
 Route::post('/keluhan', [KeluhanController::class, 'store']);
+
+// Keluhan
+Route::get('/tutorial-pembayaran', [TutorialController::class, 'indexPembayaran']);
+Route::post('/tutorial-pembayaran', [TutorialController::class, 'storePembayaran']);
 
 // Staff Dan Pengasuh
 Route::get('/get-ustadz', [StaffPengasuhController::class, 'getUstadz']);
