@@ -91,6 +91,7 @@ class MurrobyController extends Controller
             ->leftJoin('santri_detail', 'santri_detail.id', '=', 'santri_kamar.santri_id')
             ->leftJoin('kota_kab_tbl', 'kota_kab_tbl.id_kota_kab', '=', 'santri_detail.kabkota')
             ->where('santri_kamar.tahun_ajaran_id', $ta->id)
+            ->where('santri_kamar.status', 1)
             ->where('ref_kamar.employee_id', $dataUser->idPegawai)
             ->get();
 
@@ -152,6 +153,7 @@ class MurrobyController extends Controller
                     ->on('tp.tanggal_pemeriksaan', '=', 'latest.latest_date');
             })
             ->where('santri_kamar.tahun_ajaran_id', $ta->id)
+            ->where('santri_kamar.status', 1)
             ->where('santri_kamar.kamar_id', $dataUser->idKamar)
             ->get();
 
