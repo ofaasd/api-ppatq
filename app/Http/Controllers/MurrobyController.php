@@ -131,7 +131,7 @@ class MurrobyController extends Controller
                 ->first();
 
             $sub = DB::table('tb_pemeriksaan as tp1')
-                ->select('tp1.no_induk', DB::raw('MAX(tp1.tanggal_pemeriksaan) as latest_date'))
+                ->select('tp1.no_induk', DB::raw('MAX(tp1.id) as latest_id'))
                 ->groupBy('tp1.no_induk');
 
             $dataSantri = SantriKamar::select([
@@ -150,7 +150,8 @@ class MurrobyController extends Controller
             })
             ->leftJoin('tb_pemeriksaan as tp', function ($join) {
                 $join->on('tp.no_induk', '=', 'santri_detail.no_induk')
-                    ->on('tp.tanggal_pemeriksaan', '=', 'latest.latest_date');
+                    ->on('tp.id', '=', 'latest.latest_id')
+                    ->whereNull('tp.deleted_at');
             })
             ->where('santri_kamar.tahun_ajaran_id', $ta->id)
             ->where('santri_kamar.status', 1)
