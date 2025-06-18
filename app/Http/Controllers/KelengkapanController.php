@@ -4,19 +4,19 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use App\Models\User;
-use App\Models\Perilaku;
 use App\Models\RefKamar;
 use App\Models\EmployeeNew;
-
+use App\Models\Kelengkapan;
 use App\Models\SantriKamar;
 use App\Models\DetailSantri;
 use Illuminate\Http\Request;
 use App\Models\RefTahunAjaran;
 use Illuminate\Support\Facades\DB;
 
-class PerilakuController extends Controller
+class KelengkapanController extends Controller
 {
-    protected $labelPerilaku = ['Kurang Baik', 'Cukup', 'Baik'];
+    protected $labelKelengkapan = ['Tidak Lengkap', 'Lengkap & Kurang baik', 'lengkap & baik'];
+
     public function index($idUser)
     {
         try{
@@ -32,48 +32,45 @@ class PerilakuController extends Controller
                 ->where('users.id', $idUser)
                 ->first();
 
-            $sub = DB::table('perilaku as pr1')
-                ->select('pr1.no_induk', DB::raw('MAX(pr1.id) as latest_id'))
-                ->groupBy('pr1.no_induk');
+            $sub = DB::table('kelengkapan as kl1')
+                ->select('kl1.no_induk', DB::raw('MAX(kl1.id) as latest_id'))
+                ->groupBy('kl1.no_induk');
 
             $dataSantri = SantriKamar::select([
                 'santri_detail.no_induk AS noInduk',
                 'santri_detail.nama',
-                'pr1.tanggal',
-                'pr1.ketertiban',
-                'pr1.kedisiplinan',
-                'pr1.kerapian',
-                'pr1.kesopanan',
-                'pr1.kepekaan_lingkungan AS kepekaanLingkungan',
-                'pr1.ketaatan_peraturan AS ketaatanPeraturan',
+                'kl1.tanggal',
+                'kl1.perlengkapan_mandi AS perlengkapanMandi',
+                // 'kl1.catatan_mandi AS catatanMandi',
+                'kl1.peralatan_sekolah AS peralatanSekolah',
+                // 'kl1.catatan_sekolah AS catatanSekolah',
+                'kl1.perlengkapan_diri AS perlengkapanDiri',
+                // 'kl1.catatan_diri AS catatanDiri',
             ])
             ->leftJoin('santri_detail', 'santri_detail.id', '=', 'santri_kamar.santri_id')
             ->leftJoinSub($sub, 'latest', function ($join) {
                 $join->on('latest.no_induk', '=', 'santri_detail.no_induk');
             })
-            ->leftJoin('perilaku as pr1', function ($join) {
-                $join->on('pr1.no_induk', '=', 'santri_detail.no_induk')
-                    ->on('pr1.id', '=', 'latest.latest_id')
-                    ->whereNull('pr1.deleted_at');
+            ->leftJoin('kelengkapan as kl1', function ($join) {
+                $join->on('kl1.no_induk', '=', 'santri_detail.no_induk')
+                    ->on('kl1.id', '=', 'latest.latest_id')
+                    ->whereNull('kl1.deleted_at');
             })
             ->where('santri_kamar.tahun_ajaran_id', $ta->id)
             ->where('santri_kamar.status', 1)
             ->where('santri_kamar.kamar_id', $dataUser->idKamar)
             ->get();
 
-            $labelPerilaku = $this->labelPerilaku;
+            $labelKelengkapan = $this->labelKelengkapan;
 
-            $dataSantri = $dataSantri->map(function ($item) use ($labelPerilaku) {
+            $dataSantri = $dataSantri->map(function ($item) use ($labelKelengkapan) {
                 // Format tanggal
                 $item->tanggal = $item->tanggal ? Carbon::parse($item->tanggal)->format('Y-m-d') : '-';
 
-                // Konversi angka ke label perilaku
-                $item->ketertiban = $labelPerilaku[$item->ketertiban] ?? '-';
-                $item->kedisiplinan = $labelPerilaku[$item->kedisiplinan] ?? '-';
-                $item->kerapian = $labelPerilaku[$item->kerapian] ?? '-';
-                $item->kesopanan = $labelPerilaku[$item->kesopanan] ?? '-';
-                $item->kepekaanLingkungan = $labelPerilaku[$item->kepekaanLingkungan] ?? '-';
-                $item->ketaatanPeraturan = $labelPerilaku[$item->ketaatanPeraturan] ?? '-';
+                // Konversi angka ke label kelengkapan
+                $item->perlengkapanMandi = $labelKelengkapan[$item->perlengkapanMandi] ?? '-';
+                $item->peralatanSekolah = $labelKelengkapan[$item->peralatanSekolah] ?? '-';
+                $item->perlengkapanDiri = $labelKelengkapan[$item->perlengkapanDiri] ?? '-';
 
                 return $item;
             });
@@ -100,21 +97,20 @@ class PerilakuController extends Controller
     public function store(Request $request)
     {
         try{
-            $data = Perilaku::create([
+            $data = Kelengkapan::create([
                 'no_induk' => $request->noInduk,
                 'tanggal' => $request->tanggal,
-                'ketertiban' => $request->ketertiban,
-                'kebersihan' => $request->kebersihan,
-                'kedisiplinan' => $request->kedisiplinan,
-                'kerapian' => $request->kerapian,
-                'kesopanan' => $request->kesopanan,
-                'kepekaan_lingkungan' => $request->kepekaanLingkungan,
-                'ketaatan_peraturan' => $request->ketaatanPeraturan,
+                'perlengkapan_mandi' => $request->perlengkapanMandi,
+                'catatan_mandi' => $request->catatanMandi,
+                'peralatan_sekolah' => $request->peralatanSekolah,
+                'catatan_sekolah' => $request->catatanSekolah,
+                'perlengkapan_diri' => $request->perlengkapanDiri,
+                'catatan_diri' => $request->catatanDiri,
             ]);
 
             return response()->json([
                 "status"  => 201,
-                "message" => "Berhasil menyimpan data perilaku santri.",
+                "message" => "Berhasil menyimpan data kelengkapan santri.",
             ], 201);
         }catch (\Exception $e) {
             return response()->json([
@@ -133,37 +129,32 @@ class PerilakuController extends Controller
             $kamar = RefKamar::where('id', $dataSantri->kamar_id)->first();
             $var['EmployeeNew'] = EmployeeNew::where('id', $kamar->employee_id)->first();
 
-            $labelPerilaku = $this->labelPerilaku;
-            $perilaku = Perilaku::where('no_induk', $noInduk)
+            $labelKelengkapan = $this->labelKelengkapan;
+            $kelengkapan = Kelengkapan::where('no_induk', $noInduk)
             ->select([
                 'tanggal',
-                'ketertiban',
-                'kebersihan',
-                'kedisiplinan',
-                'kerapian',
-                'kesopanan',
-                'kepekaan_lingkungan AS kepekaanLingkungan',
-                'ketaatan_peraturan AS ketaatanPeraturan',
+                'perlengkapan_mandi AS perlengkapanMandi',
+                'catatan_mandi AS catatanMandi',
+                'peralatan_sekolah AS peralatanSekolah',
+                'catatan_sekolah AS catatanSekolah',
+                'perlengkapan_diri AS perlengkapanDiri',
+                'catatan_diri AS catatanDiri',
             ])
             ->orderBy('created_at', 'desc') // jika kamu ingin data terbaru di urutan atas
             ->get()
-            ->map(function ($item) use ($labelPerilaku) {
+            ->map(function ($item) use ($labelKelengkapan) {
                 $item->tanggal = $item->tanggal ? Carbon::parse($item->tanggal)->format('Y-m-d') : '-';
 
-                $item->ketertiban = $labelPerilaku[$item->ketertiban] ?? '-';
-                $item->kebersihan = $labelPerilaku[$item->kebersihan] ?? '-';
-                $item->kedisiplinan = $labelPerilaku[$item->kedisiplinan] ?? '-';
-                $item->kerapian = $labelPerilaku[$item->kerapian] ?? '-';
-                $item->kesopanan = $labelPerilaku[$item->kesopanan] ?? '-';
-                $item->kepekaanLingkungan = $labelPerilaku[$item->kepekaanLingkungan] ?? '-';
-                $item->ketaatanPeraturan = $labelPerilaku[$item->ketaatanPeraturan] ?? '-';
+                $item->perlengkapanMandi = $labelKelengkapan[$item->perlengkapanMandi] ?? '-';
+                $item->peralatanSekolah = $labelKelengkapan[$item->peralatanSekolah] ?? '-';
+                $item->perlengkapanDiri = $labelKelengkapan[$item->perlengkapanDiri] ?? '-';
 
                 return $item;
             });
 
             $data = [
                 'namaSantri'    => $dataSantri->nama,
-                'dataPerilaku'  => $perilaku
+                'dataKelengkapan'  => $kelengkapan
             ];
 
             return response()->json([
@@ -183,16 +174,15 @@ class PerilakuController extends Controller
     public function edit($id)
     {
         try{
-            $data = Perilaku::select([
+            $data = Kelengkapan::select([
                 'id',
                 'tanggal',
-                'ketertiban',
-                'kebersihan',
-                'kedisiplinan',
-                'kerapian',
-                'kesopanan',
-                'kepekaan_lingkungan AS kepekaanLingkungan',
-                'ketaatan_peraturan AS ketaatanPeraturan',
+                'perlengkapan_mandi AS perlengkapanMandi',
+                'catatan_mandi AS catatanMandi',
+                'peralatan_sekolah AS peralatanSekolah',
+                'catatan_sekolah AS catatanSekolah',
+                'perlengkapan_diri AS perlengkapanDiri',
+                'catatan_diri AS catatanDiri',
             ])
             ->where('id', $id)
             ->first();
@@ -218,22 +208,21 @@ class PerilakuController extends Controller
     public function update(Request $request, $id)
     {
         try{
-            $data = Perilaku::where('id', $id)->first();
+            $data = Kelengkapan::where('id', $id)->first();
             $data->update([
                 'no_induk' => $request->noInduk,
                 'tanggal' => $request->tanggal,
-                'ketertiban' => $request->ketertiban,
-                'kebersihan' => $request->kebersihan,
-                'kedisiplinan' => $request->kedisiplinan,
-                'kerapian' => $request->kerapian,
-                'kesopanan' => $request->kesopanan,
-                'kepekaan_lingkungan' => $request->kepekaanLingkungan,
-                'ketaatan_peraturan' => $request->ketaatanPeraturan,
+                'perlengkapan_mandi' => $request->perlengkapanMandi,
+                'catatan_mandi' => $request->catatanMandi,
+                'peralatan_sekolah' => $request->peralatanSekolah,
+                'catatan_sekolah' => $request->catatanSekolah,
+                'perlengkapan_diri' => $request->perlengkapanDiri,
+                'catatan_diri' => $request->catatanDiri,
             ]);
 
             return response()->json([
                 "status"  => 200,
-                "message" => "Berhasil mengubah data pemeriksaan santri",
+                "message" => "Berhasil mengubah data kelengkapan santri.",
             ], 200);
         }catch (\Exception $e) {
             return response()->json([
@@ -247,7 +236,7 @@ class PerilakuController extends Controller
     public function delete($id)
     {
         try{
-            $data = Perilaku::where('id', $id)->first();
+            $data = Kelengkapan::where('id', $id)->first();
             $data->delete();
             return response()->json([
                 "status"  => 200,

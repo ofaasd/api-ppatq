@@ -13,6 +13,7 @@ use App\Http\Controllers\GetDataController;
 use App\Http\Controllers\MurrobyController;
 use App\Http\Controllers\UangSakuController;
 use App\Http\Controllers\KelasKamarController;
+use App\Http\Controllers\KelengkapanController;
 use App\Http\Controllers\KeluhanController;
 use App\Http\Controllers\KesantrianController;
 use App\Http\Controllers\WaliSantriController;
@@ -111,6 +112,13 @@ Route::prefix('murroby')->group(function () {
     Route::get('/santri/perilaku/edit/{idPerilaku}', [PerilakuController::class, 'edit']);
     Route::put('/santri/perilaku/update/{idPerilaku}', [PerilakuController::class, 'update']);
     Route::delete('/santri/perilaku/{idPerilaku}', [PerilakuController::class, 'delete']);
+    
+    Route::get('/santri/kelengkapan/{idUser}', [KelengkapanController::class, 'index']);
+    Route::post('/santri/kelengkapan', [KelengkapanController::class, 'store']);
+    Route::get('/santri/kelengkapan/detail/{noInduk}', [KelengkapanController::class, 'show']);
+    Route::get('/santri/kelengkapan/edit/{idKelengkapan}', [KelengkapanController::class, 'edit']);
+    Route::put('/santri/kelengkapan/update/{idKelengkapan}', [KelengkapanController::class, 'update']);
+    Route::delete('/santri/kelengkapan/{idKelengkapan}', [KelengkapanController::class, 'delete']);
 
     // Uang Saku
     Route::get('/uang-saku/{idUser}', [UangSakuController::class, 'index']);
