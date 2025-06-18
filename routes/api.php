@@ -19,6 +19,7 @@ use App\Http\Controllers\WaliSantriController;
 use App\Http\Controllers\UstadTahfidzController;
 use App\Http\Controllers\StaffPengasuhController;
 use App\Http\Controllers\KesehatanSantriController;
+use App\Http\Controllers\PerilakuController;
 use App\Http\Controllers\TutorialController;
 
 /*
@@ -103,6 +104,13 @@ Route::prefix('murroby')->group(function () {
     Route::get('/santri/pemeriksaan/{idPemeriksaan}', [MurrobyController::class, 'editPemeriksaan']);
     Route::put('/santri/pemeriksaan/update/{idPemeriksaan}', [MurrobyController::class, 'updatePemeriksaan']);
     Route::delete('/santri/pemeriksaan/{idPemeriksaan}', [MurrobyController::class, 'deletePemeriksaan']);
+
+    Route::get('/santri/perilaku/{idUser}', [PerilakuController::class, 'index']);
+    Route::post('/santri/perilaku', [PerilakuController::class, 'store']);
+    Route::get('/santri/perilaku/detail/{noInduk}', [PerilakuController::class, 'show']);
+    Route::get('/santri/perilaku/edit/{idPerilaku}', [PerilakuController::class, 'edit']);
+    Route::put('/santri/perilaku/update/{idPerilaku}', [PerilakuController::class, 'update']);
+    Route::delete('/santri/perilaku/{idPerilaku}', [PerilakuController::class, 'delete']);
 
     // Uang Saku
     Route::get('/uang-saku/{idUser}', [UangSakuController::class, 'index']);
