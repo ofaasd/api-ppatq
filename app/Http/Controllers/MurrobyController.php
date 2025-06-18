@@ -85,6 +85,7 @@ class MurrobyController extends Controller
                 'santri_detail.nama AS namaSantri',
                 'santri_detail.kelas AS kelasSantri',
                 'santri_detail.no_hp AS noHpSantri',
+                'santri_detail.photo AS fotoSantri',
                 DB::raw("CONCAT_WS(', ', santri_detail.alamat, santri_detail.kelurahan, santri_detail.kecamatan, kota_kab_tbl.nama_kota_kab) AS alamatLengkap"),
             ])
             ->leftJoin('santri_kamar', 'santri_kamar.kamar_id', '=', 'ref_kamar.id')
