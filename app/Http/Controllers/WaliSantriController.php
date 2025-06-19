@@ -31,6 +31,8 @@ use Intervention\Image\Facades\Image;
 use App\Http\Resources\WaliSantriResource;
 
 use App\Http\Requests\LoginWaliSantriRequest;
+use App\Models\Kelengkapan;
+use App\Models\Perilaku;
 
 class WaliSantriController extends Controller
 {
@@ -251,6 +253,97 @@ class WaliSantriController extends Controller
                 "data"    => $data
             ], 200);
 
+        }catch (\Exception $e) {
+            return response()->json([
+                "status"  => 500,
+                "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
+                // "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
+            ], 500);
+        }
+    }
+
+    public function perilaku($noInduk)
+    {
+        try{
+            $labelPerilaku = ['Kurang Baik', 'Cukup', 'Baik'];
+
+            $perilaku = Perilaku::select([
+                'perilaku.tanggal',
+                'perilaku.ketertiban',
+                'perilaku.kebersihan',
+                'perilaku.kedisiplinan',
+                'perilaku.kerapian',
+                'perilaku.kesopanan',
+                'perilaku.kepekaan_lingkungan AS kepekaanLingkungan',
+                'perilaku.ketaatan_peraturan AS ketaatanPeraturan',
+            ])
+            ->orderBy('tanggal', 'desc')
+            ->where('no_induk', $noInduk)
+            ->get()
+            ->map(function ($item) use ($labelPerilaku) {
+                $item->tanggal = $item->tanggal ? Carbon::parse($item->tanggal)->format('Y-m-d') : '-';
+
+                $item->ketertiban = $labelPerilaku[$item->ketertiban] ?? '-';
+                $item->kebersihan = $labelPerilaku[$item->kebersihan] ?? '-';
+                $item->kedisiplinan = $labelPerilaku[$item->kedisiplinan] ?? '-';
+                $item->kerapian = $labelPerilaku[$item->kerapian] ?? '-';
+                $item->kesopanan = $labelPerilaku[$item->kesopanan] ?? '-';
+                $item->kepekaanLingkungan = $labelPerilaku[$item->kepekaanLingkungan] ?? '-';
+                $item->ketaatanPeraturan = $labelPerilaku[$item->ketaatanPeraturan] ?? '-';
+
+                return $item;
+            });
+
+            $data = [
+                'status'   => 200,
+                'message'   => 'Berhasil mengambil data',
+                'data'  =>  $perilaku
+            ];
+
+            return response()->json($data, 200);
+        }catch (\Exception $e) {
+            return response()->json([
+                "status"  => 500,
+                "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
+                // "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
+            ], 500);
+        }
+    }
+
+    public function kelengkapan($noInduk)
+    {
+        try{
+            $labelKelengkapan = ['Tidak Lengkap', 'Lengkap & Kurang baik', 'lengkap & baik'];
+
+            $kelengkapan = Kelengkapan::select([
+                'tanggal',
+                'perlengkapan_mandi AS perlengkapanMandi',
+                'catatan_mandi AS catatanMandi',
+                'peralatan_sekolah AS peralatanSekolah',
+                'catatan_sekolah AS catatanSekolah',
+                'perlengkapan_diri AS perlengkapanDiri',
+                'catatan_diri AS catatanDiri',
+            ])
+            ->orderBy('tanggal', 'desc')
+            ->where('no_induk', $noInduk)
+            ->get()
+            ->map(function ($item) use ($labelKelengkapan) {
+                $item->tanggal = $item->tanggal ? Carbon::parse($item->tanggal)->format('Y-m-d') : '-';
+
+                $item->perlengkapanMandi = $labelKelengkapan[$item->perlengkapanMandi] ?? '-';
+                $item->peralatanSekolah = $labelKelengkapan[$item->peralatanSekolah] ?? '-';
+                $item->perlengkapanDiri = $labelKelengkapan[$item->perlengkapanDiri] ?? '-';
+
+                return $item;
+            });
+
+            $data = [
+                'status'   => 200,
+                'message'   => 'Berhasil mengambil data',
+                'data'  =>  $kelengkapan
+            ];
+
+            return response()->json($data, 200);
         }catch (\Exception $e) {
             return response()->json([
                 "status"  => 500,
