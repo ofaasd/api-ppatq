@@ -132,6 +132,7 @@ class KelengkapanController extends Controller
             $labelKelengkapan = $this->labelKelengkapan;
             $kelengkapan = Kelengkapan::where('no_induk', $noInduk)
             ->select([
+                'id',
                 'tanggal',
                 'perlengkapan_mandi AS perlengkapanMandi',
                 'catatan_mandi AS catatanMandi',
@@ -154,6 +155,7 @@ class KelengkapanController extends Controller
 
             $data = [
                 'namaSantri'    => $dataSantri->nama,
+                'noInduk'    => $dataSantri->no_induk,
                 'dataKelengkapan'  => $kelengkapan
             ];
 

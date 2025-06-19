@@ -136,6 +136,7 @@ class PerilakuController extends Controller
             $labelPerilaku = $this->labelPerilaku;
             $perilaku = Perilaku::where('no_induk', $noInduk)
             ->select([
+                'id',
                 'tanggal',
                 'ketertiban',
                 'kebersihan',
@@ -163,6 +164,7 @@ class PerilakuController extends Controller
 
             $data = [
                 'namaSantri'    => $dataSantri->nama,
+                'noInduk'    => $dataSantri->no_induk,
                 'dataPerilaku'  => $perilaku
             ];
 
