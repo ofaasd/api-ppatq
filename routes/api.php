@@ -134,7 +134,7 @@ Route::prefix('murroby')->group(function () {
 Route::prefix('ustad-tahfidz')->group(function () {
     Route::get('/santri/{idUser}', [UstadTahfidzController::class, 'listSantri']);
     Route::get('/tahfidz/{idUser}', [UstadTahfidzController::class, 'index']);
-    Route::get('/tahfidz/{idDetailTahfidz}', [UstadTahfidzController::class, 'edit']);
+    Route::get('/tahfidz/edit/{idDetailTahfidz}', [UstadTahfidzController::class, 'edit']);
     Route::put('/tahfidz/update/{idDetailTahfidz}', [UstadTahfidzController::class, 'update']);
     Route::post('/tahfidz', [UstadTahfidzController::class, 'store']);
     Route::get('/tahfidz/show/{noInduk}', [UstadTahfidzController::class, 'detailSantri']);

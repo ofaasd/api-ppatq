@@ -13,6 +13,19 @@ use App\Models\SantriDetail;
 
 class UstadTahfidzController extends Controller
 {
+    private function convertNilai($angka)
+    {
+        $mapping = [
+            4 => 'A',
+            3 => 'B',
+            2 => 'C',
+            1 => 'D',
+            0 => 'E',
+        ];
+
+        return $mapping[$angka] ?? null;
+    }
+
     public function index($idUser)
     {
         try{
@@ -24,6 +37,16 @@ class UstadTahfidzController extends Controller
                 'detail_santri_tahfidz.bulan',
                 'santri_detail.nama AS namaSantri',
                 'kode_juz.nama AS juz',
+                'detail_santri_tahfidz.hafalan',
+                'detail_santri_tahfidz.tilawah',
+                'detail_santri_tahfidz.kefasihan',
+                'detail_santri_tahfidz.daya_ingat AS dayaIngat',
+                'detail_santri_tahfidz.kelancaran',
+                'detail_santri_tahfidz.praktek_tajwid AS praktekTajwid',
+                'detail_santri_tahfidz.makhroj',
+                'detail_santri_tahfidz.tanafus',
+                'detail_santri_tahfidz.waqof_wasol AS waqofWasol',
+                'detail_santri_tahfidz.ghorib',
             ])
             ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'detail_santri_tahfidz.no_induk')
             ->leftJoin('kode_juz', 'kode_juz.id', '=', 'detail_santri_tahfidz.kode_juz_surah')
@@ -31,6 +54,20 @@ class UstadTahfidzController extends Controller
             ->where('detail_santri_tahfidz.id_tahun_ajaran', $ta->id)
             ->orderBy('detail_santri_tahfidz.created_at', 'desc')
             ->get();
+
+            $detail->transform(function ($item) {
+                $item->hafalan = $this->convertNilai($item->hafalan) ?? '-';
+                $item->tilawah = $this->convertNilai($item->tilawah) ?? '-';
+                $item->kefasihan = $this->convertNilai($item->kefasihan) ?? '-';
+                $item->dayaIngat = $this->convertNilai($item->dayaIngat) ?? '-';
+                $item->kelancaran = $this->convertNilai($item->kelancaran) ?? '-';
+                $item->praktekTajwid = $this->convertNilai($item->praktekTajwid) ?? '-';
+                $item->makhroj = $this->convertNilai($item->makhroj) ?? '-';
+                $item->tanafus = $this->convertNilai($item->tanafus) ?? '-';
+                $item->waqofWasol = $this->convertNilai($item->waqofWasol) ?? '-';
+                $item->ghorib = $this->convertNilai($item->ghorib) ?? '-';
+                return $item;
+            });
 
             $data = [
                 'idTahfidz' => $tahfidz->id,
@@ -77,6 +114,16 @@ class UstadTahfidzController extends Controller
                     'tanggal' => $tanggal,
                     'id_tahun_ajaran' => $ta->id,
                     'kode_juz_surah' => $request->kodeJuzSurah,
+                    'hafalan' => $request->hafalan,
+                    'tilawah' => $request->tilawah,
+                    'kefasihan' => $request->kefasihan,
+                    'daya_ingat' => $request->dayaIngat,
+                    'kelancaran' => $request->kelancaran,
+                    'praktek_tajwid' => $request->praktekTajwid,
+                    'makhroj' => $request->makhroj,
+                    'tanafus' => $request->tanafus,
+                    'waqof_wasol' => $request->waqofWasol,
+                    'ghorib' => $request->ghorib,
                 ]
             );
 
@@ -135,15 +182,40 @@ class UstadTahfidzController extends Controller
         try{
             $ta = RefTahunAjaran::where('is_aktif', 1)->first();
             $getData = DetailSantriTahfidz::select([
-                    'detail_santri_tahfidz.bulan',
-                    'detail_santri_tahfidz.tahun',
-                    'kode_juz.nama AS juz',
-                ])
-                ->leftJoin('kode_juz', 'kode_juz.id', '=', 'detail_santri_tahfidz.kode_juz_surah')
-                ->where('detail_santri_tahfidz.id_tahun_ajaran', $ta->id)
-                ->where('detail_santri_tahfidz.no_induk', $noInduk)
-                ->orderBy('detail_santri_tahfidz.created_at', 'desc')
-                ->get();
+                'detail_santri_tahfidz.bulan',
+                'detail_santri_tahfidz.tahun',
+                'kode_juz.nama AS juz',
+                'detail_santri_tahfidz.hafalan',
+                'detail_santri_tahfidz.tilawah',
+                'detail_santri_tahfidz.kefasihan',
+                'detail_santri_tahfidz.daya_ingat AS dayaIngat',
+                'detail_santri_tahfidz.kelancaran',
+                'detail_santri_tahfidz.praktek_tajwid AS praktekTajwid',
+                'detail_santri_tahfidz.makhroj',
+                'detail_santri_tahfidz.tanafus',
+                'detail_santri_tahfidz.waqof_wasol AS waqofWasol',
+                'detail_santri_tahfidz.ghorib',
+            ])
+            ->leftJoin('kode_juz', 'kode_juz.id', '=', 'detail_santri_tahfidz.kode_juz_surah')
+            ->where('detail_santri_tahfidz.id_tahun_ajaran', $ta->id)
+            ->where('detail_santri_tahfidz.no_induk', $noInduk)
+            ->orderBy('detail_santri_tahfidz.created_at', 'desc')
+            ->get();
+
+            $getData->transform(function ($item) {
+                $item->hafalan = $this->convertNilai($item->hafalan) ?? '-';
+                $item->tilawah = $this->convertNilai($item->tilawah) ?? '-';
+                $item->kefasihan = $this->convertNilai($item->kefasihan) ?? '-';
+                $item->dayaIngat = $this->convertNilai($item->dayaIngat) ?? '-';
+                $item->kelancaran = $this->convertNilai($item->kelancaran) ?? '-';
+                $item->praktekTajwid = $this->convertNilai($item->praktekTajwid) ?? '-';
+                $item->makhroj = $this->convertNilai($item->makhroj) ?? '-';
+                $item->tanafus = $this->convertNilai($item->tanafus) ?? '-';
+                $item->waqofWasol = $this->convertNilai($item->waqofWasol) ?? '-';
+                $item->ghorib = $this->convertNilai($item->ghorib) ?? '-';
+                return $item;
+            });
+
             $getProfil = SantriDetail::where('no_induk', $noInduk)->first();
 
             $data = [
@@ -172,6 +244,16 @@ class UstadTahfidzController extends Controller
                 'detail_santri_tahfidz.bulan',
                 'santri_detail.nama AS namaSantri',
                 'kode_juz.nama AS juz',
+                'detail_santri_tahfidz.hafalan',
+                'detail_santri_tahfidz.tilawah',
+                'detail_santri_tahfidz.kefasihan',
+                'detail_santri_tahfidz.daya_ingat AS dayaIngat',
+                'detail_santri_tahfidz.kelancaran',
+                'detail_santri_tahfidz.praktek_tajwid AS praktekTajwid',
+                'detail_santri_tahfidz.makhroj',
+                'detail_santri_tahfidz.tanafus',
+                'detail_santri_tahfidz.waqof_wasol AS waqofWasol',
+                'detail_santri_tahfidz.ghorib',
             ])
             ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'detail_santri_tahfidz.no_induk')
             ->leftJoin('kode_juz', 'kode_juz.id', '=', 'detail_santri_tahfidz.kode_juz_surah')
@@ -207,6 +289,16 @@ class UstadTahfidzController extends Controller
                 'tanggal' => $request->tanggal,
                 'id_tahun_ajaran' => $ta->id,
                 'kode_juz_surah' => $request->kodeJuzSurah,
+                'hafalan' => $request->hafalan,
+                'tilawah' => $request->tilawah,
+                'kefasihan' => $request->kefasihan,
+                'daya_ingat' => $request->dayaIngat,
+                'kelancaran' => $request->kelancaran,
+                'praktek_tajwid' => $request->praktekTajwid,
+                'makhroj' => $request->makhroj,
+                'tanafus' => $request->tanafus,
+                'waqof_wasol' => $request->waqofWasol,
+                'ghorib' => $request->ghorib,
             ]);
 
             return response()->json([
