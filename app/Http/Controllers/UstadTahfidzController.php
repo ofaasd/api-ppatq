@@ -52,7 +52,7 @@ class UstadTahfidzController extends Controller
             ->leftJoin('kode_juz', 'kode_juz.id', '=', 'detail_santri_tahfidz.kode_juz_surah')
             ->where('id_tahfidz', $tahfidz->id)
             ->where('detail_santri_tahfidz.id_tahun_ajaran', $ta->id)
-            ->orderBy('detail_santri_tahfidz.created_at', 'desc')
+            ->orderBy('detail_santri_tahfidz.created_at', 'asc')
             ->get();
 
             $detail->transform(function ($item) {
@@ -94,18 +94,25 @@ class UstadTahfidzController extends Controller
             $tanggal = $request->tanggal;
             $bulan = date('m', strtotime($tanggal));
             $tahun = date('Y', strtotime($tanggal));
+
             $ta = RefTahunAjaran::where('is_aktif', 1)->first();
+
+            // Cek apakah data sudah ada
             $cekData = DetailSantriTahfidz::where('id_tahfidz', $request->idTahfidz)
                 ->where('no_induk', $request->noInduk)
                 ->where('bulan', $bulan)
                 ->where('tahun', $tahun)
                 ->first();
-            if (!empty($cekData->id)) {
-                $id = $cekData->id;
+
+            // Siapkan kondisi update/create
+            $kondisi = [];
+
+            if ($cekData && $cekData->id) {
+                $kondisi = ['id' => $cekData->id];
             }
 
             $data = DetailSantriTahfidz::updateOrCreate(
-                ['id' => $id],
+                $kondisi,
                 [
                     'id_tahfidz' => $request->idTahfidz,
                     'no_induk' => $request->noInduk,
@@ -199,7 +206,7 @@ class UstadTahfidzController extends Controller
             ->leftJoin('kode_juz', 'kode_juz.id', '=', 'detail_santri_tahfidz.kode_juz_surah')
             ->where('detail_santri_tahfidz.id_tahun_ajaran', $ta->id)
             ->where('detail_santri_tahfidz.no_induk', $noInduk)
-            ->orderBy('detail_santri_tahfidz.created_at', 'desc')
+            ->orderBy('detail_santri_tahfidz.created_at', 'asc')
             ->get();
 
             $getData->transform(function ($item) {
