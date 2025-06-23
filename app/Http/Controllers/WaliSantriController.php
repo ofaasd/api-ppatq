@@ -204,11 +204,33 @@ class WaliSantriController extends Controller
         }
     }
 
+    private function konversiNilaiHuruf($nilai)
+    {
+        return match ((int) $nilai) {
+            4 => 'A',
+            3 => 'B',
+            2 => 'C',
+            1 => 'D',
+            0 => 'E',
+            default => '-',
+        };
+    }
+
     public function ketahfidzan($noInduk)
     {
         try{
             $ketahfidzan = DetailSantriTahfidz::select([
                 'detail_santri_tahfidz.tanggal',
+                'detail_santri_tahfidz.hafalan',
+                'detail_santri_tahfidz.tilawah',
+                'detail_santri_tahfidz.kefasihan',
+                'detail_santri_tahfidz.daya_ingat AS dayaIngat',
+                'detail_santri_tahfidz.kelancaran',
+                'detail_santri_tahfidz.praktek_tajwid AS praktekTajwid',
+                'detail_santri_tahfidz.makhroj',
+                'detail_santri_tahfidz.tanafus',
+                'detail_santri_tahfidz.waqof_wasol AS waqofWasol',
+                'detail_santri_tahfidz.ghorib',
                 'kode_juz.nama as nmJuz'
             ])
             ->leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
@@ -219,6 +241,18 @@ class WaliSantriController extends Controller
             ->get()
             ->map(function ($item) {
                 $item->tanggalTahfidzan = Carbon::parse($item->tanggal)->translatedFormat('d F Y');
+
+                $item->hafalan          = $this->konversiNilaiHuruf($item->hafalan);
+                $item->tilawah          = $this->konversiNilaiHuruf($item->tilawah);
+                $item->kefasihan        = $this->konversiNilaiHuruf($item->kefasihan);
+                $item->dayaIngat        = $this->konversiNilaiHuruf($item->dayaIngat);
+                $item->kelancaran       = $this->konversiNilaiHuruf($item->kelancaran);
+                $item->praktekTajwid    = $this->konversiNilaiHuruf($item->praktekTajwid);
+                $item->makhroj          = $this->konversiNilaiHuruf($item->makhroj);
+                $item->tanafus          = $this->konversiNilaiHuruf($item->tanafus);
+                $item->waqofWasol       = $this->konversiNilaiHuruf($item->waqofWasol);
+                $item->ghorib           = $this->konversiNilaiHuruf($item->ghorib);
+
                 return $item;
             });
 

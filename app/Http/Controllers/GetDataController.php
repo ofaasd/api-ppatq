@@ -15,7 +15,7 @@ class GetDataController extends Controller
     public function kodeJuz()
     {
         try{
-            $data = KodeJuz::select('id', 'nama')->get();
+            $data = KodeJuz::select('kode', 'nama')->get();
 
             return response()->json([
                     "status"  => 200,
