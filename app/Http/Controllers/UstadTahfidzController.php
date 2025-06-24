@@ -49,7 +49,7 @@ class UstadTahfidzController extends Controller
                 'detail_santri_tahfidz.ghorib',
             ])
             ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'detail_santri_tahfidz.no_induk')
-            ->leftJoin('kode_juz', 'kode_juz.id', '=', 'detail_santri_tahfidz.kode_juz_surah')
+            ->leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
             ->where('id_tahfidz', $tahfidz->id)
             ->where('detail_santri_tahfidz.id_tahun_ajaran', $ta->id)
             ->orderBy('detail_santri_tahfidz.created_at', 'asc')
@@ -203,7 +203,7 @@ class UstadTahfidzController extends Controller
                 'detail_santri_tahfidz.waqof_wasol AS waqofWasol',
                 'detail_santri_tahfidz.ghorib',
             ])
-            ->leftJoin('kode_juz', 'kode_juz.id', '=', 'detail_santri_tahfidz.kode_juz_surah')
+            ->leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
             ->where('detail_santri_tahfidz.id_tahun_ajaran', $ta->id)
             ->where('detail_santri_tahfidz.no_induk', $noInduk)
             ->orderBy('detail_santri_tahfidz.created_at', 'asc')
@@ -248,12 +248,13 @@ class UstadTahfidzController extends Controller
         try{
             $data = DetailSantriTahfidz::select([
                 'detail_santri_tahfidz.id',
+                'detail_santri_tahfidz.no_induk AS noInduk',
                 'detail_santri_tahfidz.bulan',
-                'santri_detail.nama AS namaSantri',
-                'kode_juz.nama AS juz',
+                'detail_santri_tahfidz.kode_juz_surah AS kodeJuzSurah',
+                'detail_santri_tahfidz.tanggal',
                 'detail_santri_tahfidz.hafalan',
-                'detail_santri_tahfidz.tilawah',
                 'detail_santri_tahfidz.kefasihan',
+                'detail_santri_tahfidz.tilawah',
                 'detail_santri_tahfidz.daya_ingat AS dayaIngat',
                 'detail_santri_tahfidz.kelancaran',
                 'detail_santri_tahfidz.praktek_tajwid AS praktekTajwid',
@@ -263,7 +264,7 @@ class UstadTahfidzController extends Controller
                 'detail_santri_tahfidz.ghorib',
             ])
             ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'detail_santri_tahfidz.no_induk')
-            ->leftJoin('kode_juz', 'kode_juz.id', '=', 'detail_santri_tahfidz.kode_juz_surah')
+            ->leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
             ->where('detail_santri_tahfidz.id', $id)
             ->first();
             return response()->json([
