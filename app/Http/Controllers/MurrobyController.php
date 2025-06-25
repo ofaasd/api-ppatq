@@ -62,7 +62,8 @@ class MurrobyController extends Controller
                 'employee_new.nama AS namaMurroby',
                 'employee_new.photo AS fotoMurroby',
                 'employee_new.alamat AS alamatMurroby',
-                'ref_kamar.code AS kodeKamar'
+                // 'ref_kamar.code AS kodeKamar',
+                'ref_kamar.id AS idKamar'
             ])
             ->leftJoin('employee_new', 'employee_new.id', '=', 'users.pegawai_id')
             ->leftJoin('ref_kamar', 'ref_kamar.employee_id', '=', 'employee_new.id')
@@ -80,23 +81,35 @@ class MurrobyController extends Controller
             ], 404);
         }
 
-        $listSantri = RefKamar::select([
-                'santri_detail.no_induk AS noIndukSantri',
-                'santri_detail.nama AS namaSantri',
-                'santri_detail.kelas AS kelasSantri',
-                'santri_detail.no_hp AS noHpSantri',
-                'santri_detail.photo AS fotoSantri',
-                DB::raw("CONCAT_WS(', ', santri_detail.alamat, santri_detail.kelurahan, santri_detail.kecamatan, kota_kab_tbl.nama_kota_kab) AS alamatLengkap"),
-            ])
-            ->leftJoin('santri_kamar', 'santri_kamar.kamar_id', '=', 'ref_kamar.id')
-            ->leftJoin('santri_detail', 'santri_detail.id', '=', 'santri_kamar.santri_id')
-            ->leftJoin('kota_kab_tbl', 'kota_kab_tbl.id_kota_kab', '=', 'santri_detail.kabkota')
-            ->where('santri_kamar.tahun_ajaran_id', $ta->id)
-            ->where('santri_kamar.status', 1)
-            ->where('ref_kamar.employee_id', $dataUser->idPegawai)
-            ->get();
+        // $listSantri = RefKamar::select([
+        //         'santri_detail.no_induk AS noIndukSantri',
+        //         'santri_detail.nama AS namaSantri',
+        //         'santri_detail.kelas AS kelasSantri',
+        //         'santri_detail.no_hp AS noHpSantri',
+        //         'santri_detail.photo AS fotoSantri',
+        //         DB::raw("CONCAT_WS(', ', santri_detail.alamat, santri_detail.kelurahan, santri_detail.kecamatan, kota_kab_tbl.nama_kota_kab) AS alamatLengkap"),
+        //     ])
+        //     ->leftJoin('santri_kamar', 'santri_kamar.kamar_id', '=', 'ref_kamar.id')
+        //     ->leftJoin('santri_detail', 'santri_detail.id', '=', 'santri_kamar.santri_id')
+        //     ->leftJoin('kota_kab_tbl', 'kota_kab_tbl.id_kota_kab', '=', 'santri_detail.kabkota')
+        //     ->where('santri_kamar.tahun_ajaran_id', $ta->id)
+        //     ->where('santri_kamar.status', 1)
+        //     ->where('ref_kamar.employee_id', $dataUser->idPegawai)
+        //     ->get();
 
-        if(!$listSantri)
+        $listSantri = SantriDetail::select([
+            'santri_detail.no_induk AS noIndukSantri',
+            'santri_detail.nama AS namaSantri',
+            'santri_detail.kelas AS kelasSantri',
+            'santri_detail.no_hp AS noHpSantri',
+            'santri_detail.photo AS fotoSantri',
+            DB::raw("CONCAT_WS(', ', santri_detail.alamat, santri_detail.kelurahan, santri_detail.kecamatan, kota_kab_tbl.nama_kota_kab) AS alamatLengkap"),
+        ])
+        ->leftJoin('kota_kab_tbl', 'kota_kab_tbl.id_kota_kab', '=', 'santri_detail.kabkota')
+        ->where('kamar_id', $dataUser->idKamar)
+        ->get();
+
+        if($listSantri->isEmpty())
         {
             return response()->json([
                 'status'   => 404,
