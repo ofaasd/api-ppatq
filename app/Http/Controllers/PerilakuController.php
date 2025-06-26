@@ -56,7 +56,7 @@ class PerilakuController extends Controller
                     ->on('pr1.id', '=', 'latest.latest_id')
                     ->whereNull('pr1.deleted_at');
             })
-            ->where('santri_kamar.tahun_ajaran_id', $ta->id)
+            // ->where('santri_kamar.tahun_ajaran_id', $ta->id)
             ->where('santri_kamar.status', 1)
             ->where('santri_kamar.kamar_id', $dataUser->idKamar)
             ->get();

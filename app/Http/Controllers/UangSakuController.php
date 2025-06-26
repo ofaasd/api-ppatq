@@ -46,7 +46,7 @@ class UangSakuController extends Controller
             ->leftJoin('santri_detail', 'santri_detail.id', '=', 'santri_kamar.santri_id')
             ->leftJoin('tb_uang_saku', 'tb_uang_saku.no_induk', '=', 'santri_detail.no_induk')
             ->where('ref_kamar.employee_id', $dataUser->idPegawai)
-            ->where('santri_kamar.tahun_ajaran_id', $ta->id)
+            // ->where('santri_kamar.tahun_ajaran_id', $ta->id)
             ->orderBy('namaSantri', 'asc')
             ->get();
 

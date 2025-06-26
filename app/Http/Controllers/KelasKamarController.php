@@ -32,8 +32,8 @@ class KelasKamarController extends Controller
             ->leftJoin('employee_new', 'ref_kamar.employee_id', '=', 'employee_new.id')
             ->whereIn('ref_kamar.id', function ($query) use ($tahunAjaran) {
                 $query->select('kamar_id')
-                    ->from('santri_kamar')
-                    ->where('tahun_ajaran_id', $tahunAjaran->id);
+                    ->from('santri_kamar');
+                    // ->where('tahun_ajaran_id', $tahunAjaran->id);
             })
             ->get()
             ->map(function ($item) {
@@ -171,7 +171,7 @@ class KelasKamarController extends Controller
             ->leftJoin('employee_new', 'ref_kamar.employee_id', '=', 'employee_new.id')
             ->where('santri_kamar.kamar_id', $id)
             ->where('santri_kamar.status', 1)
-            ->where('santri_kamar.tahun_ajaran_id', $tahunAjaran->id)
+            // ->where('santri_kamar.tahun_ajaran_id', $tahunAjaran->id)
             ->distinct()
             ;
 

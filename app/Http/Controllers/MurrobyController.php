@@ -82,7 +82,6 @@ class MurrobyController extends Controller
     
     public function index($idUser)
     {
-        $ta = RefTahunAjaran::where('is_aktif', 1)->first();
         $dataUser = User::select([
                 'employee_new.id AS idPegawai',
                 'employee_new.nama AS namaMurroby',
@@ -106,22 +105,6 @@ class MurrobyController extends Controller
                 'message'   => 'Data murroby tidak ditemukan',
             ], 404);
         }
-
-        // $listSantri = RefKamar::select([
-        //         'santri_detail.no_induk AS noIndukSantri',
-        //         'santri_detail.nama AS namaSantri',
-        //         'santri_detail.kelas AS kelasSantri',
-        //         'santri_detail.no_hp AS noHpSantri',
-        //         'santri_detail.photo AS fotoSantri',
-        //         DB::raw("CONCAT_WS(', ', santri_detail.alamat, santri_detail.kelurahan, santri_detail.kecamatan, kota_kab_tbl.nama_kota_kab) AS alamatLengkap"),
-        //     ])
-        //     ->leftJoin('santri_kamar', 'santri_kamar.kamar_id', '=', 'ref_kamar.id')
-        //     ->leftJoin('santri_detail', 'santri_detail.id', '=', 'santri_kamar.santri_id')
-        //     ->leftJoin('kota_kab_tbl', 'kota_kab_tbl.id_kota_kab', '=', 'santri_detail.kabkota')
-        //     ->where('santri_kamar.tahun_ajaran_id', $ta->id)
-        //     ->where('santri_kamar.status', 1)
-        //     ->where('ref_kamar.employee_id', $dataUser->idPegawai)
-        //     ->get();
 
         $listSantri = SantriDetail::select([
             'santri_detail.no_induk AS noIndukSantri',
@@ -193,7 +176,6 @@ class MurrobyController extends Controller
                     ->on('tp.id', '=', 'latest.latest_id')
                     ->whereNull('tp.deleted_at');
             })
-            ->where('santri_kamar.tahun_ajaran_id', $ta->id)
             ->where('santri_kamar.status', 1)
             ->where('santri_kamar.kamar_id', $dataUser->idKamar)
             ->get();
