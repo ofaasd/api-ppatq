@@ -41,7 +41,8 @@ class AuthServiceProvider extends ServiceProvider
                 $this->app->make(RefreshTokenRepository::class),
                 new DateInterval('P15D') // access token valid 15 hari
             ),
-            new DateInterval('PT1H') // token TTL: 1 jam
+            // new DateInterval('PT1H') // token TTL: 1 jam
+            new DateInterval('PT1M') // token TTL: 1 menit
         );
     }
 
