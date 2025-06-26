@@ -147,12 +147,12 @@ Route::middleware('auth:api')->group(function () {
 Route::prefix('wali-santri')->group(function () {
     Route::post('/login', [WaliSantriController::class, 'login']);
 
-    Route::middleware('auth:api-siswa')->group(function () {
+    // Route::middleware('auth:api-siswa')->group(function () {
         Route::get('/kesehatan/{noInduk}', [WaliSantriController::class, 'kesehatan']);
         Route::get('/ketahfidzan/{noInduk}', [WaliSantriController::class, 'ketahfidzan']);
         Route::get('/perilaku/{noInduk}', [WaliSantriController::class, 'perilaku']);
         Route::get('/kelengkapan/{noInduk}', [WaliSantriController::class, 'kelengkapan']);
         Route::post('/lapor-bayar', [WaliSantriController::class, 'laporBayar']);
         Route::get('/riwayat-bayar/{noInduk}', [WaliSantriController::class, 'riwayatBayar']);
-    });
+    // });
 });
