@@ -31,9 +31,15 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
-    'passport' => [
+    'passport_user' => [
         'login_endpoint' => env('PASSPORT_LOGIN_ENDPOINT', env('APP_URL').'/oauth/token'),
         'client_id' => env('PASSPORT_CLIENT_ID'),
         'client_secret' => env('PASSPORT_CLIENT_SECRET'),
+    ],
+
+    'passport_siswa' => [
+        'login_endpoint' => env('PASSPORT_LOGIN_ENDPOINT', env('APP_URL').'/oauth/token'),
+        'client_id' => env('PASSPORT_CLIENT_ID_SISWA'),
+        'client_secret' => env('PASSPORT_CLIENT_SECRET_SISWA'),
     ],
 ];

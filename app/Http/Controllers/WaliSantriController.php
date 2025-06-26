@@ -34,6 +34,8 @@ use App\Http\Requests\LoginWaliSantriRequest;
 use App\Models\Kelengkapan;
 use App\Models\Perilaku;
 
+use Illuminate\Support\Facades\Http;
+
 class WaliSantriController extends Controller
 {
     private function getNamaBulan($angkaBulan)
@@ -59,12 +61,43 @@ class WaliSantriController extends Controller
     public function login(LoginWaliSantriRequest $request): JsonResponse
     {
         $reqData = $request->validated();
+        $noInduk = $reqData['noInduk'];
+        $kode = $reqData['kode'];
+
+        $response = Http::asForm()->post(config('services.passport_siswa.login_endpoint'), [
+            'grant_type'    => 'password',
+            'client_id'     => config('services.passport_siswa.client_id'),
+            'client_secret' => config('services.passport_siswa.client_secret'),
+            'username'      => $noInduk,
+            'password'      => $kode,
+            'scope'         => '',
+        ]);
+
+        // if ($response->failed()) {
+        //     throw new HttpResponseException(response([
+        //         "errors" => [
+        //             'Verifikasi' => [
+        //                 $response->json() // SALAH! Ini bukan bentuk response yang valid
+        //             ]
+        //         ]
+        //     ], 400));
+        // }
+
+        if ($response->failed()) {
+            throw new HttpResponseException(response([
+                "errors" => [
+                    'Verifikasi' => [
+                        'Login gagal. Harap pastikan email dan password benar.'
+                    ]
+                ]
+            ], 400));
+        }
 
         $tanggalLahir = Carbon::parse($reqData['tanggalLahir'])->format('Y-m-d');
 
         $siswa = RefSiswa::where([
-            'ref_siswa.no_induk'=>$reqData['noInduk'], 
-            'ref_siswa.kode'=>$reqData['kode'],
+            'ref_siswa.no_induk'=>$noInduk, 
+            'ref_siswa.kode'=>$kode,
             'santri_detail.tanggal_lahir'=>$tanggalLahir
         ])
         ->select([
@@ -105,6 +138,9 @@ class WaliSantriController extends Controller
 
         if($siswa->count() > 0){
             $hasil = $siswa->first();
+
+            $tokenData = $response->json();
+
             $sakuMasuk = SakuMasuk::select([
                 DB::raw("
                     CASE tb_saku_masuk.dari
@@ -130,14 +166,11 @@ class WaliSantriController extends Controller
             if ($hasil) {
                 $hasil->kelas = strtoupper($hasil->kelas);
                 $hasil->tanggal_lahir = Carbon::parse($hasil->tanggal_lahir)->translatedFormat('d F Y');
+                $hasil->access_token = $tokenData['access_token'];
+                $hasil->expires_in = $tokenData['expires_in'];
             }
             $hasil->saku_masuk = $sakuMasuk;
             $hasil->saku_keluar = $sakuKeluar;
-            // $token = Str::random(40);
-            // $update = RefSiswa::find($hasil->id);
-            // $update->token = $token;
-            // $update->save();
-            // $update->refresh();
             return (new WaliSantriResource($hasil))->response()->setStatusCode(200);
         }else{
             throw new HttpResponseException(response([

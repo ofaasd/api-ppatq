@@ -1,15 +1,17 @@
 <?php
 
 namespace App\Providers;
+
 use DateInterval;
 use Laravel\Passport\Passport;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Passport\Bridge\UserRepository;
+
 use League\OAuth2\Server\AuthorizationServer;
 use League\OAuth2\Server\Grant\PasswordGrant;
 use Laravel\Passport\Bridge\RefreshTokenRepository;
+use App\Passport\SiswaUserRepository;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
-
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -30,20 +32,26 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        // Aktifkan password grant
+        // Konfigurasi masa berlaku token
         Passport::tokensExpireIn(now()->addDays(15));
         Passport::refreshTokensExpireIn(now()->addDays(30));
 
-        // Enable password grant secara manual
-        $this->app->get(AuthorizationServer::class)->enableGrantType(
-            new PasswordGrant(
-                $this->app->make(UserRepository::class),
-                $this->app->make(RefreshTokenRepository::class),
-                new DateInterval('P15D') // access token valid 15 hari
-            ),
-            // new DateInterval('PT1H') // token TTL: 1 jam
-            new DateInterval('PT1M') // token TTL: 1 menit
+        $server = $this->app->get(AuthorizationServer::class);
+
+        $userGrant = new PasswordGrant(
+            app(UserRepository::class),
+            app(RefreshTokenRepository::class),
+            new \DateInterval('P15D')
         );
+        $server->enableGrantType($userGrant, new \DateInterval('PT8H'));
+
+        // Password grant untuk siswa
+        // $siswaGrant = new PasswordGrant(
+        //     app(SiswaUserRepository::class),
+        //     app(RefreshTokenRepository::class),
+        //     new \DateInterval('P15D')
+        // );
+        // $server->enableGrantType($siswaGrant, new \DateInterval('PT2H'));
     }
 
 }

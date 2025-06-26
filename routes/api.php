@@ -95,59 +95,64 @@ Route::get('/kamar/{id}', [KelasKamarController::class, 'showKamar']);
 // Login Ustad
 Route::post('/ustad/login', [MurrobyController::class, 'login']);
 
-// Murroby
-Route::prefix('murroby')->group(function () {
-    Route::get('/santri/{idUser}', [MurrobyController::class, 'index']);
+Route::middleware('auth:api')->group(function () {
+    // Murroby
+    Route::prefix('murroby')->group(function () {
+        Route::get('/santri/{idUser}', [MurrobyController::class, 'index']);
 
-    Route::get('/santri/pemeriksaan/{idUser}', [MurrobyController::class, 'pemeriksaan']);
-    Route::post('/santri/pemeriksaan', [MurrobyController::class, 'storePemeriksaan']);
-    Route::get('/santri/pemeriksaan/detail/{noInduk}', [MurrobyController::class, 'detailPemeriksaan']);
-    Route::get('/santri/pemeriksaan/edit/{idPemeriksaan}', [MurrobyController::class, 'editPemeriksaan']);
-    Route::put('/santri/pemeriksaan/update/{idPemeriksaan}', [MurrobyController::class, 'updatePemeriksaan']);
-    Route::delete('/santri/pemeriksaan/{idPemeriksaan}', [MurrobyController::class, 'deletePemeriksaan']);
+        Route::get('/santri/pemeriksaan/{idUser}', [MurrobyController::class, 'pemeriksaan']);
+        Route::post('/santri/pemeriksaan', [MurrobyController::class, 'storePemeriksaan']);
+        Route::get('/santri/pemeriksaan/detail/{noInduk}', [MurrobyController::class, 'detailPemeriksaan']);
+        Route::get('/santri/pemeriksaan/edit/{idPemeriksaan}', [MurrobyController::class, 'editPemeriksaan']);
+        Route::put('/santri/pemeriksaan/update/{idPemeriksaan}', [MurrobyController::class, 'updatePemeriksaan']);
+        Route::delete('/santri/pemeriksaan/{idPemeriksaan}', [MurrobyController::class, 'deletePemeriksaan']);
 
-    Route::get('/santri/perilaku/{idUser}', [PerilakuController::class, 'index']);
-    Route::post('/santri/perilaku', [PerilakuController::class, 'store']);
-    Route::get('/santri/perilaku/detail/{noInduk}', [PerilakuController::class, 'show']);
-    Route::get('/santri/perilaku/edit/{idPerilaku}', [PerilakuController::class, 'edit']);
-    Route::put('/santri/perilaku/update/{idPerilaku}', [PerilakuController::class, 'update']);
-    Route::delete('/santri/perilaku/{idPerilaku}', [PerilakuController::class, 'delete']);
-    
-    Route::get('/santri/kelengkapan/{idUser}', [KelengkapanController::class, 'index']);
-    Route::post('/santri/kelengkapan', [KelengkapanController::class, 'store']);
-    Route::get('/santri/kelengkapan/detail/{noInduk}', [KelengkapanController::class, 'show']);
-    Route::get('/santri/kelengkapan/edit/{idKelengkapan}', [KelengkapanController::class, 'edit']);
-    Route::put('/santri/kelengkapan/update/{idKelengkapan}', [KelengkapanController::class, 'update']);
-    Route::delete('/santri/kelengkapan/{idKelengkapan}', [KelengkapanController::class, 'delete']);
+        Route::get('/santri/perilaku/{idUser}', [PerilakuController::class, 'index']);
+        Route::post('/santri/perilaku', [PerilakuController::class, 'store']);
+        Route::get('/santri/perilaku/detail/{noInduk}', [PerilakuController::class, 'show']);
+        Route::get('/santri/perilaku/edit/{idPerilaku}', [PerilakuController::class, 'edit']);
+        Route::put('/santri/perilaku/update/{idPerilaku}', [PerilakuController::class, 'update']);
+        Route::delete('/santri/perilaku/{idPerilaku}', [PerilakuController::class, 'delete']);
+        
+        Route::get('/santri/kelengkapan/{idUser}', [KelengkapanController::class, 'index']);
+        Route::post('/santri/kelengkapan', [KelengkapanController::class, 'store']);
+        Route::get('/santri/kelengkapan/detail/{noInduk}', [KelengkapanController::class, 'show']);
+        Route::get('/santri/kelengkapan/edit/{idKelengkapan}', [KelengkapanController::class, 'edit']);
+        Route::put('/santri/kelengkapan/update/{idKelengkapan}', [KelengkapanController::class, 'update']);
+        Route::delete('/santri/kelengkapan/{idKelengkapan}', [KelengkapanController::class, 'delete']);
 
-    // Uang Saku
-    Route::get('/uang-saku/{idUser}', [UangSakuController::class, 'index']);
+        // Uang Saku
+        Route::get('/uang-saku/{idUser}', [UangSakuController::class, 'index']);
 
-    // Transaksi Saku
-    Route::get('/saku-masuk/{noInduk}', [UangSakuController::class, 'uangMasuk']);
-    Route::post('/saku-masuk', [UangSakuController::class, 'storeUangMasuk']);
-    Route::get('/saku-keluar/{noInduk}', [UangSakuController::class, 'uangKeluar']);
-    Route::post('/saku-keluar', [UangSakuController::class, 'storeUangKeluar']);
-});
+        // Transaksi Saku
+        Route::get('/saku-masuk/{noInduk}', [UangSakuController::class, 'uangMasuk']);
+        Route::post('/saku-masuk', [UangSakuController::class, 'storeUangMasuk']);
+        Route::get('/saku-keluar/{noInduk}', [UangSakuController::class, 'uangKeluar']);
+        Route::post('/saku-keluar', [UangSakuController::class, 'storeUangKeluar']);
+    });
 
-// Ustad Tahfidz
-Route::prefix('ustad-tahfidz')->group(function () {
-    Route::get('/santri/{idUser}', [UstadTahfidzController::class, 'listSantri']);
-    Route::get('/tahfidz/{idUser}', [UstadTahfidzController::class, 'index']);
-    Route::get('/tahfidz/edit/{idDetailTahfidz}', [UstadTahfidzController::class, 'edit']);
-    Route::put('/tahfidz/update/{idDetailTahfidz}', [UstadTahfidzController::class, 'update']);
-    Route::post('/tahfidz', [UstadTahfidzController::class, 'store']);
-    Route::get('/tahfidz/show/{noInduk}', [UstadTahfidzController::class, 'detailSantri']);
-    Route::delete('/tahfidz/{idDetailTahfidz}', [UstadTahfidzController::class, 'delete']);
+    // Ustad Tahfidz
+    Route::prefix('ustad-tahfidz')->group(function () {
+        Route::get('/santri/{idUser}', [UstadTahfidzController::class, 'listSantri']);
+        Route::get('/tahfidz/{idUser}', [UstadTahfidzController::class, 'index']);
+        Route::get('/tahfidz/edit/{idDetailTahfidz}', [UstadTahfidzController::class, 'edit']);
+        Route::put('/tahfidz/update/{idDetailTahfidz}', [UstadTahfidzController::class, 'update']);
+        Route::post('/tahfidz', [UstadTahfidzController::class, 'store']);
+        Route::get('/tahfidz/show/{noInduk}', [UstadTahfidzController::class, 'detailSantri']);
+        Route::delete('/tahfidz/{idDetailTahfidz}', [UstadTahfidzController::class, 'delete']);
+    });
 });
  
 // Wali Santri
 Route::prefix('wali-santri')->group(function () {
     Route::post('/login', [WaliSantriController::class, 'login']);
-    Route::get('/kesehatan/{noInduk}', [WaliSantriController::class, 'kesehatan']);
-    Route::get('/ketahfidzan/{noInduk}', [WaliSantriController::class, 'ketahfidzan']);
-    Route::get('/perilaku/{noInduk}', [WaliSantriController::class, 'perilaku']);
-    Route::get('/kelengkapan/{noInduk}', [WaliSantriController::class, 'kelengkapan']);
-    Route::post('/lapor-bayar', [WaliSantriController::class, 'laporBayar']);
-    Route::get('/riwayat-bayar/{noInduk}', [WaliSantriController::class, 'riwayatBayar']);
+
+    Route::middleware('auth:api-siswa')->group(function () {
+        Route::get('/kesehatan/{noInduk}', [WaliSantriController::class, 'kesehatan']);
+        Route::get('/ketahfidzan/{noInduk}', [WaliSantriController::class, 'ketahfidzan']);
+        Route::get('/perilaku/{noInduk}', [WaliSantriController::class, 'perilaku']);
+        Route::get('/kelengkapan/{noInduk}', [WaliSantriController::class, 'kelengkapan']);
+        Route::post('/lapor-bayar', [WaliSantriController::class, 'laporBayar']);
+        Route::get('/riwayat-bayar/{noInduk}', [WaliSantriController::class, 'riwayatBayar']);
+    });
 });

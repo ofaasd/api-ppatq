@@ -41,7 +41,9 @@ class WaliSantriResource extends JsonResource
                 'saldo' => $this->saldo,
                 'sakuMasuk' => $this->saku_masuk,
                 'sakuKeluar' => $this->saku_keluar,
-            ]
+            ],
+            'accessToken'   => $this->access_token,
+            'expiresIn'   => $this->expires_in,
         ];
     }
 }

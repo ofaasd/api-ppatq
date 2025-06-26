@@ -27,10 +27,10 @@ class MurrobyController extends Controller
     {
         $data = $request->validated();
 
-        $response = Http::asForm()->post(config('services.passport.login_endpoint'), [
+        $response = Http::asForm()->post(config('services.passport_user.login_endpoint'), [
             'grant_type' => 'password',
-            'client_id'     => config('services.passport.client_id'),
-            'client_secret' => config('services.passport.client_secret'),
+            'client_id'     => config('services.passport_user.client_id'),
+            'client_secret' => config('services.passport_user.client_secret'),
             'username'      => $data['email'],
             'password'      => $data['password'],
             'scope'         => '',

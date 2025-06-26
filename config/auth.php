@@ -44,6 +44,11 @@ return [
             'driver' => 'passport',
             'provider' => 'users',
          ],
+         
+        'api-siswa' => [
+            'driver' => 'passport',
+            'provider' => 'siswa',
+        ],
     ],
 
     /*
@@ -69,10 +74,10 @@ return [
             'model' => App\Models\User::class,
         ],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
+        'siswa' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\RefSiswa::class,
+        ],
     ],
 
     /*
