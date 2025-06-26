@@ -19,39 +19,65 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 
 use Illuminate\Support\Facades\Hash;
 
+use Illuminate\Support\Facades\Http;
+
 class MurrobyController extends Controller
 {
     public function login(LoginMurrobyRequest $request): JsonResponse
     {
         $data = $request->validated();
 
-        // Ambil user berdasarkan email
-        $user = User::where('email', $data['email'])->first();
+        $response = Http::asForm()->post(config('services.passport.login_endpoint'), [
+            'grant_type' => 'password',
+            'client_id'     => config('services.passport.client_id'),
+            'client_secret' => config('services.passport.client_secret'),
+            'username'      => $data['email'],
+            'password'      => $data['password'],
+            'scope'         => '',
+        ]);
 
-        // Cek jika user ditemukan dan password cocok
-        if ($user && Hash::check($data['password'], $user->password)) {
-            // Ambil data pegawai terkait
-            $pegawai = EmployeeNew::where('employee_new.id', $user->pegawai_id)
-                ->select([
-                    'users.id AS idUser',
-                    'employee_new.nama',
-                    'employee_new.photo',
-                ])
-                ->leftJoin('users', 'users.pegawai_id', '=', 'employee_new.id')
-                ->first();
+        // if ($response->failed()) {
+        //     throw new HttpResponseException(response([
+        //         "errors" => [
+        //             'Verifikasi' => [
+        //                 $response->json() // SALAH! Ini bukan bentuk response yang valid
+        //             ]
+        //         ]
+        //     ], 400));
+        // }
 
-            // Return resource dengan data pegawai
-            return (new MurrobyResource($pegawai))->response()->setStatusCode(200);
-        } else {
-            // Jika gagal
+        if ($response->failed()) {
             throw new HttpResponseException(response([
                 "errors" => [
                     'Verifikasi' => [
-                        'Login gagal. Harap pastikan data yang dimasukkan sudah benar'
+                        'Login gagal. Harap pastikan email dan password benar.'
                     ]
                 ]
             ], 400));
         }
+
+        // Token berhasil dibuat
+        $tokenData = $response->json();
+
+        // Ambil user
+        $user = User::where('email', $data['email'])->first();
+
+        // Ambil data pegawai seperti sebelumnya
+        $pegawai = EmployeeNew::where('employee_new.id', $user->pegawai_id)
+            ->select([
+                'users.id AS idUser',
+                'employee_new.nama',
+                'employee_new.photo',
+            ])
+            ->leftJoin('users', 'users.pegawai_id', '=', 'employee_new.id')
+            ->first();
+
+        // Tambahkan token ke resource
+        $pegawai->access_token = $tokenData['access_token'];
+        $pegawai->expires_in = $tokenData['expires_in'];
+
+        // Return resource
+        return (new MurrobyResource($pegawai))->response()->setStatusCode(200);
     }
     
     public function index($idUser)

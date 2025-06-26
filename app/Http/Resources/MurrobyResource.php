@@ -18,7 +18,8 @@ class MurrobyResource extends JsonResource
             'id' => $this->idUser,
             'nama' => $this->nama,
             'photo' => $this->photo,
-            // 'token' => $this->token,
+            'accesToken' => $this->access_token,
+            'expiresIn' => $this->expires_in,
         ];
     }
 }
