@@ -159,12 +159,14 @@ class UstadTahfidzController extends Controller
                     'santri_detail.no_induk',
                     'santri_detail.nama',
                     'santri_detail.kelas',
+                    'santri_detail.photo',
                 ])
                 ->where('tahfidz_id', $tahfidz->id)
                 ->get();
 
             $data = [
                 'namaUstad' => $ustadTahfidz->nama,
+                'photo' => $ustadTahfidz->photo,
                 'kodeTahfidz' => $tahfidz->code,
                 'kelas' => $tahfidz->name,
                 'listSantri' => $listSantri
