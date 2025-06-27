@@ -95,7 +95,7 @@ Route::get('/kamar/{id}', [KelasKamarController::class, 'showKamar']);
 // Login Ustad
 Route::post('/ustad/login', [MurrobyController::class, 'login']);
 
-Route::middleware('auth:api')->group(function () {
+// Route::middleware('auth:api')->group(function () {
     // Murroby
     Route::prefix('murroby')->group(function () {
         Route::get('/santri/{idUser}', [MurrobyController::class, 'index']);
@@ -141,7 +141,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/tahfidz/show/{noInduk}', [UstadTahfidzController::class, 'detailSantri']);
         Route::delete('/tahfidz/{idDetailTahfidz}', [UstadTahfidzController::class, 'delete']);
     });
-});
+// });
  
 // Wali Santri
 Route::prefix('wali-santri')->group(function () {
