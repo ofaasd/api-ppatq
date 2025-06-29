@@ -32,6 +32,7 @@ class WaliSantriResource extends JsonResource
             'pendidikanIbu' => strtoupper($this->pendidikan_ibu),
             'pekerjaanIbu' => $this->pekerjaan_ibu,
             'noHp' => $this->no_hp,
+            'noVa' => $this->no_va,
             'kamar' => $this->kamar,
             'namaMurroby' => $this->namaMurroby,
             'fotoMurroby' => $this->fotoMurroby,
