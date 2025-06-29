@@ -26,6 +26,26 @@ class UstadTahfidzController extends Controller
         return $mapping[$angka] ?? null;
     }
 
+    private function convertBulan($angka)
+    {
+        $daftarBulan = [
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember',
+        ];
+
+        return $daftarBulan[$angka] ?? "-";
+    }
+
     public function index($idUser)
     {
         try{
@@ -56,16 +76,18 @@ class UstadTahfidzController extends Controller
             ->get();
 
             $detail->transform(function ($item) {
-                $item->hafalan = $this->convertNilai($item->hafalan) ?? '-';
-                $item->tilawah = $this->convertNilai($item->tilawah) ?? '-';
-                $item->kefasihan = $this->convertNilai($item->kefasihan) ?? '-';
-                $item->dayaIngat = $this->convertNilai($item->dayaIngat) ?? '-';
-                $item->kelancaran = $this->convertNilai($item->kelancaran) ?? '-';
-                $item->praktekTajwid = $this->convertNilai($item->praktekTajwid) ?? '-';
-                $item->makhroj = $this->convertNilai($item->makhroj) ?? '-';
-                $item->tanafus = $this->convertNilai($item->tanafus) ?? '-';
-                $item->waqofWasol = $this->convertNilai($item->waqofWasol) ?? '-';
-                $item->ghorib = $this->convertNilai($item->ghorib) ?? '-';
+                $item->namaBulan = $this->convertBulan($item->bulan);
+                
+                $item->hafalan = $this->convertNilai($item->hafalan);
+                $item->tilawah = $this->convertNilai($item->tilawah);
+                $item->kefasihan = $this->convertNilai($item->kefasihan);
+                $item->dayaIngat = $this->convertNilai($item->dayaIngat);
+                $item->kelancaran = $this->convertNilai($item->kelancaran);
+                $item->praktekTajwid = $this->convertNilai($item->praktekTajwid);
+                $item->makhroj = $this->convertNilai($item->makhroj);
+                $item->tanafus = $this->convertNilai($item->tanafus);
+                $item->waqofWasol = $this->convertNilai($item->waqofWasol);
+                $item->ghorib = $this->convertNilai($item->ghorib);
                 return $item;
             });
 
