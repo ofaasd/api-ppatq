@@ -55,6 +55,7 @@ class UstadTahfidzController extends Controller
             $detail = DetailSantriTahfidz::select([
                 'detail_santri_tahfidz.id',
                 'detail_santri_tahfidz.bulan',
+                'detail_santri_tahfidz.tahun',
                 'santri_detail.nama AS namaSantri',
                 'kode_juz.nama AS juz',
                 'detail_santri_tahfidz.hafalan',
@@ -72,7 +73,7 @@ class UstadTahfidzController extends Controller
             ->leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
             ->where('id_tahfidz', $tahfidz->id)
             ->where('detail_santri_tahfidz.id_tahun_ajaran', $ta->id)
-            ->orderBy('detail_santri_tahfidz.created_at', 'asc')
+            ->orderBy('detail_santri_tahfidz.created_at', 'desc')
             ->get();
 
             $detail->transform(function ($item) {
@@ -230,10 +231,12 @@ class UstadTahfidzController extends Controller
             ->leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
             ->where('detail_santri_tahfidz.id_tahun_ajaran', $ta->id)
             ->where('detail_santri_tahfidz.no_induk', $noInduk)
-            ->orderBy('detail_santri_tahfidz.created_at', 'asc')
+            ->orderBy('detail_santri_tahfidz.created_at', 'desc')
             ->get();
 
             $getData->transform(function ($item) {
+                $item->namaBulan = $this->convertBulan($item->bulan);
+                
                 $item->hafalan = $this->convertNilai($item->hafalan) ?? '-';
                 $item->tilawah = $this->convertNilai($item->tilawah) ?? '-';
                 $item->kefasihan = $this->convertNilai($item->kefasihan) ?? '-';
