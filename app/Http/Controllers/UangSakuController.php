@@ -195,11 +195,17 @@ class UangSakuController extends Controller
             try {
                 $jumlah = $request->jumlah;
                 $user = User::where('id', $request->idUser)->first();
+                if (!$user || !$user->pegawai_id) {
+                    return response()->json([
+                        "status"  => 404,
+                        "message" => "Data user atau pegawai tidak valid.",
+                    ], 404);
+                }
                 if(!$user)
                 {
                     return response()->json([
-                        "status", 404,
-                        "message" => "Data user tidak ditemukan.",
+                        "status"    => 404,
+                        "message"   => "Data user tidak ditemukan.",
                     ], 404);
                 }
                 if($request->allKamar)
@@ -219,13 +225,26 @@ class UangSakuController extends Controller
                         {
                             $sakuKeluar = SakuKeluar::create([
                                 'pegawai_id' => $user->pegawai_id,
-                                'jumlah' => $request->jumlah,
+                                'jumlah' => $jumlah,
                                 'no_induk' => $row->noIndukSantri,
                                 'note' => $request->note,
                                 'tanggal' => date('Y-m-d', strtotime($request->tanggal)),
                             ]);
                             $saku = UangSaku::where('no_induk', $row->noInduk)->first();
+                            if(!$saku)
+                            {
+                                return response()->json([
+                                    "status"    => 404,
+                                    "message"   => "Ada Santri yang tidak ditemukan.",
+                                ], 404);
+                            }
                             $updateSaku = UangSaku::find($saku->id);
+                            if($saku->jumlah <= $jumlah){
+                                return response()->json([
+                                    "status"    => 400,
+                                    "message"   => "Uang saku cukup " . $row->namaSantri . " tidak cukup.",
+                                ], 400);
+                            }
                             $updateSaku->jumlah = $saku->jumlah - $jumlah;
                             $updateSaku->save();
                         }
@@ -234,24 +253,32 @@ class UangSakuController extends Controller
                     return response()->json("Semua uang saku santri telah dikurangi sebesar " . number_format($jumlah, 0, ',', '.'));
                 }else
                 {
+                    $saku = UangSaku::where('no_induk', $request->noInduk)->first();
+                    if (!$saku) {
+                        return response()->json([
+                            "status"  => 404,
+                            "message" => "Data uang saku santri tidak ditemukan.",
+                        ], 404);
+                    }
+
+                    if($saku->jumlah <= $jumlah){
+                        return response()->json([
+                            "status"    => 400,
+                            "message"   => "Uang tidak cukup.",
+                        ], 400);
+                    }
+
+                    $updateSaku = UangSaku::find($saku->id);
+                    $updateSaku->jumlah = $saku->jumlah - $jumlah;
+                    $updateSaku->save();
+
                     $sakuKeluar = SakuKeluar::create([
                         'pegawai_id' => $user->pegawai_id,
-                        'jumlah' => $request->jumlah,
+                        'jumlah' => $jumlah,
                         'no_induk' => $request->noInduk,
                         'note' => $request->note,
                         'tanggal' => date('Y-m-d', strtotime($request->tanggal)),
                     ]);
-                    $saku = UangSaku::where('no_induk', $request->noInduk)->first();
-                    if(!$saku)
-                    {
-                        return response()->json([
-                            "status", 404,
-                            "message" => "Santri tidak ditemukan.",
-                        ], 404);
-                    }
-                    $updateSaku = UangSaku::find($saku->id);
-                    $updateSaku->jumlah = $saku->jumlah - $jumlah;
-                    $updateSaku->save();
 
                     $sisaSaldo = $updateSaku->jumlah;
                     DB::commit();
@@ -262,7 +289,7 @@ class UangSakuController extends Controller
             return response()->json([
                     "status"  => 500,
                     "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
-                    "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
+                    // "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
                 ], 500);
             }
         }else{
