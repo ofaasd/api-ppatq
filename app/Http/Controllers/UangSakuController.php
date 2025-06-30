@@ -21,7 +21,8 @@ class UangSakuController extends Controller
                 'employee_new.id AS idPegawai',
                 'employee_new.nama AS namaMurroby',
                 'employee_new.photo AS fotoMurroby',
-                'ref_kamar.code AS kodeKamar'
+                'ref_kamar.code AS kodeKamar',
+                'ref_kamar.id AS idKamar'
             ])
             ->leftJoin('employee_new', 'employee_new.id', '=', 'users.pegawai_id')
             ->leftJoin('ref_kamar', 'ref_kamar.employee_id', '=', 'employee_new.id')
@@ -36,17 +37,15 @@ class UangSakuController extends Controller
             ], 404);
         }
 
-        $listSantri = DB::table('ref_kamar')
+        $listSantri = DB::table('santri_detail')
             ->select([
                 'santri_detail.no_induk AS noIndukSantri',
                 'santri_detail.nama AS namaSantri',
                 'tb_uang_saku.jumlah AS jumlahSaldo',
             ])
-            ->leftJoin('santri_kamar', 'santri_kamar.kamar_id', '=', 'ref_kamar.id')
-            ->leftJoin('santri_detail', 'santri_detail.id', '=', 'santri_kamar.santri_id')
             ->leftJoin('tb_uang_saku', 'tb_uang_saku.no_induk', '=', 'santri_detail.no_induk')
-            ->where('ref_kamar.employee_id', $dataUser->idPegawai)
-            // ->where('santri_kamar.tahun_ajaran_id', $ta->id)
+            ->where('santri_detail.kamar_id', $dataUser->idKamar)
+            ->whereNull('santri_detail.deleted_at')
             ->orderBy('namaSantri', 'asc')
             ->get();
 
