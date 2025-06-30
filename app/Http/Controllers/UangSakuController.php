@@ -191,66 +191,85 @@ class UangSakuController extends Controller
     public function storeUangKeluar(Request $request)
     {
         if (!empty($request->note)) {
-        DB::beginTransaction();
-        try {
-            $jumlah = $request->jumlah;
-            $user = User::where('id', $request->idUser)->first();
-            if($request->allKamar)
-            {
-                $dataKamar = RefKamar::where('employee_id', $user->pegawai_id)
-                    ->select([
-                        'santri_detail.no_induk AS noIndukSantri',
-                        'santri_detail.nama AS namaSantri',
-                        'tb_uang_saku.jumlah AS jumlahSaldo',
-                    ])
-                    ->leftJoin('santri_kamar', 'santri_kamar.kamar_id', '=', 'ref_kamar.id')
-                    ->leftJoin('santri_detail', 'santri_detail.id', '=', 'santri_kamar.santri_id')
-                    ->leftJoin('tb_uang_saku', 'tb_uang_saku.no_induk', '=', 'santri_detail.no_induk')
-                    ->get();
+            DB::beginTransaction();
+            try {
+                $jumlah = $request->jumlah;
+                $user = User::where('id', $request->idUser)->first();
+                if(!$user)
+                {
+                    return response()->json([
+                        "status", 404,
+                        "message" => "Data user tidak ditemukan.",
+                    ], 404);
+                }
+                if($request->allKamar)
+                {
+                    $dataKamar = RefKamar::where('employee_id', $user->pegawai_id)
+                        ->select([
+                            'santri_detail.no_induk AS noIndukSantri',
+                            'santri_detail.nama AS namaSantri',
+                            'tb_uang_saku.jumlah AS jumlahSaldo',
+                        ])
+                        ->leftJoin('santri_kamar', 'santri_kamar.kamar_id', '=', 'ref_kamar.id')
+                        ->leftJoin('santri_detail', 'santri_detail.id', '=', 'santri_kamar.santri_id')
+                        ->leftJoin('tb_uang_saku', 'tb_uang_saku.no_induk', '=', 'santri_detail.no_induk')
+                        ->get();
 
-                    foreach($dataKamar as $row)
+                        foreach($dataKamar as $row)
+                        {
+                            $sakuKeluar = SakuKeluar::create([
+                                'pegawai_id' => $user->pegawai_id,
+                                'jumlah' => $request->jumlah,
+                                'no_induk' => $row->noIndukSantri,
+                                'note' => $request->note,
+                                'tanggal' => date('Y-m-d', strtotime($request->tanggal)),
+                            ]);
+                            $saku = UangSaku::where('no_induk', $row->noInduk)->first();
+                            $updateSaku = UangSaku::find($saku->id);
+                            $updateSaku->jumlah = $saku->jumlah - $jumlah;
+                            $updateSaku->save();
+                        }
+                    
+                    DB::commit();
+                    return response()->json("Semua uang saku santri telah dikurangi sebesar " . number_format($jumlah, 0, ',', '.'));
+                }else
+                {
+                    $sakuKeluar = SakuKeluar::create([
+                        'pegawai_id' => $user->pegawai_id,
+                        'jumlah' => $request->jumlah,
+                        'no_induk' => $request->noInduk,
+                        'note' => $request->note,
+                        'tanggal' => date('Y-m-d', strtotime($request->tanggal)),
+                    ]);
+                    $saku = UangSaku::where('no_induk', $request->noInduk)->first();
+                    if(!$saku)
                     {
-                        $sakuKeluar = SakuKeluar::create([
-                            'pegawai_id' => $user->pegawai_id,
-                            'jumlah' => $request->jumlah,
-                            'no_induk' => $row->noIndukSantri,
-                            'note' => $request->note,
-                            'tanggal' => date('Y-m-d', strtotime($request->tanggal)),
-                        ]);
-                        $saku = UangSaku::where('no_induk', $row->noInduk)->first();
-                        $updateSaku = UangSaku::find($saku->id);
-                        $updateSaku->jumlah = $saku->jumlah - $jumlah;
-                        $updateSaku->save();
+                        return response()->json([
+                            "status", 404,
+                            "message" => "Santri tidak ditemukan.",
+                        ], 404);
                     }
-                
-                DB::commit();
-                return response()->json("Semua uang saku santri telah dikurangi sebesar " . number_format($jumlah, 0, ',', '.'));
-            }else
-            {
-                $sakuKeluar = SakuKeluar::create([
-                    'pegawai_id' => $user->pegawai_id,
-                    'jumlah' => $request->jumlah,
-                    'no_induk' => $request->noInduk,
-                    'note' => $request->note,
-                    'tanggal' => date('Y-m-d', strtotime($request->tanggal)),
-                ]);
-                $saku = UangSaku::where('no_induk', $request->noInduk)->first();
-                $updateSaku = UangSaku::find($saku->id);
-                $updateSaku->jumlah = $saku->jumlah - $jumlah;
-                $updateSaku->save();
+                    $updateSaku = UangSaku::find($saku->id);
+                    $updateSaku->jumlah = $saku->jumlah - $jumlah;
+                    $updateSaku->save();
 
-                $sisaSaldo = $updateSaku->jumlah;
-                DB::commit();
-                return response()->json('Uang keluar sebesar Rp ' . number_format($jumlah, 0, ',', '.') . ', Sisa Saldo Rp ' . number_format($sisaSaldo, 0, ',', '.'));
+                    $sisaSaldo = $updateSaku->jumlah;
+                    DB::commit();
+                    return response()->json('Uang keluar sebesar Rp ' . number_format($jumlah, 0, ',', '.') . ', Sisa Saldo Rp ' . number_format($sisaSaldo, 0, ',', '.'));
+                }
+            } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                    "status"  => 500,
+                    "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
+                    "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
+                ], 500);
             }
-        } catch (\Exception $e) {
-          DB::rollback();
-          return response()->json([
-                "status"  => 500,
-                "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
-                // "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
-            ], 500);
+        }else{
+            return response()->json([
+                "status", 422,
+                "message" => "Catatan harus diisi.",
+            ], 422);
         }
-      }
     }
 }

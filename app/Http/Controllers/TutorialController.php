@@ -58,15 +58,23 @@ class TutorialController extends Controller
     }
     public function storePembayaran(Request $request)
     {
-        $data = Tutorial::where('id', $request->idJenisTutorial)->first();
-        $data->update([
-            'teks'  => $request->teks
-        ]);
+        $jenisPembayaran = Tutorial::where('jenis', $request->jenisTutorial)->get();
+        $berhasil = false;
 
-        if ($data) {
-            return response()->json('Berhasil mengupdate data.');
+        foreach ($jenisPembayaran as $row) {
+        $teksBaru = $request->input('teks-' . $row->id); // ambil berdasarkan nama input
+        if ($teksBaru !== null) {
+            $row->update([
+            'teks' => $teksBaru,
+            ]);
+            $berhasil = true;
+        }
+        }
+
+        if ($berhasil) {
+        return response()->json('Berhasil mengupdate data.');
         } else {
-            return response()->json('Gagal mengupdate data.');
+        return response()->json('Gagal mengupdate data.');
         }
     }
 }
