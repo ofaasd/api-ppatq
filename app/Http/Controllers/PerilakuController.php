@@ -12,6 +12,7 @@ use App\Models\SantriKamar;
 use App\Models\DetailSantri;
 use Illuminate\Http\Request;
 use App\Models\RefTahunAjaran;
+use App\Models\SantriDetail;
 use Illuminate\Support\Facades\DB;
 
 class PerilakuController extends Controller
@@ -36,7 +37,7 @@ class PerilakuController extends Controller
                 ->select('pr1.no_induk', DB::raw('MAX(pr1.id) as latest_id'))
                 ->groupBy('pr1.no_induk');
 
-            $dataSantri = SantriKamar::select([
+            $dataSantri = SantriDetail::select([
                 'santri_detail.no_induk AS noInduk',
                 'santri_detail.nama',
                 'pr1.tanggal',
@@ -47,7 +48,6 @@ class PerilakuController extends Controller
                 'pr1.kepekaan_lingkungan AS kepekaanLingkungan',
                 'pr1.ketaatan_peraturan AS ketaatanPeraturan',
             ])
-            ->leftJoin('santri_detail', 'santri_detail.id', '=', 'santri_kamar.santri_id')
             ->leftJoinSub($sub, 'latest', function ($join) {
                 $join->on('latest.no_induk', '=', 'santri_detail.no_induk');
             })
@@ -57,8 +57,7 @@ class PerilakuController extends Controller
                     ->whereNull('pr1.deleted_at');
             })
             // ->where('santri_kamar.tahun_ajaran_id', $ta->id)
-            ->where('santri_kamar.status', 1)
-            ->where('santri_kamar.kamar_id', $dataUser->idKamar)
+            ->where('santri_detail.kamar_id', $dataUser->idKamar)
             ->get();
 
             $labelPerilaku = $this->labelPerilaku;
