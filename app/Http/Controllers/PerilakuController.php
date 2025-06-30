@@ -145,7 +145,7 @@ class PerilakuController extends Controller
                 'kepekaan_lingkungan AS kepekaanLingkungan',
                 'ketaatan_peraturan AS ketaatanPeraturan',
             ])
-            ->orderBy('created_at', 'desc') // jika kamu ingin data terbaru di urutan atas
+            ->orderBy('tanggal', 'desc') // jika kamu ingin data terbaru di urutan atas
             ->get()
             ->map(function ($item) use ($labelPerilaku) {
                 $item->tanggal = $item->tanggal ? Carbon::parse($item->tanggal)->format('Y-m-d') : '-';

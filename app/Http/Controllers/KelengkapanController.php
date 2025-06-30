@@ -140,7 +140,7 @@ class KelengkapanController extends Controller
                 'perlengkapan_diri AS perlengkapanDiri',
                 'catatan_diri AS catatanDiri',
             ])
-            ->orderBy('created_at', 'desc') // jika kamu ingin data terbaru di urutan atas
+            ->orderBy('tanggal', 'desc') // jika kamu ingin data terbaru di urutan atas
             ->get()
             ->map(function ($item) use ($labelKelengkapan) {
                 $item->tanggal = $item->tanggal ? Carbon::parse($item->tanggal)->format('Y-m-d') : '-';

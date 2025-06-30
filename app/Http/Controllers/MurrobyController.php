@@ -176,7 +176,11 @@ class MurrobyController extends Controller
                     ->whereNull('tp.deleted_at');
             })
             ->where('santri_detail.kamar_id', $dataUser->idKamar)
-            ->get();
+            ->get()
+            ->map(function ($item) {
+                    $item->tanggalPemeriksaanFormatted = date('Y-m-d', $item->tanggalPemeriksaan);
+                return $item;
+            });
 
             $data = [
                 'dataUser' => $dataUser,
@@ -218,7 +222,11 @@ class MurrobyController extends Controller
             ])
             ->where('no_induk', $noInduk)
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->get()
+            ->map(function ($item) {
+                    $item->tanggalPemeriksaanFormatted = date('Y-m-d', $item->tanggalPemeriksaan);
+                return $item;
+            });
             
             $data = [
                 'dataSantri'    => $dataSantri,
