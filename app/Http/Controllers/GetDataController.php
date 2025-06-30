@@ -6,9 +6,8 @@ use App\Models\KodeJuz;
 use App\Models\RefBank;
 use App\Models\RefKelas;
 use App\Models\RefKategori;
-use App\Models\RefSiswa;
+use App\Models\SantriDetail;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
 class GetDataController extends Controller
 {
@@ -34,14 +33,14 @@ class GetDataController extends Controller
     public function siswa($search = null)
     {
         try {
-            $data = RefSiswa::select([
-                    'ref_siswa.nama',
-                    'ref_siswa.no_induk'
+            $data = SantriDetail::select([
+                    'santri_detail.nama',
+                    'santri_detail.no_induk'
                 ])
                 ->when($search, function ($query, $search) {
                     $query->where(function($q) use ($search) {
-                        $q->where('ref_siswa.nama', 'like', '%' . $search . '%')
-                        ->orWhere('ref_siswa.no_induk', 'like', '%' . $search . '%');
+                        $q->where('santri_detail.nama', 'like', '%' . $search . '%')
+                        ->orWhere('santri_detail.no_induk', 'like', '%' . $search . '%');
                     });
                 })
                 ->get();

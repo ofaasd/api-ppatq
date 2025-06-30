@@ -16,7 +16,6 @@ class WaliSantriResource extends JsonResource
     {
         return [
             'noInduk' => $this->no_induk,
-            'kode' => $this->kode,
             'nama' => $this->nama,
             'photo' => $this->photo,
             'kelas' => $this->kelas,

@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Http\Helpers\Helpers_wa;
 use Illuminate\Http\Request;
 
-use App\Models\RefSiswa;
 use App\Models\Kesehatan;
 use App\Models\RawatInap;
 use App\Models\SakuMasuk;
@@ -16,7 +15,6 @@ use App\Models\TbPemeriksaan;
 use App\Models\RefJenisPembayaran;
 use App\Models\DetailSantriTahfidz;
 use App\Models\detailPembayaran;
-use App\Models\Agenda;
 use App\Models\DetailSantri;
 use App\Models\SendWA;
 
@@ -95,14 +93,13 @@ class WaliSantriController extends Controller
 
         $tanggalLahir = Carbon::parse($reqData['tanggalLahir'])->format('Y-m-d');
 
-        $siswa = RefSiswa::where([
-            'ref_siswa.no_induk'=>$noInduk, 
-            'ref_siswa.kode'=>$kode,
+        $siswa = SantriDetail::where([
+            'santri_detail.no_induk'=>$noInduk, 
+            'santri_detail.kelas'=>$kode,
             'santri_detail.tanggal_lahir'=>$tanggalLahir
         ])
         ->select([
             'santri_detail.no_induk',
-            'ref_siswa.kode',
             'santri_detail.tanggal_lahir',
             'santri_detail.nama',
             'santri_detail.photo',
@@ -129,11 +126,10 @@ class WaliSantriController extends Controller
             'tahfidz.photo AS fotoTahfidz',
             'tb_uang_saku.jumlah AS saldo',
         ])
-        ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'ref_siswa.no_induk')
         ->leftJoin('kota_kab_tbl', 'kota_kab_tbl.id_kota_kab', '=', 'santri_detail.kabkota')
         ->leftJoin('ref_kamar', 'ref_kamar.id', '=', 'santri_detail.kamar_id')
         ->leftJoin('ref_tahfidz', 'ref_tahfidz.id', '=', 'santri_detail.tahfidz_id')
-        ->leftJoin('tb_uang_saku', 'tb_uang_saku.no_induk', '=', 'ref_siswa.no_induk')
+        ->leftJoin('tb_uang_saku', 'tb_uang_saku.no_induk', '=', 'santri_detail.no_induk')
         ->leftJoin('employee_new AS murroby', 'murroby.id', '=', 'ref_kamar.employee_id')
         ->leftJoin('employee_new AS tahfidz', 'tahfidz.id', '=', 'ref_tahfidz.employee_id');   
 

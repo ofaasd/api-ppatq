@@ -11,7 +11,7 @@ class JenisPembayaranController extends Controller
 {
     //
     public function index(){
-        $hasil = JenisPembayaran::all();
+        $hasil = JenisPembayaran::orderBy('urutan', 'asc')->get();
         return (JenisPembayaranResource::collection($hasil))->response()->setStatusCode(200);
     }
 }

@@ -76,7 +76,7 @@ return [
 
         'siswa' => [
             'driver' => 'eloquent',
-            'model' => App\Models\RefSiswa::class,
+            'model' => App\Models\SantriDetail::class,
         ],
     ],
 
