@@ -150,9 +150,9 @@ Route::middleware('auth:api')->group(function () {
 // Wali Santri
 Route::prefix('wali-santri')->group(function () {
     Route::post('/login', [WaliSantriController::class, 'login']);
-    Route::post('/logout', [WaliSantriController::class, 'logout']);
 
     Route::middleware('auth:api-siswa')->group(function () {
+        Route::post('/logout', [WaliSantriController::class, 'logout']);
         Route::get('/kesehatan/{noInduk}', [WaliSantriController::class, 'kesehatan']);
         Route::get('/ketahfidzan/{noInduk}', [WaliSantriController::class, 'ketahfidzan']);
         Route::get('/perilaku/{noInduk}', [WaliSantriController::class, 'perilaku']);
