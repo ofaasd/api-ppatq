@@ -99,6 +99,7 @@ class WaliSantriController extends Controller
             'santri_detail.tanggal_lahir'=>$tanggalLahir
         ])
         ->select([
+            'santri_detail.id',
             'santri_detail.no_induk',
             'santri_detail.tanggal_lahir',
             'santri_detail.nama',
@@ -168,6 +169,18 @@ class WaliSantriController extends Controller
             }
             $hasil->saku_masuk = $sakuMasuk;
             $hasil->saku_keluar = $sakuKeluar;
+
+            activity()
+            ->useLog('autentikasi')
+            ->event('POST')
+            ->causedBy($hasil)
+            ->withProperties([
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'who' => 'ortu',
+            ])
+            ->log('Login');
+
             return (new WaliSantriResource($hasil))->response()->setStatusCode(200);
         }else{
             throw new HttpResponseException(response([

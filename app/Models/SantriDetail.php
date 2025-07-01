@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Passport\HasApiTokens;
+use Spatie\Activitylog\Traits\CausesActivity;
 
 class SantriDetail extends Authenticatable
 {
-    use HasFactory, SoftDeletes, HasApiTokens;
+    use HasFactory, SoftDeletes, HasApiTokens, CausesActivity;
     protected $table = 'santri_detail';
     protected $primaryKey = 'id';
     protected $keyType = "int";

@@ -76,6 +76,17 @@ class MurrobyController extends Controller
         $pegawai->access_token = $tokenData['access_token'];
         $pegawai->expires_in = $tokenData['expires_in'];
 
+        activity()
+        ->useLog('autentikasi')
+        ->event('POST')
+        ->causedBy($user)
+        ->withProperties([
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'who' => 'ustad',
+        ])
+        ->log('Login');
+
         // Return resource
         return (new MurrobyResource($pegawai))->response()->setStatusCode(200);
     }
