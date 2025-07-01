@@ -95,6 +95,7 @@ Route::get('/kamar/{id}', [KelasKamarController::class, 'showKamar']);
 // Autentikasi Ustad
 Route::post('/ustad/login', [MurrobyController::class, 'login']);
 
+Route::middleware('auth:api')->group(function () {
     Route::post('/ustad/logout', [MurrobyController::class, 'logout']);
 });
 
