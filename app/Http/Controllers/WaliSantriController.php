@@ -177,7 +177,7 @@ class WaliSantriController extends Controller
             ->withProperties([
                 'ip_address' => request()->ip(),
                 'user_agent' => request()->userAgent(),
-                'who' => 'ortu',
+                'who' => 'wali-santri',
             ])
             ->log('Login');
 
