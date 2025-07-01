@@ -21,6 +21,7 @@ use App\Http\Controllers\UstadTahfidzController;
 use App\Http\Controllers\StaffPengasuhController;
 use App\Http\Controllers\KesehatanSantriController;
 use App\Http\Controllers\PerilakuController;
+use App\Http\Controllers\RekeningController;
 use App\Http\Controllers\TutorialController;
 
 /*
