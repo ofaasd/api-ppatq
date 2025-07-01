@@ -76,6 +76,9 @@ Route::get('/galeri', [GaleriController::class, 'index']);
 // Keluhan
 Route::post('/keluhan', [KeluhanController::class, 'store']);
 
+// Rekening
+Route::get('/rekening', [RekeningController::class, 'index']);
+
 // Keluhan
 Route::get('/tutorial-pembayaran', [TutorialController::class, 'indexPembayaran']);
 Route::post('/tutorial-pembayaran', [TutorialController::class, 'storePembayaran']);
