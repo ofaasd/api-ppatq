@@ -152,7 +152,7 @@ Route::prefix('wali-santri')->group(function () {
     Route::post('/login', [WaliSantriController::class, 'login']);
     Route::post('/logout', [WaliSantriController::class, 'logout']);
 
-    // Route::middleware('auth:api-siswa')->group(function () {
+    Route::middleware('auth:api-siswa')->group(function () {
         Route::get('/kesehatan/{noInduk}', [WaliSantriController::class, 'kesehatan']);
         Route::get('/ketahfidzan/{noInduk}', [WaliSantriController::class, 'ketahfidzan']);
         Route::get('/perilaku/{noInduk}', [WaliSantriController::class, 'perilaku']);
@@ -162,5 +162,5 @@ Route::prefix('wali-santri')->group(function () {
 
         Route::get('/saku-masuk/{noInduk}', [UangSakuController::class, 'uangMasuk']);
         Route::get('/saku-keluar/{noInduk}', [UangSakuController::class, 'uangKeluar']);
-    // });
+    });
 });
