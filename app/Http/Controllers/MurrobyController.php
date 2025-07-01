@@ -90,6 +90,29 @@ class MurrobyController extends Controller
         // Return resource
         return (new MurrobyResource($pegawai))->response()->setStatusCode(200);
     }
+
+    public function logout(Request $request)
+    {
+        $user = $request->user();
+
+        $request->user()->token()->revoke();
+
+        activity()
+        ->useLog('autentikasi')
+        ->event('POST')
+        ->causedBy($user)
+        ->withProperties([
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'who' => 'ustad',
+        ])
+        ->log('Logout');
+
+        return response()->json([
+            'status', 200,
+            'message' => 'Logout berhasil',
+        ], 200);
+    }
     
     public function index($idUser)
     {

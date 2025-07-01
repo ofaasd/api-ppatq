@@ -92,8 +92,11 @@ Route::get('/kelas-kamar', [KelasKamarController::class, 'index']);
 Route::get('/kelas/{id}', [KelasKamarController::class, 'showKelas']);
 Route::get('/kamar/{id}', [KelasKamarController::class, 'showKamar']);
 
-// Login Ustad
+// Autentikasi Ustad
 Route::post('/ustad/login', [MurrobyController::class, 'login']);
+
+    Route::post('/ustad/logout', [MurrobyController::class, 'logout']);
+});
 
 Route::middleware('auth:api')->group(function () {
     // Murroby
@@ -146,6 +149,7 @@ Route::middleware('auth:api')->group(function () {
 // Wali Santri
 Route::prefix('wali-santri')->group(function () {
     Route::post('/login', [WaliSantriController::class, 'login']);
+    Route::post('/logout', [WaliSantriController::class, 'logout']);
 
     // Route::middleware('auth:api-siswa')->group(function () {
         Route::get('/kesehatan/{noInduk}', [WaliSantriController::class, 'kesehatan']);

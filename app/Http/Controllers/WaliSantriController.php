@@ -193,6 +193,29 @@ class WaliSantriController extends Controller
         }
     }
 
+    public function logout(Request $request)
+    {
+        $user = $request->user();
+
+        $request->user()->token()->revoke();
+
+        activity()
+        ->useLog('autentikasi')
+        ->event('POST')
+        ->causedBy($user)
+        ->withProperties([
+            'ip_address' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'who' => 'wali-santri',
+        ])
+        ->log('Logout');
+
+        return response()->json([
+            'status', 200,
+            'message' => 'Logout berhasil',
+        ], 200);
+    }
+
     public function kesehatan($noInduk)
     {
         try{
