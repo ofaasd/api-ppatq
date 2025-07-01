@@ -211,7 +211,7 @@ class WaliSantriController extends Controller
         ->log('Logout');
 
         return response()->json([
-            'status', 200,
+            'status'    => 200,
             'message' => 'Logout berhasil',
         ], 200);
     }
