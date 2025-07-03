@@ -509,6 +509,7 @@ class WaliSantriController extends Controller
                     'atas_nama' => $request->atasNama,
                     'no_wa' => $request->noWa,
                     'catatan' => $request->catatan,
+                    'tipe' => 'Bank',
                     'created_at' => date('Y-m-d H:i:s'),
                     'bukti' => $filename,
                     'input_by' => 3, //input lewat api / aplikasi
