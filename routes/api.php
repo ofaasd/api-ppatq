@@ -97,24 +97,27 @@ Route::get('/kelas-kamar', [KelasKamarController::class, 'index']);
 Route::get('/kelas/{id}', [KelasKamarController::class, 'showKelas']);
 Route::get('/kamar/{id}', [KelasKamarController::class, 'showKamar']);
 
+Route::middleware('update.lastseen')->group(function () {
 // Autentikasi Ustad
 Route::post('/ustad/login', [MurrobyController::class, 'login']);
 
-// Autentikasi Ustad
+// Autentikasi Keuangan
 Route::post('/keuangan/login', [MurrobyController::class, 'login']);
 
-Route::middleware('auth:api')->group(function () {
-    Route::post('/ustad/logout', [MurrobyController::class, 'logout']);
-    
-    Route::post('/keuangan/logout', [MurrobyController::class, 'logout']);
 });
 
-Route::middleware('auth:api')->group(function () {
+Route::middleware(['auth:api', 'update.lastseen'])->group(function () {
+    // log out ustad
+    Route::post('/ustad/logout', [MurrobyController::class, 'logout']);
     
+    // log out keuangan
+    Route::post('/keuangan/logout', [MurrobyController::class, 'logout']);
+
     // Keuangan
     Route::prefix('keuangan')->group(function () {
         Route::post('/lapor-bayar', [KeuanganController::class, 'laporBayar']);
     });
+
     // Murroby
     Route::prefix('murroby')->group(function () {
         Route::get('/santri/{idUser}', [MurrobyController::class, 'index']);
@@ -166,7 +169,7 @@ Route::middleware('auth:api')->group(function () {
 Route::prefix('wali-santri')->group(function () {
     Route::post('/login', [WaliSantriController::class, 'login']);
 
-    Route::middleware('auth:api-siswa')->group(function () {
+    Route::middleware(['auth:api-siswa', 'update.lastseen'])->group(function () {
         Route::post('/logout', [WaliSantriController::class, 'logout']);
         
         Route::get('/kesehatan/{noInduk}', [WaliSantriController::class, 'kesehatan']);

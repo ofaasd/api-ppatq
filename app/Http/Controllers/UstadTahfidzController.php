@@ -34,7 +34,6 @@ class UstadTahfidzController extends Controller
         return $mapping[$angka];
     }
 
-
     private function convertBulan($angka)
     {
         $daftarBulan = [
@@ -357,86 +356,6 @@ class UstadTahfidzController extends Controller
             ], 500);
         }
     }
-
-    // public function indexAdmin($idUser)
-    // {
-    //     try{
-    //         $dataUser = User::select([
-    //                 'employee_new.id AS idPegawai',
-    //                 'employee_new.nama AS namaMurroby',
-    //                 'employee_new.photo AS fotoMurroby',
-    //                 'ref_kamar.code AS kodeKamar'
-    //             ])
-    //             ->leftJoin('employee_new', 'employee_new.id', '=', 'users.pegawai_id')
-    //             ->leftJoin('ref_kamar', 'ref_kamar.employee_id', '=', 'employee_new.id')
-    //             ->where('users.id', $idUser)
-    //             ->first();
-
-    //         if(!$dataUser)
-    //         {
-    //             return response()->json([
-    //                 'status'   => 404,
-    //                 'message'   => 'Data murroby tidak ditemukan',
-    //             ], 404);
-    //         }
-
-    //         $query = DetailSantriTahfidz::select(
-    //             "santri_detail.nama AS nmSantri",
-    //             "employee_new.nama AS nmMurroby",
-    //             "santri_detail.kelas AS klsSantri",
-    //             \DB::raw("MONTH(detail_santri_tahfidz.tanggal) as bulan"),
-    //             \DB::raw("MAX(detail_santri_tahfidz.kode_juz_surah) as maxJuzSurah"),
-    //             \DB::raw("(SELECT kode_juz.nama 
-    //                         FROM kode_juz 
-    //                         WHERE kode_juz.kode = MAX(detail_santri_tahfidz.kode_juz_surah) 
-    //                         LIMIT 1) AS nmJuz")
-    //         )
-    //         ->leftJoin("ref_tahfidz", "ref_tahfidz.id", "=", "detail_santri_tahfidz.id_tahfidz")
-    //         ->leftJoin("employee_new", "employee_new.id", "=", "ref_tahfidz.employee_id")
-    //         ->leftJoin("santri_detail", "santri_detail.no_induk", "=", "detail_santri_tahfidz.no_induk")
-    //         ->where("ref_tahfidz.employee_id", $dataUser->idPegawai)
-    //         ->groupBy(
-    //             \DB::raw("santri_detail.nama"),
-    //             \DB::raw("santri_detail.kelas"),
-    //             \DB::raw("employee_new.nama"),
-    //             \DB::raw("MONTH(detail_santri_tahfidz.tanggal)")
-    //         )
-    //         ->orderBy("bulan")
-    //         ->get();
-
-    //         // Siapkan data pivot dalam format array
-    //         $data = [];
-
-    //         foreach ($query as $item) { 
-    //             $nama = $item->nmSantri;
-
-    //             if (!isset($data[$nama])) {
-    //                 $data[$nama] = [
-    //                     'nmSantri' => $nama,
-    //                     'nmMurroby' => $item->nmMurroby,
-    //                     // 'klsSantri' => $item->klsSantri,
-    //                     'bulan' => array_fill(1, 12, '-') // Inisialisasi semua bulan dengan "-"
-    //                 ];
-    //             }
-
-    //             $data[$nama]['bulan'][$item->bulan] = $item->nmJuz;
-    //         }
-
-    //         $data = [
-    //             'status'   => 200,
-    //             'message'   => 'Berhasil mengambil data',
-    //             'data'  =>  $data
-    //         ];
-
-    //         return response()->json($data, 200);
-    //     }catch (\Exception $e) {
-    //         return response()->json([
-    //             "status"  => 500,
-    //             "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
-    //             // "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
-    //         ], 500);
-    //     }
-    // }
 
     public function delete(string $id)
     {

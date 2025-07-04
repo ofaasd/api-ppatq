@@ -15,7 +15,7 @@ class SantriDetail extends Authenticatable
     protected $table = 'santri_detail';
     protected $primaryKey = 'id';
     protected $keyType = "int";
-    protected $dateFormat = 'U';
+    // protected $dateFormat = 'U';
 
     public function findForPassport($username)
     {
