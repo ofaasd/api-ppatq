@@ -272,6 +272,10 @@ class WaliSantriController extends Controller
 
     private function konversiNilaiHuruf($nilai)
     {
+        if ($nilai === null) {
+            return '-';
+        }
+
         return match ((int) $nilai) {
             4 => 'A',
             3 => 'B',
