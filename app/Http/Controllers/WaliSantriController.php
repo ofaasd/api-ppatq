@@ -545,13 +545,13 @@ class WaliSantriController extends Controller
                     }
                 }
 
-                // if($totalRincian != $request->jumlah)
-                // {
-                //     return response()->json([
-                //         'status'    => 422,
-                //         'message'   => 'Total pembayaran dan rincian pembayaran tidak sama.',
-                //     ], 422);
-                // }
+                if($totalRincian != $request->jumlah)
+                {
+                    return response()->json([
+                        'status'    => 422,
+                        'message'   => 'Total pembayaran dan rincian pembayaran tidak sama.',
+                    ], 422);
+                }
 
                 $dataSantri = DetailSantri::where('no_induk', $request->noInduk)->first();
 $message = '[     dari mobile PPATQ-RF ku   ]
