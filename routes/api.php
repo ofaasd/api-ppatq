@@ -107,6 +107,8 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/ustad/logout', [MurrobyController::class, 'logout']);
     
     Route::post('/keuangan/logout', [MurrobyController::class, 'logout']);
+});
+
 Route::prefix('keuangan')->group(function () {
     Route::post('/lapor-bayar', [KeuanganController::class, 'laporBayar']);
 });
