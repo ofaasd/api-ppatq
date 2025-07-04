@@ -109,11 +109,12 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/keuangan/logout', [MurrobyController::class, 'logout']);
 });
 
-Route::prefix('keuangan')->group(function () {
-    Route::post('/lapor-bayar', [KeuanganController::class, 'laporBayar']);
-});
-
 Route::middleware('auth:api')->group(function () {
+    
+    // Keuangan
+    Route::prefix('keuangan')->group(function () {
+        Route::post('/lapor-bayar', [KeuanganController::class, 'laporBayar']);
+    });
     // Murroby
     Route::prefix('murroby')->group(function () {
         Route::get('/santri/{idUser}', [MurrobyController::class, 'index']);
