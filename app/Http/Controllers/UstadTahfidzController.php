@@ -15,6 +15,10 @@ class UstadTahfidzController extends Controller
 {
     private function convertNilai($angka)
     {
+        if (is_null($angka)) {
+            return '-';
+        }
+
         $mapping = [
             4 => 'A',
             3 => 'B',
@@ -23,8 +27,13 @@ class UstadTahfidzController extends Controller
             0 => 'E',
         ];
 
-        return $mapping[$angka] ?? null;
+        if (!array_key_exists($angka, $mapping)) {
+            return '-';
+        }
+
+        return $mapping[$angka];
     }
+
 
     private function convertBulan($angka)
     {

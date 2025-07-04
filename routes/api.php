@@ -20,6 +20,7 @@ use App\Http\Controllers\WaliSantriController;
 use App\Http\Controllers\UstadTahfidzController;
 use App\Http\Controllers\StaffPengasuhController;
 use App\Http\Controllers\KesehatanSantriController;
+use App\Http\Controllers\KeuanganController;
 use App\Http\Controllers\PerilakuController;
 use App\Http\Controllers\RekeningController;
 use App\Http\Controllers\TutorialController;
@@ -99,8 +100,15 @@ Route::get('/kamar/{id}', [KelasKamarController::class, 'showKamar']);
 // Autentikasi Ustad
 Route::post('/ustad/login', [MurrobyController::class, 'login']);
 
+// Autentikasi Ustad
+Route::post('/keuangan/login', [MurrobyController::class, 'login']);
+
 Route::middleware('auth:api')->group(function () {
     Route::post('/ustad/logout', [MurrobyController::class, 'logout']);
+    
+    Route::post('/keuangan/logout', [MurrobyController::class, 'logout']);
+Route::prefix('keuangan')->group(function () {
+    Route::post('/lapor-bayar', [KeuanganController::class, 'laporBayar']);
 });
 
 Route::middleware('auth:api')->group(function () {

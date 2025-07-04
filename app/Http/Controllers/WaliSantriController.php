@@ -560,7 +560,7 @@ Dapatkan Aplikasi Mobile Wali Santri
 https://new.ppatq-rf.sch.id/app-wali-santri
 
 Yth. Bp/Ibu *' . $request->atasNama . '*, Wali Santri *' . $dataSantri->nama . '* kelas *' . $dataSantri->kelas . '* telah melaporkan pembayaran bulan *' .   $this->getNamaBulan($request->periode) . '* 
-Rp. ' . $request->jumlah . ' rincian sbb : 
+Rp. ' . number_format($request->jumlah, 0, ',', '.') . ' rincian sbb : 
 ';
 $jenis = RefJenisPembayaran::orderBy('urutan', 'asc')->get();
 $listJenis = [];
