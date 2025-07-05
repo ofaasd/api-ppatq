@@ -1,9 +1,7 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AboutController;
-use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\AgendaController;
 use App\Http\Controllers\BeritaController;
 use App\Http\Controllers\DakwahController;
@@ -11,17 +9,11 @@ use App\Http\Controllers\GaleriController;
 use App\Http\Controllers\GetDataController;
 
 use App\Http\Controllers\MurrobyController;
-use App\Http\Controllers\UangSakuController;
 use App\Http\Controllers\KelasKamarController;
-use App\Http\Controllers\KelengkapanController;
 use App\Http\Controllers\KeluhanController;
 use App\Http\Controllers\KesantrianController;
-use App\Http\Controllers\WaliSantriController;
-use App\Http\Controllers\UstadTahfidzController;
 use App\Http\Controllers\StaffPengasuhController;
 use App\Http\Controllers\KesehatanSantriController;
-use App\Http\Controllers\KeuanganController;
-use App\Http\Controllers\PerilakuController;
 use App\Http\Controllers\RekeningController;
 use App\Http\Controllers\TutorialController;
 
@@ -98,12 +90,11 @@ Route::get('/kelas/{id}', [KelasKamarController::class, 'showKelas']);
 Route::get('/kamar/{id}', [KelasKamarController::class, 'showKamar']);
 
 Route::middleware('update.lastseen')->group(function () {
-// Autentikasi Ustad
-Route::post('/ustad/login', [MurrobyController::class, 'login']);
+    // Autentikasi Ustad
+    Route::post('/ustad/login', [MurrobyController::class, 'login']);
 
-// Autentikasi Keuangan
-Route::post('/keuangan/login', [MurrobyController::class, 'login']);
-
+    // Autentikasi Keuangan
+    Route::post('/keuangan/login', [MurrobyController::class, 'login']);
 });
 
 Route::middleware(['auth:api', 'update.lastseen'])->group(function () {
@@ -114,72 +105,14 @@ Route::middleware(['auth:api', 'update.lastseen'])->group(function () {
     Route::post('/keuangan/logout', [MurrobyController::class, 'logout']);
 
     // Keuangan
-    Route::prefix('keuangan')->group(function () {
-        Route::post('/lapor-bayar', [KeuanganController::class, 'laporBayar']);
-    });
+    require __DIR__ . '/wali-santri/api-keuangan.php';
 
     // Murroby
-    Route::prefix('murroby')->group(function () {
-        Route::get('/santri/{idUser}', [MurrobyController::class, 'index']);
-
-        Route::get('/santri/pemeriksaan/{idUser}', [MurrobyController::class, 'pemeriksaan']);
-        Route::post('/santri/pemeriksaan', [MurrobyController::class, 'storePemeriksaan']);
-        Route::get('/santri/pemeriksaan/detail/{noInduk}', [MurrobyController::class, 'detailPemeriksaan']);
-        Route::get('/santri/pemeriksaan/edit/{idPemeriksaan}', [MurrobyController::class, 'editPemeriksaan']);
-        Route::put('/santri/pemeriksaan/update/{idPemeriksaan}', [MurrobyController::class, 'updatePemeriksaan']);
-        Route::delete('/santri/pemeriksaan/{idPemeriksaan}', [MurrobyController::class, 'deletePemeriksaan']);
-
-        Route::get('/santri/perilaku/{idUser}', [PerilakuController::class, 'index']);
-        Route::post('/santri/perilaku', [PerilakuController::class, 'store']);
-        Route::get('/santri/perilaku/detail/{noInduk}', [PerilakuController::class, 'show']);
-        Route::get('/santri/perilaku/edit/{idPerilaku}', [PerilakuController::class, 'edit']);
-        Route::put('/santri/perilaku/update/{idPerilaku}', [PerilakuController::class, 'update']);
-        Route::delete('/santri/perilaku/{idPerilaku}', [PerilakuController::class, 'delete']);
-        
-        Route::get('/santri/kelengkapan/{idUser}', [KelengkapanController::class, 'index']);
-        Route::post('/santri/kelengkapan', [KelengkapanController::class, 'store']);
-        Route::get('/santri/kelengkapan/detail/{noInduk}', [KelengkapanController::class, 'show']);
-        Route::get('/santri/kelengkapan/edit/{idKelengkapan}', [KelengkapanController::class, 'edit']);
-        Route::put('/santri/kelengkapan/update/{idKelengkapan}', [KelengkapanController::class, 'update']);
-        Route::delete('/santri/kelengkapan/{idKelengkapan}', [KelengkapanController::class, 'delete']);
-
-        // Uang Saku
-        Route::get('/uang-saku/{idUser}', [UangSakuController::class, 'index']);
-
-        // Transaksi Saku
-        Route::get('/saku-masuk/{noInduk}', [UangSakuController::class, 'uangMasuk']);
-        Route::post('/saku-masuk', [UangSakuController::class, 'storeUangMasuk']);
-        Route::get('/saku-keluar/{noInduk}', [UangSakuController::class, 'uangKeluar']);
-        Route::post('/saku-keluar', [UangSakuController::class, 'storeUangKeluar']);
-    });
+    require __DIR__ . '/wali-santri/api-murroby.php';
 
     // Ustad Tahfidz
-    Route::prefix('ustad-tahfidz')->group(function () {
-        Route::get('/santri/{idUser}', [UstadTahfidzController::class, 'listSantri']);
-        Route::get('/tahfidz/{idUser}', [UstadTahfidzController::class, 'index']);
-        Route::get('/tahfidz/edit/{idDetailTahfidz}', [UstadTahfidzController::class, 'edit']);
-        Route::put('/tahfidz/update/{idDetailTahfidz}', [UstadTahfidzController::class, 'update']);
-        Route::post('/tahfidz', [UstadTahfidzController::class, 'store']);
-        Route::get('/tahfidz/show/{noInduk}', [UstadTahfidzController::class, 'detailSantri']);
-        Route::delete('/tahfidz/{idDetailTahfidz}', [UstadTahfidzController::class, 'delete']);
-    });
+    require __DIR__ . '/wali-santri/api-ustad-tahfidz.php';
 });
  
-// Wali Santri
-Route::prefix('wali-santri')->group(function () {
-    Route::post('/login', [WaliSantriController::class, 'login']);
-
-    Route::middleware(['auth:api-siswa', 'update.lastseen'])->group(function () {
-        Route::post('/logout', [WaliSantriController::class, 'logout']);
-        
-        Route::get('/kesehatan/{noInduk}', [WaliSantriController::class, 'kesehatan']);
-        Route::get('/ketahfidzan/{noInduk}', [WaliSantriController::class, 'ketahfidzan']);
-        Route::get('/perilaku/{noInduk}', [WaliSantriController::class, 'perilaku']);
-        Route::get('/kelengkapan/{noInduk}', [WaliSantriController::class, 'kelengkapan']);
-        Route::post('/lapor-bayar', [WaliSantriController::class, 'laporBayar']);
-        Route::get('/riwayat-bayar/{noInduk}', [WaliSantriController::class, 'riwayatBayar']);
-
-        Route::get('/saku-masuk/{noInduk}', [UangSakuController::class, 'uangMasuk']);
-        Route::get('/saku-keluar/{noInduk}', [UangSakuController::class, 'uangKeluar']);
-    });
-});
+// API Wali Santri
+require __DIR__ . '/wali-santri/api-wali-santri.php';

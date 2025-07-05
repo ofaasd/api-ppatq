@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\RefKamar;
+use Carbon\Carbon;
 use App\Models\User;
+use App\Models\RefKamar;
 use App\Models\UangSaku;
 use App\Models\SakuMasuk;
 use App\Models\SakuKeluar;
@@ -201,13 +202,6 @@ class UangSakuController extends Controller
                         "message" => "Data user atau pegawai tidak valid.",
                     ], 404);
                 }
-                if(!$user)
-                {
-                    return response()->json([
-                        "status"    => 404,
-                        "message"   => "Data user tidak ditemukan.",
-                    ], 404);
-                }
                 if($request->allKamar)
                 {
                     $dataKamar = RefKamar::where('employee_id', $user->pegawai_id)
@@ -228,23 +222,33 @@ class UangSakuController extends Controller
                                 'jumlah' => $jumlah,
                                 'no_induk' => $row->noIndukSantri,
                                 'note' => $request->note,
-                                'tanggal' => date('Y-m-d', strtotime($request->tanggal)),
+                                'tanggal' => Carbon::parse($request->tanggal)->format('Y-m-d'),
                             ]);
-                            $saku = UangSaku::where('no_induk', $row->noInduk)->first();
+                            
+                            $saku = UangSaku::where('no_induk', $row->noIndukSantri)->first();
                             if(!$saku)
                             {
                                 return response()->json([
                                     "status"    => 404,
-                                    "message"   => "Ada Santri yang tidak ditemukan.",
+                                    "message"   => "Data uang saku {$row->namaSantri} tidak ditemukan.",
                                 ], 404);
                             }
-                            $updateSaku = UangSaku::find($saku->id);
                             if($saku->jumlah <= $jumlah){
                                 return response()->json([
                                     "status"    => 400,
-                                    "message"   => "Uang saku cukup " . $row->namaSantri . " tidak cukup.",
+                                    "message"   => "Uang saku cukup {$row->namaSantri} tidak cukup.",
                                 ], 400);
                             }
+                            
+                            $updateSaku = UangSaku::find($saku->id);
+                            if(!$updateSaku)
+                            {
+                                return response()->json([
+                                    "status"    => 404,
+                                    "message"   => "Data uang saku tidak ditemukan.",
+                                ], 404);
+                            }
+
                             $updateSaku->jumlah = $saku->jumlah - $jumlah;
                             $updateSaku->save();
                         }
@@ -277,7 +281,7 @@ class UangSakuController extends Controller
                         'jumlah' => $jumlah,
                         'no_induk' => $request->noInduk,
                         'note' => $request->note,
-                        'tanggal' => date('Y-m-d', strtotime($request->tanggal)),
+                        'tanggal' => Carbon::parse($request->tanggal)->format('Y-m-d'),
                     ]);
 
                     $sisaSaldo = $updateSaku->jumlah;
@@ -294,7 +298,7 @@ class UangSakuController extends Controller
             }
         }else{
             return response()->json([
-                "status", 422,
+                "status"    => 422,
                 "message" => "Catatan harus diisi.",
             ], 422);
         }
