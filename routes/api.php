@@ -28,14 +28,14 @@ use App\Http\Controllers\TutorialController;
 |
 */
 //Route untuk user
-Route::post('/users',[\App\Http\Controllers\UserController::class, 'register']);
-Route::get('siswa',[\App\Http\Controllers\SiswaController::class, 'get_siswa']);
-Route::get('siswa/detail',[\App\Http\Controllers\SiswaController::class, 'get_siswa_detail']);
-Route::get('siswa/verifikasi',[\App\Http\Controllers\SiswaController::class, 'verifikasi_api']);
-Route::post('siswa/login',[\App\Http\Controllers\SiswaController::class, 'login']);
-Route::post('siswa/logout',[\App\Http\Controllers\SiswaController::class, 'logout']);
-Route::post('index-pembayaran',[\App\Http\Controllers\PembayaranController::class, 'index']);
-Route::post('pembayaran',[\App\Http\Controllers\PembayaranController::class, 'store']);
+// Route::post('/users',[\App\Http\Controllers\UserController::class, 'register']);
+// Route::get('siswa',[\App\Http\Controllers\SiswaController::class, 'get_siswa']);
+// Route::get('siswa/detail',[\App\Http\Controllers\SiswaController::class, 'get_siswa_detail']);
+// Route::get('siswa/verifikasi',[\App\Http\Controllers\SiswaController::class, 'verifikasi_api']);
+// Route::post('siswa/login',[\App\Http\Controllers\SiswaController::class, 'login']);
+// Route::post('siswa/logout',[\App\Http\Controllers\SiswaController::class, 'logout']);
+// Route::post('index-pembayaran',[\App\Http\Controllers\PembayaranController::class, 'index']);
+// Route::post('pembayaran',[\App\Http\Controllers\PembayaranController::class, 'store']);
 
 // Get Santri
 Route::prefix('get')->group(function () {
