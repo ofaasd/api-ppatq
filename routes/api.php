@@ -105,14 +105,14 @@ Route::middleware(['auth:api', 'update.lastseen'])->group(function () {
     Route::post('/keuangan/logout', [MurrobyController::class, 'logout']);
 
     // Keuangan
-    require __DIR__ . '/wali-santri/api-keuangan.php';
+    require __DIR__ . '/api-keuangan.php';
 
     // Murroby
-    require __DIR__ . '/wali-santri/api-murroby.php';
+    require __DIR__ . '/api-murroby.php';
 
     // Ustad Tahfidz
-    require __DIR__ . '/wali-santri/api-ustad-tahfidz.php';
+    require __DIR__ . '/api-ustad-tahfidz.php';
 });
  
 // API Wali Santri
-require __DIR__ . '/wali-santri/api-wali-santri.php';
+require __DIR__ . '/api-wali-santri.php';
