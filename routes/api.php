@@ -110,7 +110,10 @@ Route::middleware(['auth:api', 'update.lastseen'])->group(function () {
 
     // Ustad Tahfidz
     require __DIR__ . '/api-ustad-tahfidz.php';
+
+    // Abah
+    require __DIR__ . '/api-abah.php';
 });
- 
+
 // API Wali Santri
 require __DIR__ . '/api-wali-santri.php';
