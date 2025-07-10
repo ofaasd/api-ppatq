@@ -6,16 +6,21 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('abah')->group(function () {
     Route::get('/dashboard', [DashboardAbahController::class, 'index']);
-    Route::get('/psb', [DashboardAbahController::class, 'psb']);
-    Route::get('/santri', [DashboardAbahController::class, 'santri']);
-    Route::get('/pegawai', [DashboardAbahController::class, 'pegawai']);
-    Route::get('/belum-lapor', [DashboardAbahController::class, 'belumMelaporkan']);
+    Route::get('/psb/{search?}', [DashboardAbahController::class, 'psb']);
+    Route::get('/santri/{search?}', [DashboardAbahController::class, 'santri']);
+    Route::get('/pegawai/{search?}', [DashboardAbahController::class, 'pegawai']);
+    Route::get('/belum-lapor/{search?}', [DashboardAbahController::class, 'belumMelaporkan']);
     Route::get('/bayar-valid', [DashboardAbahController::class, 'pembayaranValidBulanIni']);
     Route::get('/bayar-bulan-lalu', [DashboardAbahController::class, 'pembayaranBulanLalu']);
 
-    Route::get('/kamar', [DashboardAbahController::class, 'kamar']);
-    Route::get('/kelas', [DashboardAbahController::class, 'kelas']);
-    Route::get('/tahfidz', [DashboardAbahController::class, 'tahfidz']);
+    Route::get('/kamar/{search?}', [DashboardAbahController::class, 'kamar']);
+    Route::get('/kamar/show/{id}', [DashboardAbahController::class, 'showKamar']);
+    
+    Route::get('/kelas/{search?}', [DashboardAbahController::class, 'kelas']);
+    Route::get('/kelas/show/{id}', [DashboardAbahController::class, 'showKamar']);
+
+    Route::get('/tahfidz/{search?}', [DashboardAbahController::class, 'tahfidz']);
+    Route::get('/tahfidz/show/{id}', [DashboardAbahController::class, 'showTahfidz']);
 
     Route::get('/aset', [DashboardAbahController::class, 'aset']);
 

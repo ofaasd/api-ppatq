@@ -30,8 +30,9 @@ class DashboardAbahController extends Controller
             $qPsb = PsbPesertaOnline::where('gelombang_id', $gelombang->id);
             
             $jumlahPsb = $qPsb->count();
-            $jumlahPsbLaki = $qPsb->where('jenis_kelamin', 'L')->count();
-            $jumlahPsbPerempuan = $qPsb->where('jenis_kelamin', 'P')->count();
+            $jumlahPsbLaki = (clone $qPsb)->where('jenis_kelamin', 'L')->count();
+            $jumlahPsbPerempuan = (clone $qPsb)->where('jenis_kelamin', 'P')->count();
+
 
             $tahunLalu = $tahun-1;
             $jumlahPsbTahunLalu = PsbPesertaOnline::whereRaw(
@@ -40,14 +41,14 @@ class DashboardAbahController extends Controller
             ->count();
 
             $qSantri = SantriDetail::where('status', 0);
-            $jumlahSantri = $qSantri->count();
-            $jumlahSantriLaki = $qSantri->where('jenis_kelamin', 'L')->count();
-            $jumlahSantriPerempuan = $qSantri->where('jenis_kelamin', 'P')->count();
+            $jumlahSantri = (clone $qSantri)->count();
+            $jumlahSantriLaki = (clone $qSantri)->where('jenis_kelamin', 'L')->count();
+            $jumlahSantriPerempuan = (clone $qSantri)->where('jenis_kelamin', 'P')->count();
 
             $qPegawai = EmployeeNew::get();
-            $jumlahPegawai = $qPegawai->count();
-            $jumlahPegawaiLaki = $qPegawai->where('jenis_kelamin', 'Laki-laki')->count();
-            $jumlahPegawaiPerempuan = $qPegawai->where('jenis_kelamin', 'Perempuan')->count();
+            $jumlahPegawai = (clone $qPegawai)->count();
+            $jumlahPegawaiLaki = (clone $qPegawai)->where('jenis_kelamin', 'Laki-laki')->count();
+            $jumlahPegawaiPerempuan = (clone $qPegawai)->where('jenis_kelamin', 'Perempuan')->count();
 
             $bayar = pembayaran::whereMonth('tanggal_validasi', $bulan)
             ->whereYear('tanggal_validasi', $tahun)
@@ -105,115 +106,150 @@ class DashboardAbahController extends Controller
         }
     }
 
-    public function psb()
+    public function psb($search = null)
     {
-        try{
-
+        try {
             $gelombang = PsbGelombang::where('pmb_online', 1)->first();
-            $dataPsb = PsbPesertaOnline::where('gelombang_id', $gelombang->id)->select([
-                'psb_peserta_online.nama',
-                'psb_peserta_online.jenis_kelamin AS jenisKelamin',
-                'kota_kab_tbl.nama_kota_kab AS asal'
-            ])
-            ->leftJoin('kota_kab_tbl', 'kota_kab_tbl.id', '=', 'psb_peserta_online.kota_id')
-            ->get();
+
+            $query = PsbPesertaOnline::where('gelombang_id', $gelombang->id)
+                ->select([
+                    'psb_peserta_online.nama',
+                    'psb_peserta_online.jenis_kelamin AS jenisKelamin',
+                    'kota_kab_tbl.nama_kota_kab AS asal'
+                ])
+                ->leftJoin('kota_kab_tbl', 'kota_kab_tbl.id', '=', 'psb_peserta_online.kota_id');
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('psb_peserta_online.nama', 'like', "%$search%")
+                    ->orWhere('kota_kab_tbl.nama_kota_kab', 'like', "%$search%");
+                });
+            }
+
+            $dataPsb = $query->get();
 
             return response()->json([
                 "status"  => 200,
                 "message" => "Berhasil mengambil data",
+                "jumlah"  => $dataPsb->count(),
                 "data"    => $dataPsb
             ], 200);
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 "status"  => 500,
                 "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
-                // "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
+                // "error"   => $e->getMessage() // Hapus di production
             ], 500);
         }
     }
 
-    public function santri()
+    public function santri($search = null)
     {
-        try{
+        try {
+            $query = SantriDetail::select([
+                    'photo',
+                    'nama',
+                    'jenis_kelamin AS jenisKelamin',
+                    'kelas'
+                ])
+                ->where('status', 0);
 
-            $dataSantri = SantriDetail::select([
-                'photo',
-                'nama',
-                'jenis_kelamin AS jenisKelamin',
-                'kelas'
-            ])
-            ->where('status', 0)
-            ->get();
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('nama', 'like', "%$search%")
+                    ->orWhere('kelas', 'like', "%$search%");
+                });
+            }
+
+            $dataSantri = $query->get();
 
             return response()->json([
                 "status"  => 200,
                 "message" => "Berhasil mengambil data",
+                "jumlah"  => $dataSantri->count(),
                 "data"    => $dataSantri
             ], 200);
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 "status"  => 500,
                 "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
-                // "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
+                // "error"   => $e->getMessage() // Uncomment untuk debugging
             ], 500);
         }
     }
 
-    public function pegawai()
+    public function pegawai($search = null)
     {
-        try{
+        try {
+            $query = EmployeeNew::select([
+                    'photo',
+                    'nama',
+                    'jenis_kelamin AS jenisKelamin'
+                ]);
 
-            $dataPegawai = EmployeeNew::select([
-                'photo',
-                'nama',
-                'jenis_kelamin AS jenisKelamin'
-            ])
-            ->get();
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('nama', 'like', "%$search%");
+                });
+            }
+
+            $dataPegawai = $query->get();
 
             return response()->json([
                 "status"  => 200,
                 "message" => "Berhasil mengambil data",
-                "data"    => $dataPegawai
+                "jumlah"  => $dataPegawai->count(),
+                "data"    => $dataPegawai,
             ], 200);
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 "status"  => 500,
                 "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
-                // "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
             ], 500);
         }
     }
 
-    public function belumMelaporkan()
+    public function belumMelaporkan($search = null)
     {
-        try{
+        try {
             $bulan = (int) date('m');
             $tahun = (int) date('Y');
 
+            // Ambil no_induk santri yang sudah membayar
             $santriSudahBayar = Pembayaran::whereMonth('tanggal_bayar', $bulan)
                 ->whereYear('tanggal_bayar', $tahun)
                 ->distinct()
-                ->pluck('nama_santri');
+                ->pluck('nama_santri'); // diasumsikan berisi no_induk
 
-            $dataBelumLapor = SantriDetail::select([
-                'photo',
-                'no_induk AS noInduk',
-                'nama'
-            ])
-            ->whereNotIn('no_induk', $santriSudahBayar)
-            ->where('status', 0)
-            ->get();
+            // Query awal santri yang belum melapor
+            $query = SantriDetail::select([
+                    'photo',
+                    'no_induk AS noInduk',
+                    'nama'
+                ])
+                ->whereNotIn('no_induk', $santriSudahBayar)
+                ->where('status', 0);
+
+            // Tambahkan filter jika ada pencarian
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('nama', 'like', "%$search%")
+                    ->orWhere('no_induk', 'like', "%$search%");
+                });
+            }
+
+            $dataBelumLapor = $query->get();
 
             return response()->json([
                 "status"  => 200,
                 "message" => "Berhasil mengambil data",
+                "jumlah"  => $dataBelumLapor->count(),
                 "data"    => $dataBelumLapor
             ], 200);
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 "status"  => 500,
                 "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
-                // "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
             ], 500);
         }
     }
@@ -239,6 +275,7 @@ class DashboardAbahController extends Controller
             return response()->json([
                 "status"  => 200,
                 "message" => "Berhasil mengambil data",
+                "jumlah"    => $bayarValid->count(),
                 "data"    => $bayarValid
             ], 200);
         }catch (\Exception $e) {
@@ -277,6 +314,7 @@ class DashboardAbahController extends Controller
             return response()->json([
                 "status"  => 200,
                 "message" => "Berhasil mengambil data",
+                "jumlah"    => $bayarBulanLalu->count(),
                 "data"    => $bayarBulanLalu
             ], 200);
         }catch (\Exception $e) {
@@ -288,22 +326,74 @@ class DashboardAbahController extends Controller
         }
     }
 
-    public function kamar()
+    public function kamar($search = null)
     {
-        try{
-            $dataKamar = RefKamar::select(
-                'ref_kamar.name AS namaKelas',
-                'employee_new.nama AS murroby'
-            )
-            ->leftJoin('employee_new', 'ref_kamar.employee_id', '=', 'employee_new.id')
-            ->get();
+        try {
+            $query = RefKamar::select(
+                    'ref_kamar.id',
+                    'ref_kamar.name AS namaKamar',
+                    'employee_new.nama AS murroby'
+                )
+                ->leftJoin('employee_new', 'ref_kamar.employee_id', '=', 'employee_new.id');
+
+            // Jika ada parameter pencarian
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('ref_kamar.name', 'like', "%$search%")
+                    ->orWhere('employee_new.nama', 'like', "%$search%");
+                });
+            }
+
+            // Sorting: nama kamar 1A - 10B
+            $query->orderByRaw("CAST(SUBSTRING(ref_kamar.name, 1, LENGTH(ref_kamar.name) - 1) AS UNSIGNED) ASC")
+                ->orderByRaw("SUBSTRING(ref_kamar.name, -1) ASC");
+
+            $dataKamar = $query->get();
 
             return response()->json([
                 "status"  => 200,
                 "message" => "Berhasil mengambil data",
+                "jumlah"  => $dataKamar->count(),
                 "data"    => $dataKamar
             ], 200);
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
+            return response()->json([
+                "status"  => 500,
+                "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
+            ], 500);
+        }
+    }
+
+    public function showKamar($id)
+    {
+        try {
+            $data = SantriDetail::select([
+                    'photo',
+                    'nama',
+                    'jenis_kelamin AS jenisKelamin',
+                ])
+                ->where('kamar_id', $id)
+                ->get();
+
+            $dataKamar = RefKamar::select([
+                'employee_new.nama AS namaMurroby',
+                'employee_new.photo AS fotoMurroby',
+                'ref_kamar.name AS namaKamar'
+            ])
+            ->leftJoin('employee_new', 'employee_new.id', 'ref_kamar.employee_id')
+            ->where('ref_kamar.id', $id)
+            ->first();
+
+            return response()->json([
+                "status"  => 200,
+                "message" => "Berhasil mengambil data",
+                "jumlah"  => $data->count(),
+                "data"    => [
+                    'dataKamar' => $dataKamar,
+                    'santri'    => $data
+                ]
+            ], 200);
+        } catch (\Exception $e) {
             return response()->json([
                 "status"  => 500,
                 "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
@@ -312,20 +402,33 @@ class DashboardAbahController extends Controller
         }
     }
 
-    public function kelas()
+    public function kelas($search = null)
     {
         try{
-            $dataKelas = RefKelas::select([
+            $query = RefKelas::select([
+                'ref_kelas.code AS kode',
                 'ref_kelas.name AS namaKelas',
                 'employee_new.nama AS guru',
             ])
-            ->leftJoin('employee_new', 'ref_kelas.employee_id','=','employee_new.id')
-            ->get();
+            ->leftJoin('employee_new', 'ref_kelas.employee_id','=','employee_new.id');
+
+            // Jika ada parameter pencarian
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('ref_kelas.name', 'like', "%$search%")
+                    ->orWhere('employee_new.nama', 'like', "%$search%");
+                });
+            }
+
+            $query->orderByRaw("CAST(SUBSTRING(ref_kelas.code, 1, LENGTH(ref_kelas.code) - 1) AS UNSIGNED) ASC")
+                ->orderByRaw("SUBSTRING(ref_kelas.code, -1) ASC");
+
+            $data = $query->get();
 
             return response()->json([
                 "status"  => 200,
                 "message" => "Berhasil mengambil data",
-                "data"    => $dataKelas
+                "data"    => $data
             ], 200);
         }catch (\Exception $e) {
             return response()->json([
@@ -336,26 +439,113 @@ class DashboardAbahController extends Controller
         }
     }
 
-    public function tahfidz()
+    public function showKelas($kode)
     {
-        try{
-            $dataKelasTahfidz = RefTahfidz::select([
-                'ref_tahfidz.name AS namaKelas',
-                'employee_new.nama AS guruTahfidz',
+        try {
+            $data = SantriDetail::select([
+                    'photo',
+                    'nama',
+                    'jenis_kelamin AS jenisKelamin',
+                ])
+                ->where('kelas', $kode)
+                ->get();
+
+            $dataKelas = RefKelas::select([
+                'employee_new.nama AS namaWaliKelas',
+                'employee_new.photo AS fotoWaliKelas',
+                'ref_kelas.name AS namaKelas'
             ])
-            ->leftJoin('employee_new', 'ref_tahfidz.employee_id', '=', 'employee_new.id')
-            ->get();
+            ->leftJoin('employee_new', 'employee_new.id', 'ref_kelas.employee_id')
+            ->where('ref_kelas.code', $kode)
+            ->first();
 
             return response()->json([
                 "status"  => 200,
                 "message" => "Berhasil mengambil data",
-                "data"    => $dataKelasTahfidz
+                "jumlah"  => $data->count(),
+                "data"    => [
+                    'dataKelas' => $dataKelas,
+                    'santri'    => $data
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                "status"  => 500,
+                "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
+            ], 500);
+        }
+    }
+
+    public function tahfidz($search = null)
+    {
+        try{
+            $query = RefTahfidz::select([
+                'ref_tahfidz.id',
+                'ref_tahfidz.name AS namaKelas',
+                'employee_new.nama AS guruTahfidz',
+            ])
+            ->leftJoin('employee_new', 'ref_tahfidz.employee_id', '=', 'employee_new.id');
+
+            // Jika ada parameter pencarian
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('ref_tahfidz.name', 'like', "%$search%")
+                    ->orWhere('employee_new.nama', 'like', "%$search%");
+                });
+            }
+
+            $query->orderByRaw("CAST(SUBSTRING(ref_tahfidz.code, 1, LENGTH(ref_tahfidz.code) - 1) AS UNSIGNED) ASC")
+                ->orderByRaw("SUBSTRING(ref_tahfidz.code, -1) ASC");
+            
+            $data = $query->get();
+
+            return response()->json([
+                "status"  => 200,
+                "message" => "Berhasil mengambil data",
+                "data"    => $data
             ], 200);
         }catch (\Exception $e) {
             return response()->json([
                 "status"  => 500,
                 "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
                 // "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
+            ], 500);
+        }
+    }
+
+    public function showTahfidz($id)
+    {
+        try {
+            $data = SantriDetail::select([
+                    'photo',
+                    'nama',
+                    'jenis_kelamin AS jenisKelamin',
+                ])
+                ->where('tahfidz_id', $id)
+                ->get();
+
+            $dataTahfidz = RefTahfidz::select([
+                'employee_new.nama AS namaGuruTahfidz',
+                'employee_new.photo AS fotoGuruTahfidz',
+                'ref_tahfidz.name AS namaKelasTahfidz'
+            ])
+            ->leftJoin('employee_new', 'employee_new.id', 'ref_tahfidz.employee_id')
+            ->where('ref_tahfidz.id', $id)
+            ->first();
+
+            return response()->json([
+                "status"  => 200,
+                "message" => "Berhasil mengambil data",
+                "jumlah"  => $data->count(),
+                "data"    => [
+                    'dataTahfidz' => $dataTahfidz,
+                    'santri'    => $data
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                "status"  => 500,
+                "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
             ], 500);
         }
     }
