@@ -8,14 +8,14 @@ use App\Http\Controllers\DakwahController;
 use App\Http\Controllers\GaleriController;
 use App\Http\Controllers\GetDataController;
 
-use App\Http\Controllers\MurrobyController;
-use App\Http\Controllers\KelasKamarController;
 use App\Http\Controllers\KeluhanController;
+use App\Http\Controllers\MurrobyController;
+use App\Http\Controllers\RekeningController;
+use App\Http\Controllers\TutorialController;
+use App\Http\Controllers\KelasKamarController;
 use App\Http\Controllers\KesantrianController;
 use App\Http\Controllers\StaffPengasuhController;
 use App\Http\Controllers\KesehatanSantriController;
-use App\Http\Controllers\RekeningController;
-use App\Http\Controllers\TutorialController;
 
 /*
 |--------------------------------------------------------------------------
