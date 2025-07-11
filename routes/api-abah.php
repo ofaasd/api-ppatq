@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\DashboardAbahController;
 use App\Http\Controllers\DawuhAbahController;
+use App\Http\Controllers\ReplyKeluhanController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('abah')->group(function () {
@@ -36,5 +37,14 @@ Route::prefix('abah')->group(function () {
         Route::get('/edit/{id}', [DawuhAbahController::class, 'edit']);
         Route::put('/update/{id}', [DawuhAbahController::class, 'update']);
         Route::delete('/delete/{id}', [DawuhAbahController::class, 'destroy']);
+    });
+
+    // Balas Keluhan
+    Route::prefix('reply-keluhan')->group(function () {
+        Route::get('/', [ReplyKeluhanController::class, 'index']);
+        Route::post('/store', [ReplyKeluhanController::class, 'store']);
+        Route::get('/edit/{idKeluhan}', [ReplyKeluhanController::class, 'edit']);
+        Route::put('/update/{idKeluhan}', [ReplyKeluhanController::class, 'update']);
+        Route::delete('/delete/{idBalasan}', [ReplyKeluhanController::class, 'destroy']);
     });
 });

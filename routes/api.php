@@ -14,6 +14,7 @@ use App\Http\Controllers\RekeningController;
 use App\Http\Controllers\TutorialController;
 use App\Http\Controllers\KelasKamarController;
 use App\Http\Controllers\KesantrianController;
+use App\Http\Controllers\ReplyKeluhanController;
 use App\Http\Controllers\DashboardAbahController;
 use App\Http\Controllers\StaffPengasuhController;
 use App\Http\Controllers\KesehatanSantriController;
