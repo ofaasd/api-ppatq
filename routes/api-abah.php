@@ -9,10 +9,16 @@ Route::prefix('abah')->group(function () {
     Route::get('/dashboard', [DashboardAbahController::class, 'index']);
     Route::get('/psb/{search?}', [DashboardAbahController::class, 'psb']);
 
-    Route::get('/santri/{search?}', [DashboardAbahController::class, 'santri']);
-    Route::get('/detail-santri/{noInduk}', [DashboardAbahController::class, 'detailSantri']);
+    Route::prefix('santri')->group(function () {
+        Route::get('/{search?}', [DashboardAbahController::class, 'santri']);
+        Route::get('/detail/{noInduk}', [DashboardAbahController::class, 'detailSantri']);
+    });
 
-    Route::get('/pegawai/{search?}', [DashboardAbahController::class, 'pegawai']);
+    Route::prefix('pegawai')->group(function () {
+        Route::get('/{search?}', [DashboardAbahController::class, 'pegawai']);
+        Route::get('/detail/{noInduk?}', [DashboardAbahController::class, 'detailPegawai']);
+    });
+
     Route::get('/belum-lapor/{search?}', [DashboardAbahController::class, 'belumMelaporkan']);
     Route::get('/bayar-valid', [DashboardAbahController::class, 'pembayaranValidBulanIni']);
     Route::get('/bayar-bulan-lalu', [DashboardAbahController::class, 'pembayaranBulanLalu']);
