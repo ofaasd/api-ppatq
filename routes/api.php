@@ -14,6 +14,7 @@ use App\Http\Controllers\RekeningController;
 use App\Http\Controllers\TutorialController;
 use App\Http\Controllers\KelasKamarController;
 use App\Http\Controllers\KesantrianController;
+use App\Http\Controllers\PelanggaranController;
 use App\Http\Controllers\ReplyKeluhanController;
 use App\Http\Controllers\DashboardAbahController;
 use App\Http\Controllers\StaffPengasuhController;
@@ -115,6 +116,9 @@ Route::middleware(['auth:api', 'update.lastseen'])->group(function () {
 
     // Abah
     require __DIR__ . '/api-abah.php';
+
+    // Keamanan
+    require __DIR__ . '/api-keamanan.php';
 });
 
 // API Wali Santri

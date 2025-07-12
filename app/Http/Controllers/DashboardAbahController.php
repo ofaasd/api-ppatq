@@ -3,9 +3,8 @@
 namespace App\Http\Controllers;
 
 use Carbon\Carbon;
-use Illuminate\Http\Request;
-
 use App\Models\Kurban;
+
 use App\Models\Perilaku;
 use App\Models\RefKamar;
 use App\Models\RefKelas;
@@ -21,12 +20,15 @@ use App\Models\Kelengkapan;
 use App\Models\AsetBangunan;
 use App\Models\PsbGelombang;
 use App\Models\SantriDetail;
+use Illuminate\Http\Request;
 use App\Models\TbPemeriksaan;
 use App\Models\AsetElektronik;
+use App\Models\detailPembayaran;
 use App\Models\PsbPesertaOnline;
 use App\Models\RefJenisPembayaran;
+use App\Models\SantriDetailAlumni;
+use Illuminate\Support\Facades\DB;
 use App\Models\DetailSantriTahfidz;
-use App\Models\detailPembayaran;
 
 class DashboardAbahController extends Controller
 {
@@ -201,6 +203,47 @@ class DashboardAbahController extends Controller
                 "status"  => 500,
                 "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
                 // "error"   => $e->getMessage() // Uncomment untuk debugging
+            ], 500);
+        }
+    }
+
+    public function alumni($search = null)
+    {
+        try {
+            $query = SantriDetailAlumni::select(
+                'tb_alumni_santri_detail.no_induk AS noInduk',
+                'tb_alumni_santri_detail.nama',
+                DB::raw("CONCAT(SUBSTRING(tb_alumni_santri_detail.no_hp, 1, 8), '****') AS noHp"), 
+                'guru_murroby.nama AS murroby',  
+                'wali_kelas.nama AS waliKelas',
+                'tb_alumni.angkatan as angkatan'
+            )
+            ->leftJoin('tb_alumni', 'tb_alumni_santri_detail.no_induk', '=', 'tb_alumni.no_induk')
+            ->leftJoin('ref_kamar', 'tb_alumni_santri_detail.kamar_id', '=', 'ref_kamar.id')
+            ->leftJoin('ref_kelas', 'tb_alumni_santri_detail.kelas', '=', 'ref_kelas.code')
+            ->leftJoin('employee_new AS guru_murroby', 'ref_kamar.employee_id', '=', 'guru_murroby.id')
+            ->leftJoin('employee_new AS wali_kelas', 'ref_kelas.employee_id', '=', 'wali_kelas.id');
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('nama', 'like', "%$search%")
+                    ->orWhere('kelas', 'like', "%$search%");
+                });
+            }
+
+            $dataSantri = $query->paginate(25);
+
+            return response()->json([
+                "status"  => 200,
+                "message" => "Berhasil mengambil data",
+                "jumlah"  => $dataSantri->count(),
+                "data"    => $dataSantri
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                "status"  => 500,
+                "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
+                "error"   => $e->getMessage() // Uncomment untuk debugging
             ], 500);
         }
     }

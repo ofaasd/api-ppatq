@@ -24,14 +24,14 @@ class KeluhanController extends Controller
             if(!$dataSantri->nama_lengkap_ayah){
                 return response()->json([
                     "status"  => 404,
-                    "message" => "Nama ayah tidak ditemukan, Mohon segera melengkapi data.",
+                    "message" => "Nama ayah tidak ditemukan, Mohon segera melengkapi data diri.",
                 ], 404);
             }
 
             if(!$dataSantri->nama_lengkap_ibu){
                 return response()->json([
                     "status"  => 404,
-                    "message" => "Nama ibu tidak ditemukan, Mohon segera melengkapi data.",
+                    "message" => "Nama ibu tidak ditemukan, Mohon segera melengkapi data diri.",
                 ], 404);
             }
             $newId = $latestKeluhan ? $latestKeluhan->id + 1 : 1; // Jika tidak ada data, mulai dengan id = 1

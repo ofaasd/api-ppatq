@@ -14,6 +14,11 @@ Route::prefix('abah')->group(function () {
         Route::get('/detail/{noInduk}', [DashboardAbahController::class, 'detailSantri']);
     });
 
+    Route::prefix('alumni')->group(function () {
+        Route::get('/{search?}', [DashboardAbahController::class, 'alumni']);
+        Route::get('/detail/{noInduk}', [DashboardAbahController::class, 'detailSantri']);
+    });
+
     Route::prefix('pegawai')->group(function () {
         Route::get('/{search?}', [DashboardAbahController::class, 'pegawai']);
         Route::get('/detail/{idPegawai}', [DashboardAbahController::class, 'detailPegawai']);

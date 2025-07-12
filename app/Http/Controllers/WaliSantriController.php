@@ -85,7 +85,7 @@ class WaliSantriController extends Controller
             throw new HttpResponseException(response([
                 "errors" => [
                     'Verifikasi' => [
-                        'Login gagal. Harap pastikan email dan password benar.'
+                        'Login gagal. Harap pastikan data yang anda masukkan benar.'
                     ]
                 ]
             ], 400));
