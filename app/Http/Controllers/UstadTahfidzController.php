@@ -129,8 +129,7 @@ class UstadTahfidzController extends Controller
             $ta = RefTahunAjaran::where('is_aktif', 1)->first();
 
             // Cek apakah data sudah ada
-            $cekData = DetailSantriTahfidz::where('id_tahfidz', $request->idTahfidz)
-                ->where('no_induk', $request->noInduk)
+            $cekData = DetailSantriTahfidz::where('no_induk', $request->noInduk)
                 ->where('bulan', $bulan)
                 ->where('tahun', $tahun)
                 ->first();
@@ -239,7 +238,8 @@ class UstadTahfidzController extends Controller
             ->leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
             ->where('detail_santri_tahfidz.id_tahun_ajaran', $ta->id)
             ->where('detail_santri_tahfidz.no_induk', $noInduk)
-            ->orderBy('detail_santri_tahfidz.created_at', 'desc')
+            ->orderBy('detail_santri_tahfidz.tahun', 'desc')
+            ->orderBy('detail_santri_tahfidz.bulan', 'desc')
             ->get();
 
             $getData->transform(function ($item) {
