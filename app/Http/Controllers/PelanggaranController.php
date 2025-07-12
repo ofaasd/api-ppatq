@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pelanggaran;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 use Image;
@@ -13,6 +14,7 @@ class PelanggaranController extends Controller
     {
         try{
             $data = Pelanggaran::select([
+                'pelanggaran.id',
                 'santri_detail.nama',
                 'pelanggaran.tanggal',
                 'pelanggaran.jenis AS jenisPelanggaran',
@@ -22,8 +24,13 @@ class PelanggaranController extends Controller
                 'employee_new.nama AS namaPengisi',
             ])
             ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'pelanggaran.no_induk')
-            ->leftJoin('employee_new', 'employee_new.id', '=', 'pelanggaran.by_id')
-            ->get();
+            ->leftJoin('users', 'users.id', '=', 'pelanggaran.by_id')
+            ->leftJoin('employee_new', 'employee_new.id', '=', 'users.pegawai_id')
+            ->get()
+            ->map(function($item){
+                $item->tanggal = Carbon::parse($item->tanggal)->translatedFormat('d F Y');
+                return $item;
+            });
             
             return response()->json([
                 "status"  => 200,
@@ -43,22 +50,27 @@ class PelanggaranController extends Controller
     {
         try{
             $file = $request->file('bukti');
-            $ekstensi = $file->extension();
 
-            $fileName = date('YmdHis') . $file->getClientOriginalName();
-            $fileName = str_replace(' ', '-', $fileName);
+            $fileName = null;
+            if($request->has('bukti'))
+            {
+                $ekstensi = $file->extension();
 
-            if(strtolower($ekstensi) == 'jpg' || strtolower($ekstensi) == 'png' || strtolower($ekstensi) == 'jpeg'){
-
-                $kompres = Image::make($file)
-                ->resize(800, null, function ($constraint) {
-                    $constraint->aspectRatio();
-                })
-                ->save('assets/upload/pelanggaran/' . $fileName);
-
-            }else{
                 $fileName = date('YmdHis') . $file->getClientOriginalName();
-                $file->move('assets/upload/pelanggaran/',$fileName);
+                $fileName = str_replace(' ', '-', $fileName);
+
+                if(strtolower($ekstensi) == 'jpg' || strtolower($ekstensi) == 'png' || strtolower($ekstensi) == 'jpeg'){
+
+                    $kompres = Image::make($file)
+                    ->resize(800, null, function ($constraint) {
+                        $constraint->aspectRatio();
+                    })
+                    ->save('assets/upload/pelanggaran/' . $fileName);
+
+                }else{
+                    $fileName = date('YmdHis') . $file->getClientOriginalName();
+                    $file->move('assets/upload/pelanggaran/',$fileName);
+                }
             }
 
             $data = [
@@ -81,7 +93,7 @@ class PelanggaranController extends Controller
             return response()->json([
                 "status"  => 500,
                 "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
-                // "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
+                "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
             ], 500);
         }
     }
