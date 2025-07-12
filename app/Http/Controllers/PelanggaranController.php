@@ -29,6 +29,12 @@ class PelanggaranController extends Controller
             ->get()
             ->map(function($item){
                 $item->tanggal = Carbon::parse($item->tanggal)->translatedFormat('d F Y');
+
+                $item->kategori = match ($item->kategori) {
+                    1 => "Ringan",
+                    2 => "Berat",
+                };
+
                 return $item;
             });
             
