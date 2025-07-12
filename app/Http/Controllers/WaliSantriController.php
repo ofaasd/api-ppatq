@@ -2,37 +2,38 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Helpers\Helpers_wa;
-use Illuminate\Http\Request;
+use Carbon\Carbon;
+use App\Models\SendWA;
 
+use App\Models\Keluhan;
+use App\Models\Perilaku;
 use App\Models\Kesehatan;
 use App\Models\RawatInap;
 use App\Models\SakuMasuk;
 use App\Models\pembayaran;
 use App\Models\SakuKeluar;
-use App\Models\SantriDetail;
-use App\Models\TbPemeriksaan;
-use App\Models\RefJenisPembayaran;
-use App\Models\DetailSantriTahfidz;
-use App\Models\detailPembayaran;
+use App\Models\Kelengkapan;
 use App\Models\DetailSantri;
-use App\Models\SendWA;
+use App\Models\SantriDetail;
+use Illuminate\Http\Request;
+use App\Models\TbPemeriksaan;
+
+use App\Http\Helpers\Helpers_wa;
+use App\Models\detailPembayaran;
+use Illuminate\Http\JsonResponse;
+use App\Models\RefJenisPembayaran;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Http\JsonResponse;
+use App\Models\DetailSantriTahfidz;
+
+use Illuminate\Support\Facades\Http;
+
 use Illuminate\Validation\Rules\File;
-
-use Carbon\Carbon;
 use Intervention\Image\Facades\Image;
-
 use App\Http\Resources\WaliSantriResource;
 
 use App\Http\Requests\LoginWaliSantriRequest;
-use App\Models\Kelengkapan;
-use App\Models\Perilaku;
-
-use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class WaliSantriController extends Controller
 {
@@ -448,6 +449,59 @@ class WaliSantriController extends Controller
             ];
 
             return response()->json($data, 200);
+        }catch (\Exception $e) {
+            return response()->json([
+                "status"  => 500,
+                "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
+                // "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
+            ], 500);
+        }
+    }
+
+    public function keluhan($noInduk)
+    {
+        try{
+            $data = Keluhan::select([
+                'tb_keluhan.id AS idKeluhan',
+                'reply_keluhan.id AS idBalasan',
+                'tb_keluhan.nama_pelapor AS namaPelapor',
+                'tb_keluhan.email',
+                'tb_keluhan.no_hp AS noHp',
+                'santri_detail.nama AS namaSantri',
+                'tb_keluhan.nama_wali_santri AS namaWaliSantri',
+                'ref_kategori.nama AS kategori',
+                'tb_keluhan.jenis',
+                'tb_keluhan.status',
+                'tb_keluhan.masukan',
+                'tb_keluhan.saran',
+                'tb_keluhan.rating',
+                'reply_keluhan.pesan AS balasan',
+                'tb_keluhan.created_at',
+            ])
+            ->leftJoin('reply_keluhan', 'reply_keluhan.id_keluhan', '=', 'tb_keluhan.id')
+            ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'tb_keluhan.id_santri')
+            ->leftJoin('ref_kategori', 'ref_kategori.id', '=', 'tb_keluhan.id_kategori')
+            ->where('tb_keluhan.is_hapus', 0)
+            ->where('tb_keluhan.id_santri', $noInduk)
+            ->orderBy('tb_keluhan.created_at', 'desc')
+            ->get()
+            ->map(function($item){
+                $item->status = match ($item->status) {
+                    1 => 'Belum Ditangani',
+                    2 => 'Ditangani',
+                    default => 'Status tidak diketahui',
+                };
+                $item->created_at = Carbon::parse($item->created_at)->translatedFormat('d F Y');
+
+                return $item;
+            })
+            ->groupBy('status');
+
+            return response()->json([
+                    "status"  => 200,
+                    "message" => "Berhasil mengambil data",
+                    "data"    => $data
+                ], 200);
         }catch (\Exception $e) {
             return response()->json([
                 "status"  => 500,

@@ -19,5 +19,7 @@ Route::prefix('wali-santri')->group(function () {
 
         Route::get('/saku-masuk/{noInduk}', [UangSakuController::class, 'uangMasuk']);
         Route::get('/saku-keluar/{noInduk}', [UangSakuController::class, 'uangKeluar']);
+
+        Route::get('/keluhan/{noInduk}', [WaliSantriController::class, 'keluhan']);
     });
 });

@@ -19,6 +19,7 @@ use App\Http\Controllers\ReplyKeluhanController;
 use App\Http\Controllers\DashboardAbahController;
 use App\Http\Controllers\StaffPengasuhController;
 use App\Http\Controllers\KesehatanSantriController;
+use App\Http\Controllers\WaliSantriController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,6 +31,7 @@ use App\Http\Controllers\KesehatanSantriController;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
+
 //Route untuk user
 // Route::post('/users',[\App\Http\Controllers\UserController::class, 'register']);
 // Route::get('siswa',[\App\Http\Controllers\SiswaController::class, 'get_siswa']);
