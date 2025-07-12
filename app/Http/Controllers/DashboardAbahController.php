@@ -188,7 +188,7 @@ class DashboardAbahController extends Controller
                 });
             }
 
-            $dataSantri = $query->get();
+            $dataSantri = $query->paginate(25);
 
             return response()->json([
                 "status"  => 200,
@@ -512,7 +512,7 @@ class DashboardAbahController extends Controller
                 });
             }
 
-            $dataPegawai = $query->get();
+            $dataPegawai = $query->paginate(25);
 
             return response()->json([
                 "status"  => 200,
