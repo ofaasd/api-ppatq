@@ -2,24 +2,50 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AsetBangunan;
-use App\Models\AsetBarang;
-use App\Models\AsetElektronik;
-use App\Models\AsetRuang;
-use App\Models\AsetTanah;
-use App\Models\EmployeeNew;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+
 use App\Models\Kurban;
-use App\Models\pembayaran;
-use App\Models\PsbGelombang;
-use App\Models\PsbPesertaOnline;
+use App\Models\Perilaku;
 use App\Models\RefKamar;
 use App\Models\RefKelas;
+use App\Models\AsetRuang;
+use App\Models\AsetTanah;
+use App\Models\Kesehatan;
+use App\Models\RawatInap;
+use App\Models\AsetBarang;
+use App\Models\pembayaran;
 use App\Models\RefTahfidz;
+use App\Models\EmployeeNew;
+use App\Models\Kelengkapan;
+use App\Models\AsetBangunan;
+use App\Models\PsbGelombang;
 use App\Models\SantriDetail;
-use Illuminate\Http\Request;
+use App\Models\TbPemeriksaan;
+use App\Models\AsetElektronik;
+use App\Models\PsbPesertaOnline;
+use App\Models\RefJenisPembayaran;
+use App\Models\DetailSantriTahfidz;
+use App\Models\detailPembayaran;
 
 class DashboardAbahController extends Controller
 {
+    private function konversiNilaiHuruf($nilai)
+    {
+        if ($nilai === null) {
+            return '-';
+        }
+
+        return match ((int) $nilai) {
+            4 => 'A',
+            3 => 'B',
+            2 => 'C',
+            1 => 'D',
+            0 => 'E',
+            default => '-',
+        };
+    }
+    
     public function index()
     {
         try{
@@ -174,6 +200,297 @@ class DashboardAbahController extends Controller
                 "status"  => 500,
                 "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
                 // "error"   => $e->getMessage() // Uncomment untuk debugging
+            ], 500);
+        }
+    }
+
+    public function detailSantri($noInduk)
+    {
+        try {
+            $dataDiri = SantriDetail::select([
+                'santri_detail.no_induk AS noInduk',
+                'santri_detail.tanggal_lahir AS tanggalLahir',
+                'santri_detail.nama',
+                'santri_detail.photo',
+                'santri_detail.kelas',
+                'santri_detail.tempat_lahir AS tempatLahir',
+                'santri_detail.jenis_kelamin AS jenisKelamin',
+                'santri_detail.alamat',
+                'santri_detail.kelurahan',
+                'santri_detail.kecamatan',
+                'kota_kab_tbl.nama_kota_kab AS kotaKab',
+                'santri_detail.nama_lengkap_ayah AS namaAyah',
+                'santri_detail.pendidikan_ayah AS pendidikanAyah',
+                'santri_detail.pekerjaan_ayah AS pekerjaan Ayah',
+                'santri_detail.nama_lengkap_ibu AS namaIbu',
+                'santri_detail.pendidikan_ibu AS pendidikanIbu',
+                'santri_detail.pekerjaan_ibu AS pekerjaanIbu',
+                'santri_detail.no_hp AS noHp',
+                'santri_detail.no_va AS noVa',
+                'ref_tahfidz.name AS kelasTahfidz',
+                'ref_kamar.name AS kamar',
+                'murroby.nama AS namaMurroby',
+                'murroby.photo AS fotoMurroby',
+                'tahfidz.nama AS namaTahfidz',
+                'tahfidz.photo AS fotoTahfidz',
+            ])
+            ->where('santri_detail.no_induk', $noInduk)
+            ->leftJoin('kota_kab_tbl', 'kota_kab_tbl.id_kota_kab', '=', 'santri_detail.kabkota')
+            ->leftJoin('ref_kamar', 'ref_kamar.id', '=', 'santri_detail.kamar_id')
+            ->leftJoin('ref_tahfidz', 'ref_tahfidz.id', '=', 'santri_detail.tahfidz_id')
+            ->leftJoin('employee_new AS murroby', 'murroby.id', '=', 'ref_kamar.employee_id')
+            ->leftJoin('employee_new AS tahfidz', 'tahfidz.id', '=', 'ref_tahfidz.employee_id')
+            ->first();
+
+            if($dataDiri)
+            {
+                $dataDiri->kelas = strtoupper($dataDiri->kelas);
+                $dataDiri->tanggal_lahir = Carbon::parse($dataDiri->tanggal_lahir)->translatedFormat('d F Y');
+            }
+
+            $data['dataDiri'] = $dataDiri;
+
+            $data['riwayatSakit'] = Kesehatan::select([
+                'tb_kesehatan.sakit AS keluhan',
+                'tb_kesehatan.tanggal_sakit AS tanggalSakit',
+                'tb_kesehatan.tanggal_sembuh AS tanggalSembuh',
+                'tb_kesehatan.keterangan_sakit AS keteranganSakit',
+                'tb_kesehatan.keterangan_sembuh AS keteranganSembuh',
+                'tb_kesehatan.tindakan',
+            ])
+            ->orderBy('created_at', 'desc')
+            ->where('santri_id',$noInduk)
+            ->get()
+            ->map(function($item){
+                $item->tanggalSakit = Carbon::parse($item->tanggalSakit)->translatedFormat('d F Y');
+                $item->tanggalSembuh = Carbon::parse($item->tanggalSembuh)->translatedFormat('d F Y');
+
+                return $item;
+            });
+
+            $data['pemeriksaan'] = TbPemeriksaan::select([
+                'tb_pemeriksaan.tanggal_pemeriksaan AS tanggalPemeriksaan',
+                'tb_pemeriksaan.tinggi_badan AS tinggiBadan',
+                'tb_pemeriksaan.berat_badan AS beratBadan',
+                'tb_pemeriksaan.lingkar_pinggul AS lingkarPinggul',
+                'tb_pemeriksaan.lingkar_dada AS lingkarDada',
+                'tb_pemeriksaan.kondisi_gigi AS kondisiGigi',
+            ])
+            ->orderBy('tanggalPemeriksaan', 'desc')
+            ->where('no_induk',$noInduk)
+            ->get()
+            ->map(function($item){
+                $item->tanggalPemeriksaan = Carbon::parse($item->tanggalPemeriksaan)->translatedFormat('d F Y');
+
+                return $item;
+            });
+
+            $data['rawatInap'] = RawatInap::select([
+                'rawat_inap.tanggal_masuk AS tanggalMasuk',
+                'rawat_inap.keluhan',
+                'rawat_inap.terapi',
+                'rawat_inap.tanggal_keluar AS tanggalKeluar',
+            ])
+            ->orderBy('tanggalMasuk', 'desc')
+            ->where('santri_no_induk',$noInduk)
+            ->get()
+            ->map(function($item){
+                $item->tanggalMasuk = Carbon::parse($item->tanggalMasuk)->translatedFormat('d F Y');
+
+                return $item;
+            });
+
+            $ketahfidzan = DetailSantriTahfidz::select([
+                'detail_santri_tahfidz.tanggal',
+                'detail_santri_tahfidz.hafalan',
+                'detail_santri_tahfidz.tilawah',
+                'detail_santri_tahfidz.kefasihan',
+                'detail_santri_tahfidz.daya_ingat AS dayaIngat',
+                'detail_santri_tahfidz.kelancaran',
+                'detail_santri_tahfidz.praktek_tajwid AS praktekTajwid',
+                'detail_santri_tahfidz.makhroj',
+                'detail_santri_tahfidz.tanafus',
+                'detail_santri_tahfidz.waqof_wasol AS waqofWasol',
+                'detail_santri_tahfidz.ghorib',
+                'kode_juz.nama as nmJuz'
+            ])
+            ->leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
+            ->where('detail_santri_tahfidz.no_induk', $noInduk)
+            ->whereNotNull('kode_juz.nama')
+            ->where('kode_juz.nama', '!=', '')
+            ->orderBy('detail_santri_tahfidz.tanggal', 'desc')
+            ->get()
+            ->map(function ($item) {
+                $item->tanggal = Carbon::parse($item->tanggal)->translatedFormat('d F Y');
+
+                $item->hafalan          = $this->konversiNilaiHuruf($item->hafalan);
+                $item->tilawah          = $this->konversiNilaiHuruf($item->tilawah);
+                $item->kefasihan        = $this->konversiNilaiHuruf($item->kefasihan);
+                $item->dayaIngat        = $this->konversiNilaiHuruf($item->dayaIngat);
+                $item->kelancaran       = $this->konversiNilaiHuruf($item->kelancaran);
+                $item->praktekTajwid    = $this->konversiNilaiHuruf($item->praktekTajwid);
+                $item->makhroj          = $this->konversiNilaiHuruf($item->makhroj);
+                $item->tanafus          = $this->konversiNilaiHuruf($item->tanafus);
+                $item->waqofWasol       = $this->konversiNilaiHuruf($item->waqofWasol);
+                $item->ghorib           = $this->konversiNilaiHuruf($item->ghorib);
+
+                return $item;
+            });
+
+            $groupedData = [];
+            foreach ($ketahfidzan as $row) {
+                $tahun = date('Y', strtotime($row->tanggal));
+                $bulan = date('m', strtotime($row->tanggal));
+
+                // Konversi bulan angka ke nama bulan Indonesia
+                $bulanNama = [
+                    '01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April',
+                    '05' => 'Mei', '06' => 'Juni', '07' => 'Juli', '08' => 'Agustus',
+                    '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember'
+                ];
+
+                $namaBulan = $bulanNama[$bulan] ?? $bulan;
+
+                // Simpan data dalam array terstruktur per tahun
+                $groupedData[$tahun][$namaBulan][] = $row;
+            }
+
+            $data['ketahfidzan'] = $groupedData;
+
+            $labelPerilaku = ['Kurang Baik', 'Cukup', 'Baik'];
+
+            $data['perilaku'] = Perilaku::select([
+                'perilaku.tanggal',
+                'perilaku.ketertiban',
+                'perilaku.kebersihan',
+                'perilaku.kedisiplinan',
+                'perilaku.kerapian',
+                'perilaku.kesopanan',
+                'perilaku.kepekaan_lingkungan AS kepekaanLingkungan',
+                'perilaku.ketaatan_peraturan AS ketaatanPeraturan',
+            ])
+            ->orderBy('tanggal', 'desc')
+            ->where('no_induk', $noInduk)
+            ->get()
+            ->map(function ($item) use ($labelPerilaku) {
+                $item->tanggal = $item->tanggal ? Carbon::parse($item->tanggal)->format('Y-m-d') : '-';
+
+                $item->ketertiban = $labelPerilaku[$item->ketertiban] ?? '-';
+                $item->kebersihan = $labelPerilaku[$item->kebersihan] ?? '-';
+                $item->kedisiplinan = $labelPerilaku[$item->kedisiplinan] ?? '-';
+                $item->kerapian = $labelPerilaku[$item->kerapian] ?? '-';
+                $item->kesopanan = $labelPerilaku[$item->kesopanan] ?? '-';
+                $item->kepekaanLingkungan = $labelPerilaku[$item->kepekaanLingkungan] ?? '-';
+                $item->ketaatanPeraturan = $labelPerilaku[$item->ketaatanPeraturan] ?? '-';
+
+                return $item;
+            });
+
+            $labelKelengkapan = ['Tidak Lengkap', 'Lengkap & Kurang baik', 'lengkap & baik'];
+
+            $data['kelengkapan'] = Kelengkapan::select([
+                'tanggal',
+                'perlengkapan_mandi AS perlengkapanMandi',
+                'catatan_mandi AS catatanMandi',
+                'peralatan_sekolah AS peralatanSekolah',
+                'catatan_sekolah AS catatanSekolah',
+                'perlengkapan_diri AS perlengkapanDiri',
+                'catatan_diri AS catatanDiri',
+            ])
+            ->orderBy('tanggal', 'desc')
+            ->where('no_induk', $noInduk)
+            ->get()
+            ->map(function ($item) use ($labelKelengkapan) {
+                $item->tanggal = $item->tanggal ? Carbon::parse($item->tanggal)->format('Y-m-d') : '-';
+
+                $item->perlengkapanMandi = $labelKelengkapan[$item->perlengkapanMandi] ?? '-';
+                $item->peralatanSekolah = $labelKelengkapan[$item->peralatanSekolah] ?? '-';
+                $item->perlengkapanDiri = $labelKelengkapan[$item->perlengkapanDiri] ?? '-';
+
+                return $item;
+            });
+
+            $bulan = [
+                1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+                5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+                9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+            ];
+
+            $refBayar = RefJenisPembayaran::orderBy('urutan', 'asc')->get();
+            $pembayaranList = pembayaran::where([
+                'nama_santri' => $noInduk,
+                'is_hapus' => 0
+                ])
+                ->orderBy('id','desc')
+                ->get();
+
+            $detailPembayaran = [];
+
+            foreach ($pembayaranList as $pembayaran) {
+                // Inisialisasi semua jenis pembayaran dengan 0
+                foreach ($refBayar as $jenis) {
+                    $detailPembayaran[$pembayaran->id][$jenis->id] = 0;
+                }
+
+                // Ambil detail pembayaran dari tabel tb_detail_pembayaran
+                $detail = DetailPembayaran::where('id_pembayaran', $pembayaran->id)->get();
+
+                foreach ($detail as $row) {
+                    $detailPembayaran[$pembayaran->id][$row->id_jenis_pembayaran] = $row->nominal;
+                }
+            }
+
+            $riwayatBayar = [];
+
+            foreach ($pembayaranList as $pem) {
+                $baris = [];
+
+                // Tombol cetak
+                // $baris['cetak'] = '<a href="' . url('pembayaran/print_bukti/' . $pem->id) . '" class="btn btn-success btn-sm"><i class="fa fa-print"></i></a>';
+
+                // Tanggal bayar
+                $baris['tanggalBayar'] = Carbon::parse($pem->tanggal_bayar)->translatedFormat('d F Y');
+
+                // Nama bulan dari periode
+                $baris['periode'] = $bulan[$pem->periode] ?? '-';
+
+                // Detail jenis pembayaran
+                foreach ($refBayar as $jenis) {
+                    $nominal = $detailPembayaran[$pem->id][$jenis->id] ?? 0;
+                    $baris['jenisPembayaran'][$jenis->id] = number_format($nominal, 0, ",", ".");
+                }
+
+                // Validasi
+                switch ($pem->validasi) {
+                    case 0:
+                        $baris['validasi'] = "Belum di Validasi";
+                        break;
+                    case 1:
+                        $baris['validasi'] = "Sudah di Validasi";
+                        break;
+                    case 2:
+                        $baris['validasi'] = "Validasi Ditolak";
+                        break;
+                    default:
+                        $baris['validasi'] = "";
+                }
+
+                $riwayatBayar[] = $baris;
+            }
+
+            $data['jenisPembayaran'] = $refBayar;
+            $data['riwayatBayar'] = $riwayatBayar;
+            
+            return response()->json([
+                "status"  => 200,
+                "message" => "Berhasil mengambil data",
+                "data"    => $data
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                "status"  => 500,
+                "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
+                "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
             ], 500);
         }
     }
