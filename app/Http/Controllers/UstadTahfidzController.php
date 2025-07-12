@@ -130,15 +130,6 @@ class UstadTahfidzController extends Controller
 
             $ta = RefTahunAjaran::where('is_aktif', 1)->first();
 
-            // Cek apakah data sudah ada
-            $cekData = DetailSantriTahfidz::where('no_induk', $request->noInduk)
-                ->where('bulan', $bulan)
-                ->where('tahun', $tahun)
-                ->first();
-
-            // Siapkan kondisi update/create
-            $kondisi = [];
-
             $kondisi = [
                 'bulan' => $bulan,
                 'tahun' => $tahun,
