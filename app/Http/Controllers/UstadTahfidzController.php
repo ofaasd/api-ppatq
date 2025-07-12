@@ -137,8 +137,12 @@ class UstadTahfidzController extends Controller
             // Siapkan kondisi update/create
             $kondisi = [];
 
-            if ($cekData && $cekData->id) {
-                $kondisi = ['id' => $cekData->id];
+            if ($cekData) {
+                $kondisi = [
+                    'bulan' => $bulan,
+                    'tahun' => $tahun,
+                    'no_induk' => $request->noInduk,
+                ];
             }
 
             $data = DetailSantriTahfidz::updateOrCreate(
