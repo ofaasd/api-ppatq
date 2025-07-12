@@ -13,6 +13,12 @@ class KeluhanController extends Controller
         try{
             $latestKeluhan = Keluhan::orderBy('id', 'desc')->first();
             $dataSantri = SantriDetail::where('no_induk', $request->namaSantri)->first();
+            if(!$dataSantri){
+                return response()->json([
+                    "status"  => 404,
+                    "message" => "Santri tidak ditemukan.",
+                ], 404);
+            }
             $newId = $latestKeluhan ? $latestKeluhan->id + 1 : 1; // Jika tidak ada data, mulai dengan id = 1
             $save = Keluhan::create([
                 'id' => $newId,
