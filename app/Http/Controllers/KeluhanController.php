@@ -13,10 +13,25 @@ class KeluhanController extends Controller
         try{
             $latestKeluhan = Keluhan::orderBy('id', 'desc')->first();
             $dataSantri = SantriDetail::where('no_induk', $request->namaSantri)->first();
+
             if(!$dataSantri){
                 return response()->json([
                     "status"  => 404,
                     "message" => "Santri tidak ditemukan.",
+                ], 404);
+            }
+
+            if(!$dataSantri->nama_lengkap_ayah){
+                return response()->json([
+                    "status"  => 404,
+                    "message" => "Nama ayah tidak ditemukan, Mohon segera melengkapi data.",
+                ], 404);
+            }
+
+            if(!$dataSantri->nama_lengkap_ibu){
+                return response()->json([
+                    "status"  => 404,
+                    "message" => "Nama ibu tidak ditemukan, Mohon segera melengkapi data.",
                 ], 404);
             }
             $newId = $latestKeluhan ? $latestKeluhan->id + 1 : 1; // Jika tidak ada data, mulai dengan id = 1
@@ -26,7 +41,7 @@ class KeluhanController extends Controller
                 'email' => $request->email,
                 'no_hp' => $request->noHp,
                 'id_santri' => $request->namaSantri,
-                'nama_wali_santri' => $dataSantri->nama_lengkap_ayah,
+                'nama_wali_santri' => $dataSantri->nama_lengkap_ayah ?? $dataSantri->nama_lengkap_ibu,
                 'id_kategori' => $request->kategori,
                 'masukan' => $request->masukan,
                 'saran' => $request->saran,
