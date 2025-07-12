@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Keluhan;
+use App\Models\SantriDetail;
 use Illuminate\Http\Request;
 
 class KeluhanController extends Controller
@@ -11,6 +12,7 @@ class KeluhanController extends Controller
     {
         try{
             $latestKeluhan = Keluhan::orderBy('id', 'desc')->first();
+            $dataSantri = SantriDetail::where('no_induk', $request->namaSantri)->first();
             $newId = $latestKeluhan ? $latestKeluhan->id + 1 : 1; // Jika tidak ada data, mulai dengan id = 1
             $save = Keluhan::create([
                 'id' => $newId,
@@ -18,7 +20,7 @@ class KeluhanController extends Controller
                 'email' => $request->email,
                 'no_hp' => $request->noHp,
                 'id_santri' => $request->namaSantri,
-                'nama_wali_santri' => $request->namaWaliSantri,
+                'nama_wali_santri' => $dataSantri->nama_lengkap_ayah,
                 'id_kategori' => $request->kategori,
                 'masukan' => $request->masukan,
                 'saran' => $request->saran,
