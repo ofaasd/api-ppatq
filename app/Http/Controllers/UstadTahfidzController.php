@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\User;
-use App\Models\Tahfidz;
 
+use App\Models\Tahfidz;
 use App\Models\EmployeeNew;
+use App\Models\SantriDetail;
 use Illuminate\Http\Request;
 use App\Models\RefTahunAjaran;
 use App\Models\DetailSantriTahfidz;
-use App\Models\SantriDetail;
 
 class UstadTahfidzController extends Controller
 {
@@ -81,7 +82,8 @@ class UstadTahfidzController extends Controller
             ->leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
             ->where('id_tahfidz', $tahfidz->id)
             ->where('detail_santri_tahfidz.id_tahun_ajaran', $ta->id)
-            ->orderBy('detail_santri_tahfidz.created_at', 'desc')
+            ->orderBy('detail_santri_tahfidz.bulan', 'desc')
+            ->orderBy('detail_santri_tahfidz.tahun', 'desc')
             ->get();
 
             $detail->transform(function ($item) {
@@ -123,8 +125,9 @@ class UstadTahfidzController extends Controller
     {
         try{
             $tanggal = $request->tanggal;
-            $bulan = date('m', strtotime($tanggal));
-            $tahun = date('Y', strtotime($tanggal));
+            $carbonTanggal = Carbon::parse($tanggal);
+            $bulan = $carbonTanggal->format('m');
+            $tahun = $carbonTanggal->format('Y');
 
             $ta = RefTahunAjaran::where('is_aktif', 1)->first();
 
