@@ -82,8 +82,7 @@ class UstadTahfidzController extends Controller
             ->leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
             ->where('id_tahfidz', $tahfidz->id)
             ->where('detail_santri_tahfidz.id_tahun_ajaran', $ta->id)
-            ->orderBy('detail_santri_tahfidz.bulan', 'desc')
-            ->orderBy('detail_santri_tahfidz.tahun', 'desc')
+            ->orderBy('detail_santri_tahfidz.tanggal', 'desc')
             ->get();
 
             $detail->transform(function ($item) {
@@ -140,13 +139,11 @@ class UstadTahfidzController extends Controller
             // Siapkan kondisi update/create
             $kondisi = [];
 
-            if ($cekData) {
-                $kondisi = [
-                    'bulan' => $bulan,
-                    'tahun' => $tahun,
-                    'no_induk' => $request->noInduk,
-                ];
-            }
+            $kondisi = [
+                'bulan' => $bulan,
+                'tahun' => $tahun,
+                'no_induk' => $request->noInduk,
+            ];
 
             $data = DetailSantriTahfidz::updateOrCreate(
                 $kondisi,
@@ -170,6 +167,7 @@ class UstadTahfidzController extends Controller
                     'ghorib' => $request->ghorib,
                 ]
             );
+
 
             return response()->json([
                 "status"  => 201,
