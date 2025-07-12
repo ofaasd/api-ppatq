@@ -173,6 +173,7 @@ class DashboardAbahController extends Controller
     {
         try {
             $query = SantriDetail::select([
+                    'id',
                     'photo',
                     'nama',
                     'jenis_kelamin AS jenisKelamin',
