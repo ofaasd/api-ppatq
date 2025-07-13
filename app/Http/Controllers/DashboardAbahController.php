@@ -321,7 +321,7 @@ class DashboardAbahController extends Controller
                 'tb_pemeriksaan.kondisi_gigi AS kondisiGigi',
             ])
             ->orderBy('tanggalPemeriksaan', 'desc')
-            ->where('no_induk',$noInduk)
+            ->where('no_induk', $noInduk)
             ->get()
             ->map(function($item){
                 $item->tanggalPemeriksaan = Carbon::parse($item->tanggalPemeriksaan)->translatedFormat('d F Y');
