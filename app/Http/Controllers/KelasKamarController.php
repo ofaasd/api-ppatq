@@ -55,7 +55,7 @@ class KelasKamarController extends Controller
             return response()->json([
                 "status"  => 500,
                 "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
-                // "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
+                "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
             ], 500);
         }
     }
