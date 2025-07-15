@@ -182,6 +182,22 @@ class WaliSantriController extends Controller
             ])
             ->log('Login');
 
+            $message = "🎉 Selamat datang kembali di aplikasi mobile PPATQ-RF ku!
+
+Kami senang Anda membuka aplikasi kami lagi.
+
+Wali Santri yang terhormat, ini adalah notifikasi khusus untuk Anda dari {$hasil->nama}.
+";
+
+            // kirim wa
+            $data = [
+                'no_wa' => $hasil->no_hp,
+                'pesan' => $message,
+                'tanggal_kirim' => now(),
+            ];
+
+            $sendWa = Helpers_wa::send_wa($data);
+
             return (new WaliSantriResource($hasil))->response()->setStatusCode(200);
         }else{
             throw new HttpResponseException(response([

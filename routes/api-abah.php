@@ -16,7 +16,7 @@ Route::prefix('abah')->group(function () {
 
     Route::prefix('alumni')->group(function () {
         Route::get('/{search?}', [DashboardAbahController::class, 'alumni']);
-        Route::get('/detail/{noInduk}', [DashboardAbahController::class, 'detailSantri']);
+        // Route::get('/detail/{noInduk}', [DashboardAbahController::class, 'detailSantri']);
     });
 
     Route::prefix('pegawai')->group(function () {
