@@ -265,7 +265,7 @@ class DashboardAbahController extends Controller
                 'kota_kab_tbl.nama_kota_kab AS kotaKab',
                 'santri_detail.nama_lengkap_ayah AS namaAyah',
                 'santri_detail.pendidikan_ayah AS pendidikanAyah',
-                'santri_detail.pekerjaan_ayah AS pekerjaan Ayah',
+                'santri_detail.pekerjaan_ayah AS pekerjaanAyah',
                 'santri_detail.nama_lengkap_ibu AS namaIbu',
                 'santri_detail.pendidikan_ibu AS pendidikanIbu',
                 'santri_detail.pekerjaan_ibu AS pekerjaanIbu',
