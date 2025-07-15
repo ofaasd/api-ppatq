@@ -182,13 +182,15 @@ class WaliSantriController extends Controller
             ])
             ->log('Login');
 
-            $message = "🎉 Selamat datang kembali di aplikasi mobile PPATQ-RF ku!
+            $message = "🎉 Selamat datang kembali di aplikasi mobile *PPATQ-RF ku*!
 
 Kami senang Anda membuka aplikasi kami lagi.
 
+Kami harap Anda baik-baik saja hari ini. Aplikasi mobile Anda baru saja diakses.
+
 Informasi mengenai informasi, berita dan detail santri melalui media yang lebih luas, dapat melalui https: www.ppatq-rf.sch.id
 
-Wali Santri yang terhormat, ini adalah notifikasi khusus untuk Anda dari *{$hasil->nama}*.
+Wali Santri yang terhormat, ini adalah notifikasi khusus untuk Anda sebagai wali dari *{$hasil->nama}*.
 ";
 
             // kirim wa
