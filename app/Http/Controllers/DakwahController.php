@@ -14,8 +14,9 @@ class DakwahController extends Controller
             $data = DB::table('dakwah')
                 ->select(
                     'judul',
-                    'isi_dakwah',
-                    'dakwah.created_at'
+                    'foto',
+                    'isi_dakwah AS isiDakwah',
+                    'dakwah.created_at AS createdAt'
                     )
                 ->leftJoin('users', 'dakwah.user_id', '=', 'users.id')
                 ->whereNull('dakwah.deleted_at')

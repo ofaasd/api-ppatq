@@ -32,7 +32,7 @@ Route::prefix('abah')->group(function () {
     Route::get('/kamar/show/{id}', [DashboardAbahController::class, 'showKamar']);
     
     Route::get('/kelas/{search?}', [DashboardAbahController::class, 'kelas']);
-    Route::get('/kelas/show/{id}', [DashboardAbahController::class, 'showKelas']);
+    Route::get('/kelas/show/{kode}', [DashboardAbahController::class, 'showKelas']);
 
     Route::get('/tahfidz/{search?}', [DashboardAbahController::class, 'tahfidz']);
     Route::get('/tahfidz/show/{id}', [DashboardAbahController::class, 'showTahfidz']);
