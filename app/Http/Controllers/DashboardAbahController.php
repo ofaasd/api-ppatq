@@ -226,8 +226,8 @@ class DashboardAbahController extends Controller
 
             if ($search) {
                 $query->where(function ($q) use ($search) {
-                    $q->where('nama', 'like', "%$search%")
-                    ->orWhere('kelas', 'like', "%$search%");
+                    $q->where('tb_alumni_santri_detail.nama', 'like', "%$search%")
+                    ->orWhere('tb_alumni_santri_detail.kelas', 'like', "%$search%");
                 });
             }
 
