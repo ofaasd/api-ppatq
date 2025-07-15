@@ -501,7 +501,7 @@ class DashboardAbahController extends Controller
                 // Detail jenis pembayaran
                 foreach ($refBayar as $jenis) {
                     $nominal = $detailPembayaran[$pem->id][$jenis->id] ?? 0;
-                    $baris['jenisPembayaran'][$jenis->id] = number_format($nominal, 0, ",", ".");
+                    $baris['jenisPembayaran'][$jenis->jenis] = number_format($nominal, 0, ",", ".");
                 }
 
                 // Validasi
@@ -522,7 +522,6 @@ class DashboardAbahController extends Controller
                 $riwayatBayar[] = $baris;
             }
 
-            $data['jenisPembayaran'] = $refBayar;
             $data['riwayatBayar'] = $riwayatBayar;
             
             return response()->json([
