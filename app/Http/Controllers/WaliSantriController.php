@@ -186,14 +186,15 @@ class WaliSantriController extends Controller
 
 Kami senang Anda membuka aplikasi kami lagi.
 
-Wali Santri yang terhormat, ini adalah notifikasi khusus untuk Anda dari {$hasil->nama}.
+Informasi mengenai informasi, berita dan detail santri melalui media yang lebih luas, dapat melalui https: www.ppatq-rf.sch.id
+
+Wali Santri yang terhormat, ini adalah notifikasi khusus untuk Anda dari *{$hasil->nama}*.
 ";
 
             // kirim wa
             $data = [
                 'no_wa' => $hasil->no_hp,
-                'pesan' => $message,
-                'tanggal_kirim' => now(),
+                'pesan' => $message
             ];
 
             $sendWa = Helpers_wa::send_wa($data);
