@@ -190,16 +190,17 @@ class DashboardAbahController extends Controller
     {
         try {
             $query = SantriDetail::select([
-                    'no_induk AS noInduk',
-                    'photo',
-                    'nama',
-                    'nama_lengkap_ayah AS namaAyah',
-                    'jenis_kelamin AS jenisKelamin',
-                    'kelas',
-                    'jenis_kelamin',
+                    'santri_detail.no_induk AS noInduk',
+                    'santri_detail.photo',
+                    'santri_detail.nama',
+                    'employee_new.nama AS waliKelas',
+                    'santri_detail.jenis_kelamin AS jenisKelamin',
+                    'santri_detail.kelas',
                     'cities.city_name AS asalKota'
                 ])
                 ->leftJoin('cities', 'cities.city_id', '=', 'santri_detail.kabkota')
+                ->leftJoin('ref_kelas', 'ref_kelas.code', '=', 'santri_detail.kelas')
+                ->leftJoin('employee_new', 'employee_new.id', '=', 'ref_kelas.employee_id')
                 ->where('status', 0);
 
             if ($search) {
@@ -212,7 +213,7 @@ class DashboardAbahController extends Controller
             $cloneQuery = clone $query;
             $allSantri = $cloneQuery->get();
 
-            $dataSantri = $query->paginate(25);
+            $dataSantri = $query->inRandomOrder()->paginate(25);
 
             $jumlah = [
                 'jumlah'    => $allSantri->count(),
