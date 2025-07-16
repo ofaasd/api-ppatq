@@ -18,7 +18,7 @@ class ReplyKeluhanController extends Controller
             foreach($kategori as $row)
             {
                 // $arrKategori[$row->id]['nama'] = $row->nama;
-                $arrKategori[$row->nama]['value'] =  $data = Keluhan::select([
+                $arrKategori[$row->nama]['data'] =  $data = Keluhan::select([
                     'tb_keluhan.id AS idKeluhan',
                     'reply_keluhan.id AS idBalasan',
                     'tb_keluhan.nama_pelapor AS namaPelapor',
