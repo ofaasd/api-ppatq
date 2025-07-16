@@ -29,6 +29,7 @@ use App\Models\RefJenisPembayaran;
 use App\Models\SantriDetailAlumni;
 use Illuminate\Support\Facades\DB;
 use App\Models\DetailSantriTahfidz;
+use App\Models\KodeJuz;
 
 class DashboardAbahController extends Controller
 {
@@ -54,13 +55,14 @@ class DashboardAbahController extends Controller
             $bulan = (int) date('m');
             $tahun = (int) date('Y');
 
+            $bulanIni = Carbon::now()->translatedFormat('F');        // "Juli"
+
             $gelombang = PsbGelombang::where('pmb_online', 1)->first();
             $qPsb = PsbPesertaOnline::where('gelombang_id', $gelombang->id);
             
             $jumlahPsb = $qPsb->count();
             $jumlahPsbLaki = (clone $qPsb)->where('jenis_kelamin', 'L')->count();
             $jumlahPsbPerempuan = (clone $qPsb)->where('jenis_kelamin', 'P')->count();
-
 
             $tahunLalu = $tahun-1;
             $jumlahPsbTahunLalu = PsbPesertaOnline::whereRaw(
@@ -73,6 +75,10 @@ class DashboardAbahController extends Controller
             $jumlahSantriLaki = (clone $qSantri)->where('jenis_kelamin', 'L')->count();
             $jumlahSantriPerempuan = (clone $qSantri)->where('jenis_kelamin', 'P')->count();
 
+            $syahriah = RefJenisPembayaran::where('id', 1)->first();
+            $perkalianJumlahSyahriah = $syahriah->harga * $jumlahSantri;
+            $totalTagihanSyahriah = number_format($perkalianJumlahSyahriah, 0, ',', '.');
+
             $qPegawai = EmployeeNew::get();
             $jumlahPegawai = (clone $qPegawai)->count();
             $jumlahPegawaiLaki = (clone $qPegawai)->where('jenis_kelamin', 'Laki-laki')->count();
@@ -81,12 +87,7 @@ class DashboardAbahController extends Controller
             $bayar = pembayaran::whereMonth('tanggal_validasi', $bulan)
             ->whereYear('tanggal_validasi', $tahun)
             ->sum('jumlah');
-            $jumlahPembayaran = $bayar;
-
-            $bayar = pembayaran::whereMonth('tanggal_bayar', $bulan)
-            ->whereYear('tanggal_bayar', $tahun)
-            ->sum('jumlah');
-            $totalPembayaran = $bayar;
+            $totalPembayaranValidBulanIni = number_format($bayar, 0, ',', '.');
 
             $jumlahSantriLapor = pembayaran::whereMonth('tanggal_bayar', $bulan)
             ->whereYear('tanggal_bayar', $tahun)
@@ -101,23 +102,24 @@ class DashboardAbahController extends Controller
             $bayarLalu = Pembayaran::whereMonth('tanggal_validasi', $bulanLalu)
             ->whereYear('tanggal_validasi', $tahun)
             ->sum('jumlah');
-            $jumlahPembayaranLalu = $bayarLalu;
+            $jumlahPembayaranLalu = number_format($bayarLalu, 0, ',', '.');
 
             $data = [
-                'jumlahPsbTahunLalu'               => $jumlahPsbTahunLalu,               // Jumlah total pendaftar PSB (Penerimaan Santri Baru)
-                'jumlahPsb'               => $jumlahPsb,               // Jumlah total pendaftar PSB (Penerimaan Santri Baru)
-                'jumlahPsbLaki'           => $jumlahPsbLaki,           // Jumlah pendaftar PSB laki-laki
-                'jumlahPsbPerempuan'      => $jumlahPsbPerempuan,      // Jumlah pendaftar PSB perempuan
-                'jumlahSantri'            => $jumlahSantri,            // Jumlah total santri aktif
-                'jumlahSantriLaki'        => $jumlahSantriLaki,        // Jumlah santri laki-laki aktif
-                'jumlahSantriPerempuan'   => $jumlahSantriPerempuan,   // Jumlah santri perempuan aktif
-                'jumlahPegawai'           => $jumlahPegawai,           // Jumlah total pegawai (guru/karyawan)
-                'jumlahPegawaiLaki'       => $jumlahPegawaiLaki,       // Jumlah pegawai laki-laki
-                'jumlahPegawaiPerempuan'  => $jumlahPegawaiPerempuan,  // Jumlah pegawai perempuan
-                'jumlahPembayaran'        => $jumlahPembayaran,        // Jumlah transaksi pembayaran yang tercatat
-                'totalPembayaran'         => $totalPembayaran,         // Total nominal pembayaran yang diterima
-                'jumlahSantriBelumLapor'  => $jumlahSantriBelumLapor,  // Jumlah santri yang belum melakukan pelaporan
-                'jumlahPembayaranLalu'    => $jumlahPembayaranLalu,    // Jumlah pembayaran pada periode sebelumnya (historis)
+                'bulanIni'                     => $bulanIni,              
+                'totalTagihanSyahriah'      => $totalTagihanSyahriah,              
+                'jumlahPsbTahunLalu'        => $jumlahPsbTahunLalu,              
+                'jumlahPsb'                 => $jumlahPsb,              
+                'jumlahPsbLaki'             => $jumlahPsbLaki,          
+                'jumlahPsbPerempuan'        => $jumlahPsbPerempuan,     
+                'jumlahSantri'              => $jumlahSantri,           
+                'jumlahSantriLaki'          => $jumlahSantriLaki,       
+                'jumlahSantriPerempuan'     => $jumlahSantriPerempuan,  
+                'jumlahPegawai'             => $jumlahPegawai,          
+                'jumlahPegawaiLaki'         => $jumlahPegawaiLaki,      
+                'jumlahPegawaiPerempuan'    => $jumlahPegawaiPerempuan, 
+                'totalPembayaranValidBulanIni'          => $totalPembayaranValidBulanIni,       
+                'jumlahSantriBelumLapor'    => $jumlahSantriBelumLapor, 
+                'jumlahPembayaranLalu'      => $jumlahPembayaranLalu,   
             ];
 
             return response()->json([
@@ -143,14 +145,14 @@ class DashboardAbahController extends Controller
                 ->select([
                     'psb_peserta_online.nama',
                     'psb_peserta_online.jenis_kelamin AS jenisKelamin',
-                    'kota_kab_tbl.nama_kota_kab AS asal'
+                    'cities.city_name AS asal'
                 ])
-                ->leftJoin('kota_kab_tbl', 'kota_kab_tbl.id', '=', 'psb_peserta_online.kota_id');
+                ->leftJoin('cities', 'cities.city_id', '=', 'psb_peserta_online.kota_id');
 
             if ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('psb_peserta_online.nama', 'like', "%$search%")
-                    ->orWhere('kota_kab_tbl.nama_kota_kab', 'like', "%$search%");
+                    ->orWhere('cities.city_name', 'like', "%$search%");
                 });
             }
 
@@ -178,9 +180,13 @@ class DashboardAbahController extends Controller
                     'no_induk AS noInduk',
                     'photo',
                     'nama',
+                    'nama_lengkap_ayah AS namaAyah',
                     'jenis_kelamin AS jenisKelamin',
-                    'kelas'
+                    'kelas',
+                    'jenis_kelamin',
+                    'cities.city_name AS asalKota'
                 ])
+                ->leftJoin('cities', 'cities.city_id', '=', 'santri_detail.kabkota')
                 ->where('status', 0);
 
             if ($search) {
@@ -190,12 +196,21 @@ class DashboardAbahController extends Controller
                 });
             }
 
+            $cloneQuery = clone $query;
+            $allSantri = $cloneQuery->get();
+
             $dataSantri = $query->paginate(25);
+
+            $jumlah = [
+                'jumlah'    => $allSantri->count(),
+                'jumlahLaki'    => $allSantri->where('jenis_kelamin', 'L')->count(),
+                'jumlahPerempuan'    => $allSantri->where('jenis_kelamin', 'P')->count(),
+            ];
 
             return response()->json([
                 "status"  => 200,
                 "message" => "Berhasil mengambil data",
-                "jumlah"  => $dataSantri->count(),
+                "jumlah"  => $jumlah,
                 "data"    => $dataSantri
             ], 200);
         } catch (\Exception $e) {
@@ -262,7 +277,7 @@ class DashboardAbahController extends Controller
                 'santri_detail.alamat',
                 'santri_detail.kelurahan',
                 'santri_detail.kecamatan',
-                'kota_kab_tbl.nama_kota_kab AS kotaKab',
+                'cities.city_name AS kotaKab',
                 'santri_detail.nama_lengkap_ayah AS namaAyah',
                 'santri_detail.pendidikan_ayah AS pendidikanAyah',
                 'santri_detail.pekerjaan_ayah AS pekerjaanAyah',
@@ -279,7 +294,7 @@ class DashboardAbahController extends Controller
                 'tahfidz.photo AS fotoTahfidz',
             ])
             ->where('santri_detail.no_induk', $noInduk)
-            ->leftJoin('kota_kab_tbl', 'kota_kab_tbl.id_kota_kab', '=', 'santri_detail.kabkota')
+            ->leftJoin('cities', 'cities.city_id', '=', 'santri_detail.kabkota')
             ->leftJoin('ref_kamar', 'ref_kamar.id', '=', 'santri_detail.kamar_id')
             ->leftJoin('ref_tahfidz', 'ref_tahfidz.id', '=', 'santri_detail.tahfidz_id')
             ->leftJoin('employee_new AS murroby', 'murroby.id', '=', 'ref_kamar.employee_id')
@@ -966,7 +981,9 @@ class DashboardAbahController extends Controller
     public function showTahfidz($id)
     {
         try {
+            // Ambil semua santri berdasarkan tahfidz_id
             $data = SantriDetail::select([
+                    'no_induk',
                     'photo',
                     'nama',
                     'jenis_kelamin AS jenisKelamin',
@@ -974,6 +991,21 @@ class DashboardAbahController extends Controller
                 ->where('tahfidz_id', $id)
                 ->get();
 
+            $kodeTertinggi = KodeJuz::max('kode');
+
+            $noIndukList = $data->pluck('no_induk');
+
+            $capaianTertinggi = DetailSantriTahfidz::join('santri_detail', 'detail_santri_tahfidz.no_induk', '=', 'santri_detail.no_induk')
+                ->whereIn('detail_santri_tahfidz.no_induk', $noIndukList)
+                ->orderByRaw("ABS(detail_santri_tahfidz.kode_juz_surah - ?) ASC", [$kodeTertinggi])
+                ->select([
+                    'santri_detail.nama',
+                    'kode_juz.nama AS capaian'
+                ])
+                ->leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
+                ->first();
+
+            // Ambil info tahfidz
             $dataTahfidz = RefTahfidz::select([
                 'employee_new.nama AS namaGuruTahfidz',
                 'employee_new.photo AS fotoGuruTahfidz',
@@ -988,17 +1020,20 @@ class DashboardAbahController extends Controller
                 "message" => "Berhasil mengambil data",
                 "jumlah"  => $data->count(),
                 "data"    => [
-                    'dataTahfidz' => $dataTahfidz,
-                    'santri'    => $data
+                    'dataTahfidz'       => $dataTahfidz,
+                    'capaianTertinggi'  => $capaianTertinggi,
+                    'santri'            => $data
                 ]
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 "status"  => 500,
                 "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
+                "error"   => $e->getMessage()
             ], 500);
         }
     }
+
 
     public function aset()
     {
