@@ -182,16 +182,17 @@ class WaliSantriController extends Controller
             ])
             ->log('Login');
 
-            $message = "🎉 Selamat datang kembali di aplikasi mobile *PPATQ-RF ku*!
+            $nowFormatted = Carbon::now()->translatedFormat('l d F Y, H:i');
 
-Kami senang Anda membuka aplikasi kami lagi.
+$message = "🎉 Selamat datang
 
-Kami harap Anda baik-baik saja hari ini. Aplikasi mobile Anda baru saja diakses.
+Walisantri {$hasil->nama}.
 
-Informasi mengenai informasi, berita dan detail santri melalui media yang lebih luas, dapat melalui https: www.ppatq-rf.sch.id
+{$nowFormatted}
 
-Wali Santri yang terhormat, ini adalah notifikasi khusus untuk Anda sebagai wali dari *{$hasil->nama}*.
+Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
 ";
+
 
             // kirim wa
             $data = [
