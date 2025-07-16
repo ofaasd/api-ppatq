@@ -85,15 +85,21 @@ class DashboardAbahController extends Controller
             $jumlahPegawaiLaki = (clone $qPegawai)->where('jenis_kelamin', 'Laki-laki')->count();
             $jumlahPegawaiPerempuan = (clone $qPegawai)->where('jenis_kelamin', 'Perempuan')->count();
 
-            $bayar = pembayaran::whereMonth('tanggal_validasi', $bulan)
-            ->whereYear('tanggal_validasi', $tahun)
-            ->sum('jumlah');
-            $totalPembayaranValidBulanIni = number_format($bayar, 0, ',', '.');
+            $bayarValid = pembayaran::join('tb_detail_pembayaran', 'tb_pembayaran.id', '=', 'tb_detail_pembayaran.id_pembayaran')
+                ->whereMonth('tb_pembayaran.tanggal_validasi', $bulan)
+                ->whereYear('tb_pembayaran.tanggal_validasi', $tahun)
+                ->where('tb_detail_pembayaran.id_jenis_pembayaran', 1)
+                ->sum('tb_detail_pembayaran.nominal');
 
-            $bayar = pembayaran::whereMonth('tanggal_bayar', $bulan)
-            ->whereYear('tanggal_bayar', $tahun)
-            ->sum('jumlah');
-            $totalPembayaranUnvalidBulanIni = number_format($bayar, 0, ',', '.');
+            $totalPembayaranValidBulanIni = number_format($bayarValid, 0, ',', '.');
+
+            $bayarUnvalid = pembayaran::join('tb_detail_pembayaran', 'tb_pembayaran.id', '=', 'tb_detail_pembayaran.id_pembayaran')
+                ->whereMonth('tb_pembayaran.tanggal_bayar', $bulan)
+                ->whereYear('tb_pembayaran.tanggal_bayar', $tahun)
+                ->where('tb_detail_pembayaran.id_jenis_pembayaran', 1)
+                ->sum('tb_detail_pembayaran.nominal');
+
+            $totalPembayaranUnvalidBulanIni = number_format($bayarUnvalid, 0, ',', '.');
 
             $jumlahSantriLapor = pembayaran::whereMonth('tanggal_bayar', $bulan)
             ->whereYear('tanggal_bayar', $tahun)
