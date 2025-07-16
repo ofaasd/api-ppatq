@@ -90,6 +90,11 @@ class DashboardAbahController extends Controller
             ->sum('jumlah');
             $totalPembayaranValidBulanIni = number_format($bayar, 0, ',', '.');
 
+            $bayar = pembayaran::whereMonth('tanggal_bayar', $bulan)
+            ->whereYear('tanggal_bayar', $tahun)
+            ->sum('jumlah');
+            $totalPembayaranUnvalidBulanIni = number_format($bayar, 0, ',', '.');
+
             $jumlahSantriLapor = pembayaran::whereMonth('tanggal_bayar', $bulan)
             ->whereYear('tanggal_bayar', $tahun)
             ->distinct('nama_santri');
@@ -119,6 +124,7 @@ class DashboardAbahController extends Controller
                 'jumlahPegawaiLaki'         => $jumlahPegawaiLaki,      
                 'jumlahPegawaiPerempuan'    => $jumlahPegawaiPerempuan, 
                 'totalPembayaranValidBulanIni'          => $totalPembayaranValidBulanIni,       
+                'totalPembayaranUnvalidBulanIni'          => $totalPembayaranUnvalidBulanIni,       
                 'jumlahSantriBelumLapor'    => $jumlahSantriBelumLapor, 
                 'jumlahPembayaranLalu'      => $jumlahPembayaranLalu,   
             ];
@@ -1086,7 +1092,6 @@ class DashboardAbahController extends Controller
             ], 500);
         }
     }
-
 
     public function aset()
     {
