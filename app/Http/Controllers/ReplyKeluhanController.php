@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Keluhan;
+use App\Models\RefKategori;
 use App\Models\ReplyKeluhan;
 use Illuminate\Http\Request;
 
@@ -11,37 +12,45 @@ class ReplyKeluhanController extends Controller
     public function index()
     {
         try{
-            $data = Keluhan::select([
-                'tb_keluhan.id AS idKeluhan',
-                'reply_keluhan.id AS idBalasan',
-                'tb_keluhan.nama_pelapor AS namaPelapor',
-                'tb_keluhan.email',
-                'tb_keluhan.no_hp AS noHp',
-                'santri_detail.nama AS namaSantri',
-                'tb_keluhan.nama_wali_santri AS namaWaliSantri',
-                'ref_kategori.nama AS kategori',
-                'tb_keluhan.jenis',
-                'tb_keluhan.status',
-                'tb_keluhan.masukan',
-                'tb_keluhan.saran',
-                'tb_keluhan.rating',
-                'reply_keluhan.pesan AS balasan',
-            ])
-            ->leftJoin('reply_keluhan', 'reply_keluhan.id_keluhan', '=', 'tb_keluhan.id')
-            ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'tb_keluhan.id_santri')
-            ->leftJoin('ref_kategori', 'ref_kategori.id', '=', 'tb_keluhan.id_kategori')
-            ->where('tb_keluhan.is_hapus', 0)
-            ->orderBy('tb_keluhan.created_at', 'desc')
-            ->get()
-            ->map(function($item){
-                $item->status = match ($item->status) {
-                    1 => 'Belum Ditangani',
-                    2 => 'Ditangani',
-                    default => 'Status tidak diketahui',
-                };
-                return $item;
-            })
-            ->groupBy('kategori');
+            $kategori = RefKategori::all();
+
+            $arrKategori = [];
+            foreach($kategori as $row)
+            {
+                // $arrKategori[$row->id]['nama'] = $row->nama;
+                $arrKategori[$row->nama]['value'] =  $data = Keluhan::select([
+                    'tb_keluhan.id AS idKeluhan',
+                    'reply_keluhan.id AS idBalasan',
+                    'tb_keluhan.nama_pelapor AS namaPelapor',
+                    'tb_keluhan.email',
+                    'tb_keluhan.no_hp AS noHp',
+                    'santri_detail.nama AS namaSantri',
+                    'tb_keluhan.nama_wali_santri AS namaWaliSantri',
+                    'tb_keluhan.jenis',
+                    'tb_keluhan.status',
+                    'tb_keluhan.id_kategori AS idKategori',
+                    'tb_keluhan.masukan',
+                    'tb_keluhan.saran',
+                    'tb_keluhan.rating',
+                    'reply_keluhan.pesan AS balasan',
+                ])
+                ->leftJoin('reply_keluhan', 'reply_keluhan.id_keluhan', '=', 'tb_keluhan.id')
+                ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'tb_keluhan.id_santri')
+                ->where('tb_keluhan.is_hapus', 0)
+                ->orderBy('tb_keluhan.created_at', 'desc')
+                ->where('tb_keluhan.id_kategori', $row->id)
+                ->get()
+                ->map(function($item){
+                    $item->status = match ($item->status) {
+                        1 => 'Belum Ditangani',
+                        2 => 'Ditangani',
+                        default => 'Status tidak diketahui',
+                    };
+                    return $item;
+                });
+            }
+
+            $data = $arrKategori;
 
             return response()->json([
                     "status"  => 200,
