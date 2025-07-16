@@ -41,7 +41,7 @@ class ReplyKeluhanController extends Controller
                 };
                 return $item;
             })
-            ->groupBy('status');
+            ->groupBy('kategori');
 
             return response()->json([
                     "status"  => 200,
