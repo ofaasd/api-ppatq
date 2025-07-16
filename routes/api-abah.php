@@ -24,6 +24,8 @@ Route::prefix('abah')->group(function () {
         Route::get('/detail/{idPegawai}', [DashboardAbahController::class, 'detailPegawai']);
     });
 
+    Route::get('/pelanggaran/{search?}', [DashboardAbahController::class, 'pelanggaran']);
+
     Route::get('/belum-lapor/{search?}', [DashboardAbahController::class, 'belumMelaporkan']);
     Route::get('/bayar-valid', [DashboardAbahController::class, 'pembayaranValidBulanIni']);
     Route::get('/bayar-bulan-lalu', [DashboardAbahController::class, 'pembayaranBulanLalu']);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\Kurban;
 
+use App\Models\KodeJuz;
 use App\Models\Perilaku;
 use App\Models\RefKamar;
 use App\Models\RefKelas;
@@ -17,6 +18,7 @@ use App\Models\pembayaran;
 use App\Models\RefTahfidz;
 use App\Models\EmployeeNew;
 use App\Models\Kelengkapan;
+use App\Models\Pelanggaran;
 use App\Models\AsetBangunan;
 use App\Models\PsbGelombang;
 use App\Models\SantriDetail;
@@ -29,7 +31,6 @@ use App\Models\RefJenisPembayaran;
 use App\Models\SantriDetailAlumni;
 use Illuminate\Support\Facades\DB;
 use App\Models\DetailSantriTahfidz;
-use App\Models\KodeJuz;
 
 class DashboardAbahController extends Controller
 {
@@ -670,6 +671,58 @@ class DashboardAbahController extends Controller
                 "status"  => 500,
                 "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
                 "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
+            ], 500);
+        }
+    }
+    
+    public function pelanggaran($search = null)
+    {
+        try {
+            $query = Pelanggaran::select([
+                'santri_detail.nama',
+                'pelanggaran.tanggal',
+                'pelanggaran.jenis AS jenisPelanggaran',
+                'pelanggaran.kategori',
+                'pelanggaran.hukuman',
+                'pelanggaran.bukti',
+            ])
+            ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'pelanggaran.no_induk')
+            ->leftJoin('users', 'users.id', '=', 'pelanggaran.by_id')
+            ->leftJoin('employee_new', 'employee_new.id', '=', 'users.pegawai_id');
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('santri_detail.nama', 'like', "%$search%")
+                    ->orWhere('pelanggaran.hukuman', 'like', "%$search%")
+                    ->orWhere('pelanggaran.kategori', 'like', "%$search%")
+                    ->orWhere('pelanggaran.tanggal', 'like', "%$search%")
+                    ;
+                });
+            }
+
+            $dataPelanggaran = $query->paginate(25)
+                ->map(function($item){
+                    $item->tanggal = Carbon::parse($item->tanggal)->translatedFormat('d F Y');
+
+                    $item->kategori = match ($item->kategori) {
+                        1 => "Ringan",
+                        2 => "Berat",
+                        default => "-"
+                    };
+
+                    return $item;
+                });
+
+            return response()->json([
+                "status"  => 200,
+                "message" => "Berhasil mengambil data",
+                "jumlah"  => $dataPelanggaran->count(),
+                "data"    => $dataPelanggaran,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                "status"  => 500,
+                "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
             ], 500);
         }
     }

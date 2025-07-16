@@ -23,7 +23,7 @@ class WaliSantriResource extends JsonResource
             'tempatLahir' => $this->tempat_lahir,
             'tanggalLahir' => $this->tanggal_lahir,
             'jenisKelamin' => $this->jenis_kelamin == "L" ? "Laki-Laki" : ($this->jenis_kelamin == "P" ? "Perempuan" : "Tidak diketahui"),
-            'alamat' => $this->alamat . ", " . $this->kelurahan . ", " . $this->kecamatan . ", " . $this->nama_kota_kab,
+            'alamat' => $this->alamat . ", " . $this->kelurahan . ", " . $this->kecamatan . ", " . $this->asalKota,
             'namaAyah' => $this->nama_lengkap_ayah,
             'pendidikanAyah' => strtoupper($this->pendidikan_ayah),
             'pekerjaanAyah' => $this->pekerjaan_ayah,

@@ -111,7 +111,7 @@ class WaliSantriController extends Controller
             'santri_detail.alamat',
             'santri_detail.kelurahan',
             'santri_detail.kecamatan',
-            'kota_kab_tbl.nama_kota_kab',
+            'cities.city_name AS asalKota',
             'santri_detail.nama_lengkap_ayah',
             'santri_detail.pendidikan_ayah',
             'santri_detail.pekerjaan_ayah',
@@ -128,7 +128,7 @@ class WaliSantriController extends Controller
             'tahfidz.photo AS fotoTahfidz',
             'tb_uang_saku.jumlah AS saldo',
         ])
-        ->leftJoin('kota_kab_tbl', 'kota_kab_tbl.id_kota_kab', '=', 'santri_detail.kabkota')
+        ->leftJoin('cities', 'cities.city_id', '=', 'santri_detail.kabkota')
         ->leftJoin('ref_kamar', 'ref_kamar.id', '=', 'santri_detail.kamar_id')
         ->leftJoin('ref_tahfidz', 'ref_tahfidz.id', '=', 'santri_detail.tahfidz_id')
         ->leftJoin('tb_uang_saku', 'tb_uang_saku.no_induk', '=', 'santri_detail.no_induk')

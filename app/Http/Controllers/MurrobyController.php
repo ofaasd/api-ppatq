@@ -146,9 +146,9 @@ class MurrobyController extends Controller
             'santri_detail.kelas AS kelasSantri',
             'santri_detail.no_hp AS noHpSantri',
             'santri_detail.photo AS fotoSantri',
-            DB::raw("CONCAT_WS(', ', santri_detail.alamat, santri_detail.kelurahan, santri_detail.kecamatan, kota_kab_tbl.nama_kota_kab) AS alamatLengkap"),
+            DB::raw("CONCAT_WS(', ', santri_detail.alamat, santri_detail.kelurahan, santri_detail.kecamatan, cities.city_name) AS alamatLengkap"),
         ])
-        ->leftJoin('kota_kab_tbl', 'kota_kab_tbl.id_kota_kab', '=', 'santri_detail.kabkota')
+        ->leftJoin('cities', 'cities.city_id', '=', 'santri_detail.kabkota')
         ->where('kamar_id', $dataUser->idKamar)
         ->get();
 
