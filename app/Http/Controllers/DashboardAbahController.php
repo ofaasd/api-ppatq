@@ -1375,4 +1375,46 @@ class DashboardAbahController extends Controller
             ], 500);
         }
     }
+
+    public function riwayatKorban()
+    {
+        try {
+            $jenisMapping = [
+                1 => 'Sapi',
+                2 => 'Kambing',
+                3 => 'Domba',
+                4 => 'Lainnya',
+            ];
+
+            $data = Kurban::select([
+                'santri_detail.nama',
+                'santri_detail.photo',
+                'kurban.atas_nama AS atasNama',
+                'kurban.foto',
+                'kurban.jenis',
+                'kurban.jumlah',
+                'kurban.tahun_hijriah AS tahunHijriah'
+                ])
+            ->leftJoin('santri_detail', 'santri_detail.id', '=', 'kurban.id_santri')
+            ->orderBy('kurban.tanggal', 'desc')
+            ->get()
+            ->map(function($item){
+                $item->jenis = $jenisMapping[$item->jenis] ?? 'Tidak Diketahui';
+
+                return $item;
+            });
+
+            return response()->json([
+                "status"  => 200,
+                "message" => "Berhasil mengambil data",
+                "data"    => $data
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                "status"  => 500,
+                "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
+                "error"   => $e->getMessage()
+            ], 500);
+        }
+    }
 }

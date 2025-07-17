@@ -28,6 +28,7 @@ Route::prefix('abah')->group(function () {
     Route::prefix('kurban')->group(function () {
         Route::get('/', [DashboardAbahController::class, 'kurban']);
         Route::get('/show/{kodeJenis}', [DashboardAbahController::class, 'showKorban']);
+        Route::get('/riwayat', [DashboardAbahController::class, 'riwayatKorban']);
     });
 
     Route::get('/pelanggaran/{search?}', [DashboardAbahController::class, 'pelanggaran']);
