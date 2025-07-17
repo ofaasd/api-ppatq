@@ -122,21 +122,17 @@ class UangSakuController extends Controller
     {
         DB::beginTransaction();
         try {
-            $jumlah = $request->jumlah;
             $sakuMasuk = SakuMasuk::create([
                 'dari' => $request->dari,
-                'jumlah' => $jumlah,
+                'jumlah' => $request->jumlah,
                 'no_induk' => $request->noInduk,
                 'tanggal' => date('Y-m-d', strtotime($request->tanggal)),
             ]);
             $saku = UangSaku::where('no_induk', $request->noInduk)->first();
-            $updateSaku = UangSaku::find($saku->id);
-            $updateSaku->jumlah = $saku->jumlah + $jumlah;
-            $updateSaku->save();
+            // Tambah saldo menggunakan trigger
 
-            $saldo = $saku->jumlah;
             DB::commit();
-            return response()->json('Uang masuk sebesar Rp ' . number_format($jumlah, 0, ',', '.') . ', Saldo Rp ' . number_format($saldo, 0, ',', '.'));
+            return response()->json('Uang masuk sebesar Rp ' . number_format($request->jumlah, 0, ',', '.') . ', Saldo Rp ' . number_format($saku->jumlah, 0, ',', '.'));
         } catch (\Exception $e) {
             DB::rollback();
             return response()->json([
