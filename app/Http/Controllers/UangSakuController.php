@@ -134,7 +134,7 @@ class UangSakuController extends Controller
             $updateSaku->jumlah = $saku->jumlah + $jumlah;
             $updateSaku->save();
 
-            $saldo = $saku->jumlah + $jumlah;
+            $saldo = $saku->jumlah;
             DB::commit();
             return response()->json('Uang masuk sebesar Rp ' . number_format($jumlah, 0, ',', '.') . ', Saldo Rp ' . number_format($saldo, 0, ',', '.'));
         } catch (\Exception $e) {
