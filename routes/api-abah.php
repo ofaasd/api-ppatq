@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AbahKeuanganController;
 use App\Http\Controllers\DashboardAbahController;
 use App\Http\Controllers\DawuhAbahController;
 use App\Http\Controllers\ReplyKeluhanController;
@@ -46,6 +47,13 @@ Route::prefix('abah')->group(function () {
 
     Route::get('/kurban', [DashboardAbahController::class, 'kurban']);
     
+    // Dawuh Abah
+    Route::prefix('keuangan')->group(function () {
+        Route::get('/saku/{kodeKelas}', [AbahKeuanganController::class, 'saku']);
+        Route::get('/syahriah/{search?}', [AbahKeuanganController::class, 'syahriah']);
+        Route::get('/syahriah/detail/{kodeKelas}', [AbahKeuanganController::class, 'detailSyahriah']);
+    });
+
     // Dawuh Abah
     Route::prefix('dawuh-abah')->group(function () {
         Route::get('/', [DawuhAbahController::class, 'index']);
