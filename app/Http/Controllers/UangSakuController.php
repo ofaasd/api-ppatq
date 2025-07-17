@@ -233,12 +233,12 @@ class UangSakuController extends Controller
                                     "message"   => "Data uang saku {$row->namaSantri} tidak ditemukan.",
                                 ], 404);
                             }
-                            if($saku->jumlah <= $jumlah){
-                                return response()->json([
-                                    "status"    => 400,
-                                    "message"   => "Uang saku cukup {$row->namaSantri} tidak cukup.",
-                                ], 400);
-                            }
+                            // if($saku->jumlah <= $jumlah){
+                            //     return response()->json([
+                            //         "status"    => 400,
+                            //         "message"   => "Uang saku cukup {$row->namaSantri} tidak cukup.",
+                            //     ], 400);
+                            // }
                             
                             $updateSaku = UangSaku::find($saku->id);
                             if(!$updateSaku)
@@ -265,12 +265,12 @@ class UangSakuController extends Controller
                         ], 404);
                     }
 
-                    if($saku->jumlah <= $jumlah){
-                        return response()->json([
-                            "status"    => 400,
-                            "message"   => "Uang tidak cukup.",
-                        ], 400);
-                    }
+                    // if($saku->jumlah <= $jumlah){
+                    //     return response()->json([
+                    //         "status"    => 400,
+                    //         "message"   => "Uang tidak cukup.",
+                    //     ], 400);
+                    // }
 
                     $updateSaku = UangSaku::find($saku->id);
                     $updateSaku->jumlah = $saku->jumlah - $jumlah;
