@@ -49,6 +49,34 @@ class DashboardAbahController extends Controller
             default => '-',
         };
     }
+
+    private function getCapaian($noIndukList, $kodeTertinggi, $direction = 'ASC')
+    {
+        $capaian = DetailSantriTahfidz::leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
+            ->whereIn('detail_santri_tahfidz.no_induk', $noIndukList)
+            ->whereNotNull('detail_santri_tahfidz.kode_juz_surah')
+            ->orderByRaw("ABS(detail_santri_tahfidz.kode_juz_surah - ?) $direction", [$kodeTertinggi])
+            ->select([
+                'detail_santri_tahfidz.kode_juz_surah',
+                'kode_juz.nama AS capaian',
+            ])
+            ->first();
+
+        $santri = DetailSantriTahfidz::join('santri_detail', 'detail_santri_tahfidz.no_induk', '=', 'santri_detail.no_induk')
+            ->whereIn('detail_santri_tahfidz.no_induk', $noIndukList)
+            ->where('detail_santri_tahfidz.kode_juz_surah', $capaian->kode_juz_surah ?? null)
+            ->select([
+                'santri_detail.nama',
+                'santri_detail.photo',
+            ])
+            ->distinct('detail_santri_tahfidz.no_induk')
+            ->get();
+
+        return [
+            'capaian' => $capaian->capaian ?? 'Belum ada',
+            'santri' => $santri,
+        ];
+    }
     
     public function index()
     {
@@ -116,23 +144,32 @@ class DashboardAbahController extends Controller
             ->sum('jumlah');
             $jumlahPembayaranLalu = number_format($bayarLalu, 0, ',', '.');
 
+            $kodeTertinggi = KodeJuz::max('kode');
+            $noIndukList = SantriDetail::pluck('no_induk');
+
+            $tahfidzan = [
+                'tertinggi' => $this->getCapaian($noIndukList, $kodeTertinggi, 'ASC'),
+                'terendah' => $this->getCapaian($noIndukList, $kodeTertinggi, 'DESC'),
+            ];
+
             $data = [
-                'bulanIni'                     => $bulanIni,              
-                'totalTagihanSyahriah'      => $totalTagihanSyahriah,              
-                'jumlahPsbTahunLalu'        => $jumlahPsbTahunLalu,              
-                'jumlahPsb'                 => $jumlahPsb,              
-                'jumlahPsbLaki'             => $jumlahPsbLaki,          
-                'jumlahPsbPerempuan'        => $jumlahPsbPerempuan,     
-                'jumlahSantri'              => $jumlahSantri,           
-                'jumlahSantriLaki'          => $jumlahSantriLaki,       
-                'jumlahSantriPerempuan'     => $jumlahSantriPerempuan,  
-                'jumlahPegawai'             => $jumlahPegawai,          
-                'jumlahPegawaiLaki'         => $jumlahPegawaiLaki,      
-                'jumlahPegawaiPerempuan'    => $jumlahPegawaiPerempuan, 
-                'totalPembayaranValidBulanIni'          => $totalPembayaranValidBulanIni,       
-                'totalPembayaranUnvalidBulanIni'          => $totalPembayaranUnvalidBulanIni,       
-                'jumlahSantriBelumLapor'    => $jumlahSantriBelumLapor, 
-                'jumlahPembayaranLalu'      => $jumlahPembayaranLalu,   
+                'bulanIni'                          => $bulanIni,              
+                'totalTagihanSyahriah'              => $totalTagihanSyahriah,              
+                'jumlahPsbTahunLalu'                => $jumlahPsbTahunLalu,              
+                'jumlahPsb'                         => $jumlahPsb,              
+                'jumlahPsbLaki'                     => $jumlahPsbLaki,          
+                'jumlahPsbPerempuan'                => $jumlahPsbPerempuan,     
+                'jumlahSantri'                      => $jumlahSantri,           
+                'jumlahSantriLaki'                  => $jumlahSantriLaki,       
+                'jumlahSantriPerempuan'             => $jumlahSantriPerempuan,  
+                'jumlahPegawai'                     => $jumlahPegawai,          
+                'jumlahPegawaiLaki'                 => $jumlahPegawaiLaki,      
+                'jumlahPegawaiPerempuan'            => $jumlahPegawaiPerempuan, 
+                'totalPembayaranValidBulanIni'      => $totalPembayaranValidBulanIni,       
+                'totalPembayaranUnvalidBulanIni'    => $totalPembayaranUnvalidBulanIni,       
+                'jumlahSantriBelumLapor'            => $jumlahSantriBelumLapor, 
+                'jumlahPembayaranLalu'              => $jumlahPembayaranLalu,
+                'tahfidzan'                         => $tahfidzan
             ];
 
             return response()->json([
@@ -1116,7 +1153,6 @@ class DashboardAbahController extends Controller
             ], 500);
         }
     }
-
 
     public function aset()
     {

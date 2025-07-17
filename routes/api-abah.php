@@ -49,9 +49,13 @@ Route::prefix('abah')->group(function () {
     
     // Dawuh Abah
     Route::prefix('keuangan')->group(function () {
+        
         Route::get('/saku/{kodeKelas}', [AbahKeuanganController::class, 'saku']);
-        Route::get('/syahriah/{search?}', [AbahKeuanganController::class, 'syahriah']);
-        Route::get('/syahriah/detail/{kodeKelas}', [AbahKeuanganController::class, 'detailSyahriah']);
+
+        Route::prefix('syahriah')->group(function () {
+            Route::get('/{search?}', [AbahKeuanganController::class, 'syahriah']);
+            Route::get('/detail/{kodeKelas}', [AbahKeuanganController::class, 'detailSyahriah']);
+        });
     });
 
     // Dawuh Abah
