@@ -1286,38 +1286,92 @@ class DashboardAbahController extends Controller
 
     public function kurban()
     {
-        try{
+        try {
+            $jenisMapping = [
+                1 => 'Sapi',
+                2 => 'Kambing',
+                3 => 'Domba',
+                4 => 'Lainnya',
+            ];
 
-            $dataKurban = Kurban::select([
-                'santri_detail.nama AS namaSantri',
-                'kurban.atas_nama AS atasNama',
-                'kurban.jenis',
-                'kurban.tanggal',
-            ])
-            ->leftJoin('santri_detail', 'santri_detail.id', 'kurban.id_santri')
-            ->get()
-            ->map(function ($item) {
-                $jenisMapping = [
-                    1 => 'Sapi',
-                    2 => 'Kambing',
-                    3 => 'Domba',
-                    4 => 'Lainnya',
+            $maxTahun = Kurban::max('tahun_hijriah');
+
+            // Ambil dan kelompokkan data hanya berdasarkan jenis
+            $dataKurban = Kurban::select(['jenis', 'jumlah'])
+                ->where('tahun_hijriah', $maxTahun)
+                ->get()
+                ->groupBy('jenis');
+
+            // Hasil akhir hanya jenis, viewJenis, dan total
+            $result = [];
+            foreach ($dataKurban as $kodeJenis => $items) {
+                $result[] = [
+                    'jenis'     => $kodeJenis,
+                    'viewJenis' => $jenisMapping[$kodeJenis] ?? 'Tidak Diketahui',
+                    'total'     => $items->sum('jumlah'),
                 ];
+            }
 
-                $item->jenis = $jenisMapping[$item->jenis] ?? 'Tidak Diketahui';
-                return $item;
-            });
+            $data = [
+                'tahunHijriah' => $maxTahun,
+                'data' => $result
+            ];
 
             return response()->json([
                 "status"  => 200,
                 "message" => "Berhasil mengambil data",
-                "data"    => $dataKurban
+                "data"    => $data
             ], 200);
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 "status"  => 500,
                 "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
-                "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
+                "error"   => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function showKorban($kodeJenis)
+    {
+        try {
+            $jenisMapping = [
+                1 => 'Sapi',
+                2 => 'Kambing',
+                3 => 'Domba',
+                4 => 'Lainnya',
+            ];
+
+            $maxTahun = Kurban::max('tahun_hijriah');
+
+            // Ambil dan kelompokkan data hanya berdasarkan jenis
+            $dataKurban = Kurban::select([
+                'santri_detail.nama',
+                'santri_detail.photo',
+                'kurban.atas_nama AS atasNama',
+                'kurban.foto',
+                'kurban.jumlah'
+                ])
+            ->leftJoin('santri_detail', 'santri_detail.id', '=', 'kurban.id_santri')
+            ->where('jenis', $kodeJenis)
+            ->where('tahun_hijriah', $maxTahun)
+            ->get();
+
+            $data = [
+                'tahunHijriah' => $maxTahun,
+                'jenis' => $jenisMapping[$kodeJenis] ?? 'Tidak Diketahui',
+                'data' => $dataKurban
+            ];
+
+            return response()->json([
+                "status"  => 200,
+                "message" => "Berhasil mengambil data",
+                "data"    => $data
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                "status"  => 500,
+                "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
+                "error"   => $e->getMessage()
             ], 500);
         }
     }

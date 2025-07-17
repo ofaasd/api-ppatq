@@ -25,6 +25,11 @@ Route::prefix('abah')->group(function () {
         Route::get('/detail/{idPegawai}', [DashboardAbahController::class, 'detailPegawai']);
     });
 
+    Route::prefix('kurban')->group(function () {
+        Route::get('/', [DashboardAbahController::class, 'kurban']);
+        Route::get('/show/{kodeJenis}', [DashboardAbahController::class, 'showKorban']);
+    });
+
     Route::get('/pelanggaran/{search?}', [DashboardAbahController::class, 'pelanggaran']);
 
     Route::get('/belum-lapor/{search?}', [DashboardAbahController::class, 'belumMelaporkan']);
@@ -44,8 +49,6 @@ Route::prefix('abah')->group(function () {
 
     Route::get('/murroby', [DashboardAbahController::class, 'murroby']);
     Route::get('/ustad-tahfidz', [DashboardAbahController::class, 'ustadTahfidz']);
-
-    Route::get('/kurban', [DashboardAbahController::class, 'kurban']);
     
     // Dawuh Abah
     Route::prefix('keuangan')->group(function () {
