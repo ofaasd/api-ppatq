@@ -799,6 +799,77 @@ class DashboardAbahController extends Controller
         }
     }
 
+    public function kelengkapan()
+    {
+        try {
+            $now = Carbon::now();
+
+            $listData = Kelengkapan::selectRaw("
+                    SUM(perlengkapan_mandi = 0) as mandiTidakLengkap,
+                    SUM(perlengkapan_mandi = 1) as mandiLengkapKurang,
+                    SUM(perlengkapan_mandi = 2) as mandiLengkapBaik,
+
+                    SUM(peralatan_sekolah = 0) as sekolahTidakLengkap,
+                    SUM(peralatan_sekolah = 1) as sekolahLengkapKurang,
+                    SUM(peralatan_sekolah = 2) as sekolahLengkapBaik,
+
+                    SUM(perlengkapan_diri = 0) as diriTidakLengkap,
+                    SUM(perlengkapan_diri = 1) as diriLengkapKurang,
+                    SUM(perlengkapan_diri = 2) as diriLengkapBaik
+                ")
+                ->whereMonth('tanggal', $now->month)
+                ->whereYear('tanggal', $now->year)
+                ->distinct('no_induk')
+                ->get();
+
+            $data = [
+                'bulan' => $now->translatedFormat('F'),
+                'listData' => $listData
+            ];
+
+            return response()->json([
+                "status"  => 200,
+                "message" => "Berhasil mengambil data kelengkapan bulan ini",
+                "data"    => $data
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                "status"  => 500,
+                "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
+                "error"   => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function kesehatan()
+    {
+        try {
+            $now = Carbon::now();
+
+            $jumlah = Kesehatan::whereRaw('MONTH(FROM_UNIXTIME(tanggal_sakit)) = ?', [$now->month])
+            ->whereRaw('YEAR(FROM_UNIXTIME(tanggal_sakit)) = ?', [$now->year])
+            ->distinct('santri_id')
+            ->count();
+
+            $data = [
+                'bulan' => $now->translatedFormat('F'),
+                'jumlah' => $jumlah
+            ];
+
+            return response()->json([
+                "status"  => 200,
+                "message" => "Berhasil mengambil data kelengkapan bulan ini",
+                "data"    => $data
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                "status"  => 500,
+                "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
+                "error"   => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function belumMelaporkan($search = null)
     {
         try {

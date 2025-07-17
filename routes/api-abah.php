@@ -36,6 +36,16 @@ Route::prefix('abah')->group(function () {
         Route::get('/show/{kodeKategori}', [DashboardAbahController::class, 'showPelanggaran']);
     });
 
+    Route::prefix('kelengkapan')->group(function () {
+        Route::get('/', [DashboardAbahController::class, 'kelengkapan']);
+        // Route::get('/show/{kodeJenis}', [DashboardAbahController::class, 'showKelengkapan']);
+    });
+
+    Route::prefix('kesehatan')->group(function () {
+        Route::get('/', [DashboardAbahController::class, 'kesehatan']);
+        // Route::get('/show/{kodeJenis}', [DashboardAbahController::class, 'showKesehatan']);
+    });
+
     Route::get('/belum-lapor/{search?}', [DashboardAbahController::class, 'belumMelaporkan']);
     Route::get('/bayar-valid', [DashboardAbahController::class, 'pembayaranValidBulanIni']);
     Route::get('/bayar-bulan-lalu', [DashboardAbahController::class, 'pembayaranBulanLalu']);
