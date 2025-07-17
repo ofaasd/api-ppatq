@@ -724,8 +724,39 @@ class DashboardAbahController extends Controller
             ], 500);
         }
     }
-    
-    public function pelanggaran($search = null)
+
+    public function pelanggaran()
+    {
+        try {
+            $data = Pelanggaran::select('kategori')
+                ->selectRaw('COUNT(*) as jumlah')
+                ->groupBy('kategori')
+                ->get()
+                ->map(function($item){
+                    $item->viewKategori = match ($item->kategori) {
+                        1 => "Ringan",
+                        2 => "Berat",
+                        default => "-"
+                    };
+
+                    return $item;
+                });
+
+            return response()->json([
+                "status"  => 200,
+                "message" => "Berhasil mengambil data",
+                "data"    => $data
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                "status"  => 500,
+                "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
+                "error"   => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function showPelanggaran($kodeKategori)
     {
         try {
             $query = Pelanggaran::select([
@@ -736,19 +767,10 @@ class DashboardAbahController extends Controller
                 'pelanggaran.hukuman',
                 'pelanggaran.bukti',
             ])
+            ->where('pelanggaran.kategori', $kodeKategori)
             ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'pelanggaran.no_induk')
             ->leftJoin('users', 'users.id', '=', 'pelanggaran.by_id')
             ->leftJoin('employee_new', 'employee_new.id', '=', 'users.pegawai_id');
-
-            if ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('santri_detail.nama', 'like', "%$search%")
-                    ->orWhere('pelanggaran.hukuman', 'like', "%$search%")
-                    ->orWhere('pelanggaran.kategori', 'like', "%$search%")
-                    ->orWhere('pelanggaran.tanggal', 'like', "%$search%")
-                    ;
-                });
-            }
 
             $dataPelanggaran = $query->paginate(25)
                 ->map(function($item){

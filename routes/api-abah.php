@@ -30,8 +30,11 @@ Route::prefix('abah')->group(function () {
         Route::get('/show/{kodeJenis}', [DashboardAbahController::class, 'showKorban']);
         Route::get('/riwayat', [DashboardAbahController::class, 'riwayatKorban']);
     });
-
-    Route::get('/pelanggaran/{search?}', [DashboardAbahController::class, 'pelanggaran']);
+    
+    Route::prefix('pelanggaran')->group(function () {
+        Route::get('/', [DashboardAbahController::class, 'pelanggaran']);
+        Route::get('/show/{kodeKategori}', [DashboardAbahController::class, 'showPelanggaran']);
+    });
 
     Route::get('/belum-lapor/{search?}', [DashboardAbahController::class, 'belumMelaporkan']);
     Route::get('/bayar-valid', [DashboardAbahController::class, 'pembayaranValidBulanIni']);
