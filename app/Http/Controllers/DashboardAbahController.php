@@ -1058,18 +1058,31 @@ class DashboardAbahController extends Controller
                 ->get();
 
             $kodeTertinggi = KodeJuz::max('kode');
-
             $noIndukList = $data->pluck('no_induk');
 
+            // Ambil capaian yang paling mendekati kode tertinggi
             $capaianTertinggi = DetailSantriTahfidz::join('santri_detail', 'detail_santri_tahfidz.no_induk', '=', 'santri_detail.no_induk')
                 ->whereIn('detail_santri_tahfidz.no_induk', $noIndukList)
                 ->orderByRaw("ABS(detail_santri_tahfidz.kode_juz_surah - ?) ASC", [$kodeTertinggi])
                 ->select([
-                    'santri_detail.nama',
-                    'kode_juz.nama AS capaian'
+                    'detail_santri_tahfidz.kode_juz_surah',
+                    'kode_juz.nama AS capaian',
+                    'santri_detail.nama AS namaSantri'
                 ])
                 ->leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
                 ->first();
+
+            // Hitung dan ambil santri yang mencapai capaian tertinggi
+            $santriCapaianTertinggi = DetailSantriTahfidz::join('santri_detail', 'detail_santri_tahfidz.no_induk', '=', 'santri_detail.no_induk')
+                ->whereIn('detail_santri_tahfidz.no_induk', $noIndukList)
+                ->where('detail_santri_tahfidz.kode_juz_surah', $capaianTertinggi->kode_juz_surah ?? null)
+                ->select([
+                    'santri_detail.nama AS namaSantri',
+                    'santri_detail.photo',
+                ])
+                ->get();
+
+            $jumlahCapaianTertinggi = $santriCapaianTertinggi->count();
 
             // Ambil info tahfidz
             $dataTahfidz = RefTahfidz::select([
@@ -1087,7 +1100,11 @@ class DashboardAbahController extends Controller
                 "jumlah"  => $data->count(),
                 "data"    => [
                     'dataTahfidz'       => $dataTahfidz,
-                    'capaianTertinggi'  => $capaianTertinggi,
+                    'capaianTertinggi'  => [
+                        'capaian'           => $capaianTertinggi->capaian ?? null,
+                        'jumlahSantri'   => $jumlahCapaianTertinggi,
+                        'listSantriTertinggi'     => $santriCapaianTertinggi
+                    ],
                     'santri'            => $data
                 ]
             ], 200);
@@ -1099,6 +1116,7 @@ class DashboardAbahController extends Controller
             ], 500);
         }
     }
+
 
     public function aset()
     {
