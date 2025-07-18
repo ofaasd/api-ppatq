@@ -33,7 +33,7 @@ class ReplyKeluhanController extends Controller
                     'tb_keluhan.saran',
                     'tb_keluhan.rating',
                     'reply_keluhan.pesan AS balasan',
-                    'tb_keluhan.created_at AS tanggalKeluhan',
+                    'tb_keluhan.created_at AS tanggal',
                 ])
                 ->leftJoin('reply_keluhan', 'reply_keluhan.id_keluhan', '=', 'tb_keluhan.id')
                 ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'tb_keluhan.id_santri')
