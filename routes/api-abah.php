@@ -1,10 +1,11 @@
 <?php
 
-use App\Http\Controllers\AbahKeuanganController;
-use App\Http\Controllers\DashboardAbahController;
-use App\Http\Controllers\DawuhAbahController;
-use App\Http\Controllers\ReplyKeluhanController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DawuhAbahController;
+use App\Http\Controllers\AbahKeuanganController;
+use App\Http\Controllers\ReplyKeluhanController;
+use App\Http\Controllers\UstadTahfidzController;
+use App\Http\Controllers\DashboardAbahController;
 
 Route::prefix('abah')->group(function () {
     Route::get('/dashboard', [DashboardAbahController::class, 'index']);
@@ -50,14 +51,21 @@ Route::prefix('abah')->group(function () {
     Route::get('/bayar-valid', [DashboardAbahController::class, 'pembayaranValidBulanIni']);
     Route::get('/bayar-bulan-lalu', [DashboardAbahController::class, 'pembayaranBulanLalu']);
 
-    Route::get('/kamar/{search?}', [DashboardAbahController::class, 'kamar']);
-    Route::get('/kamar/show/{id}', [DashboardAbahController::class, 'showKamar']);
+    Route::prefix('kamar')->group(function () {
+        Route::get('/{search?}', [DashboardAbahController::class, 'kamar']);
+        Route::get('/show/{id}', [DashboardAbahController::class, 'showKamar']);
+    });
     
-    Route::get('/kelas/{search?}', [DashboardAbahController::class, 'kelas']);
-    Route::get('/kelas/show/{kode}', [DashboardAbahController::class, 'showKelas']);
+    Route::prefix('kelas')->group(function () {
+        Route::get('/{search?}', [DashboardAbahController::class, 'kelas']);
+        Route::get('/show/{kode}', [DashboardAbahController::class, 'showKelas']);
+    });
 
-    Route::get('/tahfidz/{search?}', [DashboardAbahController::class, 'tahfidz']);
-    Route::get('/tahfidz/show/{id}', [DashboardAbahController::class, 'showTahfidz']);
+    Route::prefix('tahfidz')->group(function () {
+        Route::get('/{search?}', [DashboardAbahController::class, 'tahfidz']);
+        Route::get('/show/{id}', [DashboardAbahController::class, 'showTahfidz']);
+        Route::get('/detail/{noInduk}', [UstadTahfidzController::class, 'detailSantri']);
+    });
 
     Route::get('/aset', [DashboardAbahController::class, 'aset']);
 
