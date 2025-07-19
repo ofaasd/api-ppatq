@@ -287,10 +287,23 @@ class DashboardAbahController extends Controller
             $query = SantriDetailAlumni::select(
                 'tb_alumni_santri_detail.no_induk AS noInduk',
                 'tb_alumni_santri_detail.nama',
-                DB::raw("CONCAT(SUBSTRING(tb_alumni_santri_detail.no_hp, 1, 8), '****') AS noHp"), 
+                'tb_alumni_santri_detail.no_hp AS noHp',
                 'guru_murroby.nama AS murroby',  
                 'wali_kelas.nama AS waliKelas',
-                'tb_alumni.angkatan as angkatan'
+                'tb_alumni_santri_detail.tahun_lulus AS tahunLulus',
+                'tb_alumni_santri_detail.tahun_msk_mi AS tahunMasukMi',
+                'tb_alumni_santri_detail.nama_pondok_mi AS namaPondokMi',
+                'tb_alumni_santri_detail.thn_msk_menengah AS tahunMasukMenengah',
+                'tb_alumni_santri_detail.nama_sekolah_menengah_pertama AS namaSekolahMenengah',
+                'tb_alumni_santri_detail.tahun_msk_menengah_atas AS tahunMasukMenengahAtas',
+                'tb_alumni_santri_detail.nama_pondok_menengah_atas AS namaPondokMenengahAtas',
+                'tb_alumni_santri_detail.tahun_msk_pt AS tahunMasukPearguruanTinggi',
+                'tb_alumni_santri_detail.nama_pt AS namaPerguruanTinggi',
+                'tb_alumni_santri_detail.nama_pondok_pt AS namaPondokPerguruanTinggi',
+                'tb_alumni_santri_detail.tahun_msk_profesi AS tahunMasukProfesi',
+                'tb_alumni_santri_detail.nama_perusahaan AS namaPerusahaan',
+                'tb_alumni_santri_detail.bidang_profesi AS bidangProfesi',
+                'tb_alumni_santri_detail.posisi_profesi AS posisiProfesi',
             )
             ->leftJoin('tb_alumni', 'tb_alumni_santri_detail.no_induk', '=', 'tb_alumni.no_induk')
             ->leftJoin('ref_kamar', 'tb_alumni_santri_detail.kamar_id', '=', 'ref_kamar.id')
