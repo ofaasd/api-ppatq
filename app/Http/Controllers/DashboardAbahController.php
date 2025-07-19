@@ -31,6 +31,7 @@ use App\Models\RefJenisPembayaran;
 use App\Models\SantriDetailAlumni;
 use Illuminate\Support\Facades\DB;
 use App\Models\DetailSantriTahfidz;
+use App\Models\TagihanSyahriah;
 
 class DashboardAbahController extends Controller
 {
@@ -74,7 +75,11 @@ class DashboardAbahController extends Controller
             ->leftJoin('ref_tahfidz', 'ref_tahfidz.id', '=', 'santri_detail.tahfidz_id')
             ->leftJoin('employee_new', 'employee_new.id', '=', 'ref_tahfidz.employee_id')
             ->distinct('detail_santri_tahfidz.no_induk')
-            ->get();
+            ->get()
+            ->map(function ($item) {
+                $item->kelas = strtoupper($item->kelas); // Kapital semua
+                return $item;
+            });
 
         return [
             'capaian' => $capaian->capaian ?? 'Belum ada',
@@ -108,9 +113,8 @@ class DashboardAbahController extends Controller
             $jumlahSantriLaki = (clone $qSantri)->where('jenis_kelamin', 'L')->count();
             $jumlahSantriPerempuan = (clone $qSantri)->where('jenis_kelamin', 'P')->count();
 
-            $syahriah = RefJenisPembayaran::where('id', 1)->first();
-            $perkalianJumlahSyahriah = $syahriah->harga * $jumlahSantri;
-            $totalTagihanSyahriah = number_format($perkalianJumlahSyahriah, 0, ',', '.');
+            $syahriah = TagihanSyahriah::sum('jumlah');
+            $totalTagihanSyahriah = number_format($syahriah, 0, ',', '.');
 
             $qPegawai = EmployeeNew::get();
             $jumlahPegawai = (clone $qPegawai)->count();
@@ -867,19 +871,141 @@ class DashboardAbahController extends Controller
         try {
             $now = Carbon::now();
 
-            $jumlah = Kesehatan::whereRaw('MONTH(FROM_UNIXTIME(tanggal_sakit)) = ?', [$now->month])
-            ->whereRaw('YEAR(FROM_UNIXTIME(tanggal_sakit)) = ?', [$now->year])
-            ->distinct('santri_id')
-            ->count();
+            $startDate = $now->copy()->subMonth()->startOfDay()->timestamp;
+            $endDate = $now->endOfDay()->timestamp;
+
+            $getSantriSakit = Kesehatan::select([
+                'tb_kesehatan.santri_id',
+                'santri_detail.nama',
+                'tb_kesehatan.sakit',
+                ])
+                ->whereBetween('tanggal_sakit', [$startDate, $endDate])
+                ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'tb_kesehatan.santri_id')
+                ->get();
+
+            $getSantriRawatInap = RawatInap::select([
+                'rawat_inap.santri_no_induk AS santri_id',
+                'rawat_inap.keluhan',
+                'santri_detail.nama',
+            ])
+            ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'rawat_inap.santri_no_induk')
+            ->whereBetween('tanggal_masuk', [$startDate, $endDate])
+            ->get();
+
+            // Gabungkan dua koleksi
+            $merged = $getSantriSakit
+                ->map(function ($item) {
+                    return [
+                        'santri_id' => $item->santri_id,
+                        'nama' => $item->nama,
+                    ];
+                })
+                ->merge(
+                    $getSantriRawatInap->map(function ($item) {
+                        return [
+                            'santri_id' => $item->santri_id,
+                            'nama' => $item->nama,
+                        ];
+                    })
+                );
+
+            // Group dan hitung jumlah kemunculan masing-masing santri
+            $santriSakit = $merged
+                ->groupBy('santri_id')
+                ->map(function ($items) {
+                    return [
+                        'nama' => $items->first()['nama'],
+                        'jumlah' => $items->count()
+                    ];
+                })
+                ->values();
+            $jumlahSantriSakit = $santriSakit->count();
+
+            $gabungan = collect($getSantriRawatInap->pluck('keluhan'))
+                ->merge($getSantriSakit->pluck('sakit'))
+                ->flatMap(function ($item) {
+                    return preg_split('/[\s,]+/', strtolower($item));
+                })
+                ->map(fn($item) => trim($item))
+                ->reject(fn($item) => $item === '') // hilangkan kosong
+                ->unique()
+                ->map(fn($item) => ucfirst($item)) // ✨ huruf pertama besar
+                ->values();
+
+            $jenis = implode(', ', $gabungan->toArray());
+
+            $kesehatanData = RefKelas::select([
+                'ref_kelas.code AS kodeKelas',
+                'santri_detail.nama',
+                'tb_kesehatan.tanggal_sakit AS tanggalSakit',
+                'tb_kesehatan.sakit',
+                'tb_kesehatan.tindakan',
+                DB::raw('NULL AS tanggalMasukRawatInap'),
+                DB::raw('NULL AS keluhan'),
+                DB::raw('NULL AS terapi'),
+                DB::raw('NULL AS tanggalKeluarRawatInap'),
+            ])
+            ->leftJoin('santri_detail', 'santri_detail.kelas', '=', 'ref_kelas.code')
+            ->leftJoin('tb_kesehatan', 'tb_kesehatan.santri_id', '=', 'santri_detail.no_induk')
+            ->whereNotNull('tb_kesehatan.id')
+            ->whereBetween('tb_kesehatan.tanggal_sakit', [$startDate, $endDate]);
+
+            // Ambil data rawat inap dalam rentang waktu
+            $rawatInapData = RefKelas::select([
+                'ref_kelas.code AS kodeKelas',
+                'santri_detail.nama',
+                DB::raw('NULL AS tanggalSakit'),
+                DB::raw('NULL AS sakit'),
+                DB::raw('NULL AS tindakan'),
+                'rawat_inap.tanggal_masuk AS tanggalMasukRawatInap',
+                'rawat_inap.keluhan',
+                'rawat_inap.terapi',
+                'rawat_inap.tanggal_keluar AS tanggalKeluarRawatInap',
+            ])
+            ->leftJoin('santri_detail', 'santri_detail.kelas', '=', 'ref_kelas.code')
+            ->leftJoin('rawat_inap', 'rawat_inap.santri_no_induk', '=', 'santri_detail.no_induk')
+            ->whereNotNull('rawat_inap.id')
+            ->whereBetween('rawat_inap.tanggal_masuk', [$startDate, $endDate]);
+
+            // Gabungkan hasil keduanya
+            $resumeKelas = $kesehatanData->unionAll($rawatInapData)->get()
+            ->map(function($item) {
+                if ($item->tanggalSakit) {
+                    $item->tanggalSakit = \Carbon\Carbon::parse($item->tanggalSakit)->translatedFormat('d F Y');
+                }
+                if ($item->tanggalMasukRawatInap) {
+                    $item->tanggalMasukRawatInap = \Carbon\Carbon::parse($item->tanggalMasukRawatInap)->translatedFormat('d F Y');
+                }
+                if ($item->tanggalKeluarRawatInap) {
+                    $item->tanggalKeluarRawatInap = \Carbon\Carbon::parse($item->tanggalKeluarRawatInap)->translatedFormat('d F Y');
+                }
+
+                if ($item->kodeKelas) {
+                    $item->kodeKelas = strtoupper($item->kodeKelas);
+                }
+                return $item;
+            })
+            ->groupBy('kodeKelas')
+            ->map(function($items, $kodeKelas) {
+                return [
+                    'kelas' => $kodeKelas,
+                    'data' => $items->values()
+                ];
+            })
+            ->sortBy('kelas')
+            ->values();
 
             $data = [
-                'bulan' => $now->translatedFormat('F'),
-                'jumlah' => $jumlah
+                'bulan' => Carbon::createFromTimestamp($startDate)->translatedFormat('d F Y') . ' - ' . Carbon::createFromTimestamp($endDate)->translatedFormat('d F Y'),
+                'jenisSakitDialami' => $jenis,
+                'jumlahSantriSakit' => $jumlahSantriSakit,
+                'daftarSantriSakit' => $santriSakit,
+                'resumeKelas' => $resumeKelas
             ];
 
             return response()->json([
                 "status"  => 200,
-                "message" => "Berhasil mengambil data kelengkapan bulan ini",
+                "message" => "Berhasil mengambil data.",
                 "data"    => $data
             ], 200);
         } catch (\Exception $e) {
