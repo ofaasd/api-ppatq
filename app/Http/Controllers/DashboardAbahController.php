@@ -68,7 +68,11 @@ class DashboardAbahController extends Controller
             ->select([
                 'santri_detail.nama',
                 'santri_detail.photo',
+                'santri_detail.kelas',
+                'employee_new.nama AS guruTahfidz'
             ])
+            ->leftJoin('ref_tahfidz', 'ref_tahfidz.id', '=', 'santri_detail.tahfidz_id')
+            ->leftJoin('employee_new', 'employee_new.id', '=', 'ref_tahfidz.employee_id')
             ->distinct('detail_santri_tahfidz.no_induk')
             ->get();
 
@@ -192,6 +196,7 @@ class DashboardAbahController extends Controller
             $gelombang = PsbGelombang::where('pmb_online', 1)->first();
 
             $query = PsbPesertaOnline::where('gelombang_id', $gelombang->id)
+                ->whereIn('status', [0, 1, 2])
                 ->select([
                     'psb_peserta_online.nama',
                     'psb_peserta_online.jenis_kelamin AS jenisKelamin',
@@ -202,7 +207,7 @@ class DashboardAbahController extends Controller
             if ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('psb_peserta_online.nama', 'like', "%$search%")
-                    ->orWhere('cities.city_name', 'like', "%$search%");
+                    ->orWhere('psb_peserta_online.jenis_kelamin', 'like', "%$search%");
                 });
             }
 
@@ -230,6 +235,9 @@ class DashboardAbahController extends Controller
                     'santri_detail.no_induk AS noInduk',
                     'santri_detail.photo',
                     'santri_detail.nama',
+                    'santri_detail.nama_lengkap_ayah AS namaAyah',
+                    'santri_detail.nama_lengkap_ibu AS namaIbu',
+                    'santri_detail.no_hp AS noHp',
                     'employee_new.nama AS waliKelas',
                     'santri_detail.jenis_kelamin AS jenisKelamin',
                     'santri_detail.kelas',
@@ -242,8 +250,8 @@ class DashboardAbahController extends Controller
 
             if ($search) {
                 $query->where(function ($q) use ($search) {
-                    $q->where('nama', 'like', "%$search%")
-                    ->orWhere('kelas', 'like', "%$search%");
+                    $q->where('santri_detail.nama', 'like', "%$search%")
+                    ->orWhere('santri_detail.kelas', 'like', "%$search%");
                 });
             }
 
