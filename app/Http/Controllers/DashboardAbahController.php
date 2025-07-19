@@ -1063,11 +1063,15 @@ class DashboardAbahController extends Controller
                 ->leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
                 ->leftJoin('cities', 'cities.city_id', '=', 'santri_detail.kabkota')
                 ->where('kamar_id', $id)
-                ->whereRaw('detail_santri_tahfidz.kode_juz_surah = (
-                    SELECT MAX(dst2.kode_juz_surah)
-                    FROM detail_santri_tahfidz dst2
-                    WHERE dst2.no_induk = santri_detail.no_induk
-                )')
+                // Ambil capaian terakhir jika ada, jika tidak ada tetap tampilkan santri
+                ->where(function($q) {
+                    $q->whereNull('detail_santri_tahfidz.kode_juz_surah')
+                      ->orWhereRaw('detail_santri_tahfidz.kode_juz_surah = (
+                          SELECT MAX(dst2.kode_juz_surah)
+                          FROM detail_santri_tahfidz dst2
+                          WHERE dst2.no_induk = santri_detail.no_induk
+                      )');
+                })
                 ->get();
 
             $dataKamar = RefKamar::select([
@@ -1213,12 +1217,22 @@ class DashboardAbahController extends Controller
         try {
             // Ambil semua santri berdasarkan tahfidz_id
             $data = SantriDetail::select([
-                    'no_induk',
-                    'photo',
-                    'nama',
-                    'jenis_kelamin AS jenisKelamin',
+                    'santri_detail.no_induk AS no_induk',
+                    'santri_detail.photo',
+                    'santri_detail.nama',
+                    'santri_detail.jenis_kelamin AS jenisKelamin',
+                    'kode_juz.nama AS capaianTerakhir'
                 ])
+                ->leftJoin('detail_santri_tahfidz', function($join) {
+                    $join->on('detail_santri_tahfidz.no_induk', '=', 'santri_detail.no_induk');
+                })
+                ->leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
                 ->where('tahfidz_id', $id)
+                ->whereRaw('detail_santri_tahfidz.kode_juz_surah = (
+                    SELECT MAX(dst2.kode_juz_surah)
+                    FROM detail_santri_tahfidz dst2
+                    WHERE dst2.no_induk = santri_detail.no_induk
+                )')
                 ->get();
 
             $kodeTertinggi = KodeJuz::max('kode');
@@ -1244,6 +1258,7 @@ class DashboardAbahController extends Controller
                     'santri_detail.nama AS namaSantri',
                     'santri_detail.photo',
                 ])
+                ->distinct('santri_detail.no_induk')
                 ->get();
 
             $jumlahCapaianTertinggi = $santriCapaianTertinggi->count();
