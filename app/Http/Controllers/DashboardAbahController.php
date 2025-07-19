@@ -1037,11 +1037,24 @@ class DashboardAbahController extends Controller
     {
         try {
             $data = SantriDetail::select([
-                    'photo',
-                    'nama',
-                    'jenis_kelamin AS jenisKelamin',
+                    'santri_detail.no_induk AS noInduk',
+                    'santri_detail.photo',
+                    'santri_detail.nama',
+                    'santri_detail.jenis_kelamin AS jenisKelamin',
+                    'cities.city_name AS asalKota',
+                    'kode_juz.nama AS capaian'
                 ])
+                ->leftJoin('detail_santri_tahfidz', function($join) {
+                    $join->on('detail_santri_tahfidz.no_induk', '=', 'santri_detail.no_induk');
+                })
+                ->leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
+                ->leftJoin('cities', 'cities.city_id', '=', 'santri_detail.kabkota')
                 ->where('kamar_id', $id)
+                ->whereRaw('detail_santri_tahfidz.kode_juz_surah = (
+                    SELECT MAX(dst2.kode_juz_surah)
+                    FROM detail_santri_tahfidz dst2
+                    WHERE dst2.no_induk = santri_detail.no_induk
+                )')
                 ->get();
 
             $dataKamar = RefKamar::select([
