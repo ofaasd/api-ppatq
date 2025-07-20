@@ -51,30 +51,48 @@ class DashboardAbahController extends Controller
         };
     }
 
-    private function getCapaian($noIndukList, $kodeTertinggi, $direction = 'ASC')
+    private function getCapaian($noIndukList, $referenceUrutan, $direction = 'ASC')
     {
-        $capaian = DetailSantriTahfidz::leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
+        // First, find the single best/worst capaian based on kode_juz.urutan
+        $capaianData = DetailSantriTahfidz::select([
+                'detail_santri_tahfidz.kode_juz_surah',
+                'kode_juz.nama AS capaian_text', // Alias to avoid conflict if 'nama' is used elsewhere
+                'kode_juz.urutan as juz_urutan' // Get the urutan to verify
+            ])
+            ->join('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah') // JOIN first
             ->whereIn('detail_santri_tahfidz.no_induk', $noIndukList)
             ->whereNotNull('detail_santri_tahfidz.kode_juz_surah')
-            ->orderByRaw("ABS(detail_santri_tahfidz.kode_juz_surah - ?) $direction", [$kodeTertinggi])
-            ->select([
-                'detail_santri_tahfidz.kode_juz_surah',
-                'kode_juz.nama AS capaian',
-            ])
+            ->orderBy('juz_urutan', $direction) // ORDER BY the actual 'urutan'
             ->first();
 
+        // Handle case where no capaian data is found
+        if (is_null($capaianData)) {
+            return [
+                'capaian' => 'Belum ada aktivitas ketahfidzan',
+                'santri' => collect(), // Return an empty collection
+            ];
+        }
+
+        // Now, get all santri who have this specific capaian (kode_juz_surah and urutan)
         $santri = DetailSantriTahfidz::join('santri_detail', 'detail_santri_tahfidz.no_induk', '=', 'santri_detail.no_induk')
+            ->leftJoin('ref_tahfidz', 'ref_tahfidz.id', '=', 'santri_detail.tahfidz_id')
+            ->leftJoin('employee_new', 'employee_new.id', '=', 'ref_tahfidz.employee_id')
             ->whereIn('detail_santri_tahfidz.no_induk', $noIndukList)
-            ->where('detail_santri_tahfidz.kode_juz_surah', $capaian->kode_juz_surah ?? null)
+            // Match both the kode_juz_surah and its corresponding urutan for precision
+            ->where('detail_santri_tahfidz.kode_juz_surah', $capaianData->kode_juz_surah)
+            ->whereExists(function ($query) use ($capaianData) {
+                $query->select(DB::raw(1))
+                    ->from('kode_juz')
+                    ->whereRaw('kode_juz.kode = detail_santri_tahfidz.kode_juz_surah')
+                    ->where('kode_juz.urutan', $capaianData->juz_urutan);
+            })
             ->select([
                 'santri_detail.nama',
                 'santri_detail.photo',
                 'santri_detail.kelas',
                 'employee_new.nama AS guruTahfidz'
             ])
-            ->leftJoin('ref_tahfidz', 'ref_tahfidz.id', '=', 'santri_detail.tahfidz_id')
-            ->leftJoin('employee_new', 'employee_new.id', '=', 'ref_tahfidz.employee_id')
-            ->distinct('detail_santri_tahfidz.no_induk')
+            ->distinct('santri_detail.no_induk') // Use distinct on no_induk to get unique santri
             ->get()
             ->map(function ($item) {
                 $item->kelas = strtoupper($item->kelas); // Kapital semua
@@ -82,7 +100,7 @@ class DashboardAbahController extends Controller
             });
 
         return [
-            'capaian' => $capaian->capaian ?? 'Belum ada',
+            'capaian' => $capaianData->capaian_text ?? 'Belum ada aktivitas ketahfidzan',
             'santri' => $santri,
         ];
     }
@@ -93,7 +111,7 @@ class DashboardAbahController extends Controller
             $bulan = (int) date('m');
             $tahun = (int) date('Y');
 
-            $bulanIni = Carbon::now()->translatedFormat('F');        // "Juli"
+            $bulanIni = Carbon::now()->translatedFormat('F');
 
             $gelombang = PsbGelombang::where('pmb_online', 1)->first();
             $qPsb = PsbPesertaOnline::where('gelombang_id', $gelombang->id);
@@ -152,13 +170,15 @@ class DashboardAbahController extends Controller
             ->sum('jumlah');
             $jumlahPembayaranLalu = number_format($bayarLalu, 0, ',', '.');
 
-            $kodeTertinggi = KodeJuz::max('kode');
+            $kodeTertinggi = KodeJuz::max('urutan');
+
             $noIndukList = SantriDetail::pluck('no_induk');
 
             $tahfidzan = [
-                'tertinggi' => $this->getCapaian($noIndukList, $kodeTertinggi, 'ASC'),
-                'terendah' => $this->getCapaian($noIndukList, $kodeTertinggi, 'DESC'),
+                'tertinggi' => $this->getCapaian($noIndukList, $kodeTertinggi, 'DESC'),
+                'terendah' => $this->getCapaian($noIndukList, $kodeTertinggi, 'ASC'),
             ];
+            
 
             $data = [
                 'bulanIni'                          => $bulanIni,              
