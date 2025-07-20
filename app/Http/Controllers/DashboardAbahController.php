@@ -1212,11 +1212,14 @@ class DashboardAbahController extends Controller
                 // Ambil capaian terakhir jika ada, jika tidak ada tetap tampilkan santri
                 ->where(function($q) {
                     $q->whereNull('detail_santri_tahfidz.kode_juz_surah')
-                      ->orWhereRaw('detail_santri_tahfidz.kode_juz_surah = (
-                          SELECT MAX(dst2.kode_juz_surah)
-                          FROM detail_santri_tahfidz dst2
-                          WHERE dst2.no_induk = santri_detail.no_induk
-                      )');
+                    ->orWhereRaw('detail_santri_tahfidz.kode_juz_surah = (
+                            SELECT dst_inner.kode_juz_surah
+                            FROM detail_santri_tahfidz dst_inner
+                            JOIN kode_juz kj_inner ON kj_inner.kode = dst_inner.kode_juz_surah
+                            WHERE dst_inner.no_induk = santri_detail.no_induk -- Correlates to the outer santri_detail
+                            ORDER BY kj_inner.urutan DESC -- Sort by urutan first, then kode_juz_surah as a tie-breaker
+                            LIMIT 1
+                        )');
                 })
                 ->get();
 
@@ -1374,11 +1377,17 @@ class DashboardAbahController extends Controller
                 })
                 ->leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
                 ->where('tahfidz_id', $id)
-                ->whereRaw('detail_santri_tahfidz.kode_juz_surah = (
-                    SELECT MAX(dst2.kode_juz_surah)
-                    FROM detail_santri_tahfidz dst2
-                    WHERE dst2.no_induk = santri_detail.no_induk
-                )')
+                ->where(function($q) {
+                    $q->whereNull('detail_santri_tahfidz.kode_juz_surah')
+                    ->orWhereRaw('detail_santri_tahfidz.kode_juz_surah = (
+                            SELECT dst_inner.kode_juz_surah
+                            FROM detail_santri_tahfidz dst_inner
+                            JOIN kode_juz kj_inner ON kj_inner.kode = dst_inner.kode_juz_surah
+                            WHERE dst_inner.no_induk = santri_detail.no_induk -- Correlates to the outer santri_detail
+                            ORDER BY kj_inner.urutan DESC -- Sort by urutan first, then kode_juz_surah as a tie-breaker
+                            LIMIT 1
+                        )');
+                })
                 ->get();
 
             $kodeTertinggi = KodeJuz::max('kode');
