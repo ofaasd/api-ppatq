@@ -1470,7 +1470,7 @@ class DashboardAbahController extends Controller
         try {
             // Ambil semua santri berdasarkan tahfidz_id
             $data = SantriDetail::select([
-                    'santri_detail.no_induk AS no_induk',
+                    'santri_detail.no_induk AS noInduk',
                     'santri_detail.photo',
                     'santri_detail.nama',
                     'santri_detail.jenis_kelamin AS jenisKelamin',
@@ -1492,10 +1492,11 @@ class DashboardAbahController extends Controller
                             LIMIT 1
                         )');
                 })
+                ->distinct('noInduk')
                 ->get();
 
             $kodeTertinggi = KodeJuz::max('kode');
-            $noIndukList = $data->pluck('no_induk');
+            $noIndukList = $data->pluck('noInduk');
 
             // Ambil capaian yang paling mendekati kode tertinggi
             $capaianTertinggi = DetailSantriTahfidz::join('santri_detail', 'detail_santri_tahfidz.no_induk', '=', 'santri_detail.no_induk')
