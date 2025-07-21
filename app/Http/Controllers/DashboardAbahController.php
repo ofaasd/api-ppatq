@@ -755,7 +755,8 @@ class DashboardAbahController extends Controller
                     'nama',
                     'jenis_kelamin AS jenisKelamin',
                     'no_hp AS noHp',
-                ]);
+                ])
+                ->where('status', 1);
 
             if ($search) {
                 $query->where(function ($q) use ($search) {
@@ -1643,6 +1644,7 @@ class DashboardAbahController extends Controller
                 'nama',
                 'jenis_kelamin AS jenisKelamin'
             ])
+            ->where('status', 1)
             ->where('jabatan_new', 12)
             ->get();
 
@@ -1669,6 +1671,7 @@ class DashboardAbahController extends Controller
                 'nama',
                 'jenis_kelamin AS jenisKelamin'
             ])
+            ->where('status', 1)
             ->where('jabatan_new', 13)
             ->get();
 
