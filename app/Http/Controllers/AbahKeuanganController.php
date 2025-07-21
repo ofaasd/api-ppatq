@@ -14,6 +14,7 @@ use App\Models\pembayaran;
 use App\Models\RefBank;
 use App\Models\SantriDetail;
 use App\Models\RefJenisPembayaran;
+use App\Models\RefKamar;
 
 class AbahKeuanganController extends Controller
 {
@@ -25,7 +26,7 @@ class AbahKeuanganController extends Controller
         $this->bulan = (int) date('m');
         $this->tahun = (int) date('Y');
     }
-    public function saku($kodeKelas)
+    public function saku($idKamar)
     {
         try {
             $rawData = SantriDetail::select([
@@ -42,7 +43,7 @@ class AbahKeuanganController extends Controller
                 ->leftJoin('tb_uang_saku', 'tb_uang_saku.no_induk', '=', 'santri_detail.no_induk')
                 ->leftJoin('ref_kamar', 'ref_kamar.id', '=', 'santri_detail.kamar_id')
                 ->leftJoin('employee_new', 'employee_new.id', 'ref_kamar.employee_id')
-                ->where('santri_detail.kelas', $kodeKelas)
+                ->where('santri_detail.kamar_id', $idKamar)
                 ->groupBy(
                     'santri_detail.photo',
                     'santri_detail.nama',
@@ -70,13 +71,13 @@ class AbahKeuanganController extends Controller
                 }
             }
 
-            $dataKelas = RefKelas::select([
-                    'employee_new.nama AS namaWaliKelas',
-                    'employee_new.photo AS fotoWaliKelas',
-                    'ref_kelas.name AS namaKelas'
+            $dataKelas = RefKamar::select([
+                    'employee_new.nama AS murroby',
+                    'employee_new.photo AS fotoMurroby',
+                    'ref_kamar.name AS namaKelas'
                 ])
-                ->leftJoin('employee_new', 'employee_new.id', 'ref_kelas.employee_id')
-                ->where('ref_kelas.code', $kodeKelas)
+                ->leftJoin('employee_new', 'employee_new.id', 'ref_kamar.employee_id')
+                ->where('ref_kamar.code', $idKamar)
                 ->first();
 
             return response()->json([

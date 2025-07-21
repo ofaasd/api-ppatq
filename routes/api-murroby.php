@@ -16,20 +16,6 @@ Route::prefix('murroby')->group(function () {
     Route::put('/santri/pemeriksaan/update/{idPemeriksaan}', [MurrobyController::class, 'updatePemeriksaan']);
     Route::delete('/santri/pemeriksaan/{idPemeriksaan}', [MurrobyController::class, 'deletePemeriksaan']);
 
-    Route::get('/santri/perilaku/{idUser}', [PerilakuController::class, 'index']);
-    Route::post('/santri/perilaku', [PerilakuController::class, 'store']);
-    Route::get('/santri/perilaku/detail/{noInduk}', [PerilakuController::class, 'show']);
-    Route::get('/santri/perilaku/edit/{idPerilaku}', [PerilakuController::class, 'edit']);
-    Route::put('/santri/perilaku/update/{idPerilaku}', [PerilakuController::class, 'update']);
-    Route::delete('/santri/perilaku/{idPerilaku}', [PerilakuController::class, 'delete']);
-    
-    Route::get('/santri/kelengkapan/{idUser}', [KelengkapanController::class, 'index']);
-    Route::post('/santri/kelengkapan', [KelengkapanController::class, 'store']);
-    Route::get('/santri/kelengkapan/detail/{noInduk}', [KelengkapanController::class, 'show']);
-    Route::get('/santri/kelengkapan/edit/{idKelengkapan}', [KelengkapanController::class, 'edit']);
-    Route::put('/santri/kelengkapan/update/{idKelengkapan}', [KelengkapanController::class, 'update']);
-    Route::delete('/santri/kelengkapan/{idKelengkapan}', [KelengkapanController::class, 'delete']);
-
     // Uang Saku
     Route::get('/uang-saku/{idUser}', [UangSakuController::class, 'index']);
 
@@ -38,4 +24,20 @@ Route::prefix('murroby')->group(function () {
     Route::post('/saku-masuk', [UangSakuController::class, 'storeUangMasuk']);
     Route::get('/saku-keluar/{noInduk}', [UangSakuController::class, 'uangKeluar']);
     Route::post('/saku-keluar', [UangSakuController::class, 'storeUangKeluar']);
+
+    // Perilaku
+    Route::get('/santri/perilaku/{idUser}', [PerilakuController::class, 'index']);
+    Route::post('/santri/perilaku', [PerilakuController::class, 'store']);
+    Route::get('/santri/perilaku/detail/{noInduk}', [PerilakuController::class, 'show']);
+    Route::get('/santri/perilaku/edit/{idPerilaku}', [PerilakuController::class, 'edit']);
+    Route::put('/santri/perilaku/update/{idPerilaku}', [PerilakuController::class, 'update']);
+    Route::delete('/santri/perilaku/{idPerilaku}', [PerilakuController::class, 'delete']);
+
+    // Kelengkapan
+    Route::get('/santri/kelengkapan/{idUser}', [KelengkapanController::class, 'index']);
+    Route::post('/santri/kelengkapan', [KelengkapanController::class, 'store']);
+    Route::get('/santri/kelengkapan/detail/{noInduk}', [KelengkapanController::class, 'show']);
+    Route::get('/santri/kelengkapan/edit/{idKelengkapan}', [KelengkapanController::class, 'edit']);
+    Route::put('/santri/kelengkapan/update/{idKelengkapan}', [KelengkapanController::class, 'update']);
+    Route::delete('/santri/kelengkapan/{idKelengkapan}', [KelengkapanController::class, 'delete']);
 });

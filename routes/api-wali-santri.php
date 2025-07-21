@@ -16,10 +16,16 @@ Route::prefix('wali-santri')->group(function () {
         Route::get('/kelengkapan/{noInduk}', [WaliSantriController::class, 'kelengkapan']);
         Route::post('/lapor-bayar', [WaliSantriController::class, 'laporBayar']);
         Route::get('/riwayat-bayar/{noInduk}', [WaliSantriController::class, 'riwayatBayar']);
-
+        
         Route::get('/saku-masuk/{noInduk}', [UangSakuController::class, 'uangMasuk']);
         Route::get('/saku-keluar/{noInduk}', [UangSakuController::class, 'uangKeluar']);
-
+        
         Route::get('/keluhan/{noInduk}', [WaliSantriController::class, 'keluhan']);
+
+        Route::get('/perlengkapan/{noInduk}', [WaliSantriController::class, 'perlengkapan']);
+        Route::get('/pelanggaran/{noInduk}', [WaliSantriController::class, 'pelanggaran']);
+        Route::get('/izin/{noInduk}', [WaliSantriController::class, 'izin']);
+        Route::get('/kerapian/{noInduk}', [WaliSantriController::class, 'kerapian']);
+        Route::get('/pelanggaran-ketertiban/{noInduk}', [WaliSantriController::class, 'pelanggaranketertiban']);
     });
 });

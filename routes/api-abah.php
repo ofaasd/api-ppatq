@@ -54,6 +54,7 @@ Route::prefix('abah')->group(function () {
     Route::prefix('kamar')->group(function () {
         Route::get('/{search?}', [DashboardAbahController::class, 'kamar']);
         Route::get('/show/{id}', [DashboardAbahController::class, 'showKamar']);
+        Route::get('/detail-saku/{noInduk}', [DashboardAbahController::class, 'detailSaku']);
     });
     
     Route::prefix('kelas')->group(function () {
@@ -75,7 +76,7 @@ Route::prefix('abah')->group(function () {
     // Dawuh Abah
     Route::prefix('keuangan')->group(function () {
         
-        Route::get('/saku/{kodeKelas}', [AbahKeuanganController::class, 'saku']);
+        Route::get('/saku/{idKamar}', [AbahKeuanganController::class, 'saku']);
         Route::get('/lapor-bayar', [AbahKeuanganController::class, 'laporBayar']);
 
         Route::prefix('syahriah')->group(function () {

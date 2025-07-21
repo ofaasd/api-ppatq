@@ -9,6 +9,7 @@ use App\Models\KodeJuz;
 use App\Models\Perilaku;
 use App\Models\RefKamar;
 use App\Models\RefKelas;
+use App\Models\UangSaku;
 use App\Models\AsetRuang;
 use App\Models\AsetTanah;
 use App\Models\Kesehatan;
@@ -25,13 +26,13 @@ use App\Models\SantriDetail;
 use Illuminate\Http\Request;
 use App\Models\TbPemeriksaan;
 use App\Models\AsetElektronik;
+use App\Models\TagihanSyahriah;
 use App\Models\detailPembayaran;
 use App\Models\PsbPesertaOnline;
 use App\Models\RefJenisPembayaran;
 use App\Models\SantriDetailAlumni;
 use Illuminate\Support\Facades\DB;
 use App\Models\DetailSantriTahfidz;
-use App\Models\TagihanSyahriah;
 
 class DashboardAbahController extends Controller
 {
@@ -948,27 +949,34 @@ class DashboardAbahController extends Controller
         try {
             $now = Carbon::now();
 
-            $listData = Kelengkapan::selectRaw("
-                    SUM(perlengkapan_mandi = 0) as mandiTidakLengkap,
-                    SUM(perlengkapan_mandi = 1) as mandiLengkapKurang,
-                    SUM(perlengkapan_mandi = 2) as mandiLengkapBaik,
+            $rowData = SantriDetail::select([
+                'santri_detail.no_induk AS noInduk',
+                'santri_detail.photo',
+                'santri_detail.nama',
+                'santri_detail.jenis_kelamin AS jenisKelamin',
+                'kode_juz.nama AS capaianTerakhir'
+            ])
+            ->leftJoin('perlengkapan', function($join) {
+                $join->on('perlengkapan.no_induk', '=', 'santri_detail.no_induk');
+            })
+            ->where(function($q) {
+                $q->whereNull('perlengkapan.no_induk')
+                ->orWhereRaw('perlengkapan.no_induk = (
+                        SELECT pkp2.no_induk
+                        FROM perlengkapan pkp2
+                        WHERE pkp2.no_induk = santri_detail.no_induk
+                        LIMIT 1
+                    )');
+            })
+            ->whereMonth('perlengkapan.tanggal', $now->month)
+            ->whereYear('perlengkapan.tanggal', $now->year)
+            ->distinct('noInduk')
+            ->get();
 
-                    SUM(peralatan_sekolah = 0) as sekolahTidakLengkap,
-                    SUM(peralatan_sekolah = 1) as sekolahLengkapKurang,
-                    SUM(peralatan_sekolah = 2) as sekolahLengkapBaik,
-
-                    SUM(perlengkapan_diri = 0) as diriTidakLengkap,
-                    SUM(perlengkapan_diri = 1) as diriLengkapKurang,
-                    SUM(perlengkapan_diri = 2) as diriLengkapBaik
-                ")
-                ->whereMonth('tanggal', $now->month)
-                ->whereYear('tanggal', $now->year)
-                ->distinct('no_induk')
-                ->get();
 
             $data = [
                 'bulan' => $now->translatedFormat('F'),
-                'listData' => $listData
+                'data' => $rowData
             ];
 
             return response()->json([
@@ -1350,6 +1358,63 @@ class DashboardAbahController extends Controller
             return response()->json([
                 "status"  => 500,
                 "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
+                "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
+            ], 500);
+        }
+    }
+
+    public function detailSaku($noInduk)
+    {
+        try {
+            $saldo = UangSaku::select([
+                    'tb_uang_saku.jumlah AS saldo'
+                ])
+                ->where('no_induk', $noInduk)
+                ->first();
+
+            $uangMasuk = DB::table('tb_saku_masuk')
+                ->select([
+                    DB::raw("
+                        CASE tb_saku_masuk.dari
+                            WHEN 1 THEN 'Uang Saku'
+                            WHEN 2 THEN 'Kunjungan Walsan'
+                            WHEN 3 THEN 'Sisa Bulan Kemarin'
+                            ELSE 'Tidak Diketahui'
+                        END AS uangAsal
+                    "),
+                    'tb_saku_masuk.jumlah AS jumlahMasuk',
+                    'tb_saku_masuk.tanggal AS tanggalTransaksi',
+                ])
+                ->orderBy('tanggalTransaksi', 'desc')
+                ->where('no_induk', $noInduk)
+                ->get();
+
+            $uangkeluar = DB::table('tb_saku_keluar')
+                ->select([
+                    'tb_saku_keluar.jumlah AS jumlahKeluar',
+                    'tb_saku_keluar.note AS catatan',
+                    'tb_saku_keluar.tanggal AS tanggalTransaksi',
+                    'employee_new.nama AS namaMurroby',
+                ])
+                ->leftJoin('employee_new', 'employee_new.id', 'tb_saku_keluar.pegawai_id')
+                ->orderBy('tanggalTransaksi', 'desc')
+                ->where('no_induk', $noInduk)
+                ->get();
+            $data = [
+                'saldo' => $saldo ? $saldo->saldo : 0,
+                'uangMasuk' => $uangMasuk,
+                'uangKeluar' => $uangkeluar,
+            ];
+
+            return response()->json([
+                'status'   => 200,
+                'message'   => 'Berhasil mengambil data',
+                'data'  =>  $data,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                "status"  => 500,
+                "message" => "Terjadi kesalahan saat menambah uang saku. Hubungi Faiz ganteng",
                 "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
             ], 500);
         }

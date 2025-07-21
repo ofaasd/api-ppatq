@@ -4,6 +4,7 @@ use App\Http\Controllers\IzinController;
 use App\Http\Controllers\KerapianController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PelanggaranController;
+use App\Http\Controllers\PelanggaranKetertibanController;
 use App\Http\Controllers\PerlengkapanController;
 use App\Models\PelanggaranKetertiban;
 
@@ -41,10 +42,10 @@ Route::prefix('keamanan')->group(function () {
     });
 
     Route::prefix('pelanggaran-ketertiban')->group(function () {
-        Route::get('/', [PelanggaranKetertiban::class, 'index']);
-        Route::post('/store', [PelanggaranKetertiban::class, 'store']);
-        Route::get('/edit/{id}', [PelanggaranKetertiban::class, 'edit']);
-        Route::put('/update/{id}', [PelanggaranKetertiban::class, 'update']);
-        Route::delete('/delete/{id}', [PelanggaranKetertiban::class, 'destroy']);
+        Route::get('/', [PelanggaranKetertibanController::class, 'index']);
+        Route::post('/store', [PelanggaranKetertibanController::class, 'store']);
+        Route::get('/edit/{id}', [PelanggaranKetertibanController::class, 'edit']);
+        Route::put('/update/{id}', [PelanggaranKetertibanController::class, 'update']);
+        Route::delete('/delete/{id}', [PelanggaranKetertibanController::class, 'destroy']);
     });
 });
