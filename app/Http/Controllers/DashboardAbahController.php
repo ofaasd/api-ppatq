@@ -270,7 +270,7 @@ class DashboardAbahController extends Controller
                 ->leftJoin('cities', 'cities.city_id', '=', 'santri_detail.kabkota')
                 ->leftJoin('ref_kelas', 'ref_kelas.code', '=', 'santri_detail.kelas')
                 ->leftJoin('employee_new', 'employee_new.id', '=', 'ref_kelas.employee_id')
-                ->where('status', 0);
+                ->where('santri_detail.status', 0);
 
             if ($search) {
                 $query->where(function ($q) use ($search) {
