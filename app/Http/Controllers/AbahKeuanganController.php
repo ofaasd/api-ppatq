@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
+
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+
+use App\Models\detailPembayaran;
 use App\Models\RefKelas;
 use App\Models\Tunggakan;
 use App\Models\pembayaran;
+use App\Models\RefBank;
 use App\Models\SantriDetail;
-use Illuminate\Http\Request;
 use App\Models\RefJenisPembayaran;
-use Illuminate\Support\Facades\DB;
 
 class AbahKeuanganController extends Controller
 {
@@ -221,5 +225,94 @@ class AbahKeuanganController extends Controller
                 "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
             ], 500);
         }
+    }
+
+    public function laporBayar()
+    {
+        $bulan = [
+            1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
+            5 => 'Mei', 6 => 'Juni', 7 => 'Juli', 8 => 'Agustus',
+            9 => 'September', 10 => 'Oktober', 11 => 'November', 12 => 'Desember'
+        ];
+
+        $refBayar = RefJenisPembayaran::orderBy('urutan', 'asc')->get();
+        $pembayaranList = pembayaran::where('is_hapus', 0)
+            ->whereMonth('tanggal_bayar', $this->bulan)
+            ->whereYear('tanggal_bayar', $this->tahun)
+            ->orderBy('id','desc')
+            ->get();
+
+        $detailPembayaran = [];
+
+		foreach ($pembayaranList as $pembayaran) {
+            // Inisialisasi semua jenis pembayaran dengan 0
+            foreach ($refBayar as $jenis) {
+                $detailPembayaran[$pembayaran->id][$jenis->id] = 0;
+            }
+
+            // Ambil detail pembayaran dari tabel tb_detail_pembayaran
+            $detail = DetailPembayaran::where('id_pembayaran', $pembayaran->id)->get();
+
+            foreach ($detail as $row) {
+                $detailPembayaran[$pembayaran->id][$row->id_jenis_pembayaran] = $row->nominal;
+            }
+        }
+
+        $response = [];
+
+        foreach ($pembayaranList as $row) {
+            $dataSantri = SantriDetail::where('no_induk', $row->nama_santri)->first();
+            $namaBank = RefBank::where('id', $row->bank_pengirim)->first();
+            $baris = [];
+
+            // Atas nama
+            $baris['pengirim'] = ($namaBank->nama ?? '-') . ' a/n ' . ($row->atas_nama ?? '-');
+
+            // No WA
+            $baris['noWa'] = $row->no_wa ?? '-';
+
+            // Nama Santri
+            $baris['namaSantri'] = $dataSantri->nama ?? '-';
+
+            // Kelas
+            $baris['kelas'] = $dataSantri->kelas ?? '-';
+
+            // Tanggal bayar
+            $baris['tanggalBayar'] = Carbon::parse($row->tanggal_bayar)->translatedFormat('d F Y');
+
+            // Periode
+            $baris['periode'] = $bulan[$row->periode] ?? '-';
+
+            // Detail jenis pembayaran
+            foreach ($refBayar as $jenis) {
+                $nominal = $detailPembayaran[$row->id][$jenis->id] ?? 0;
+                $baris['jenisPembayaran'][$jenis->jenis] = number_format($nominal, 0, ",", ".");
+            }
+
+            // Validasi
+            switch ($row->validasi) {
+                case 0:
+                    $baris['validasi'] = "Belum di Validasi";
+                    break;
+                case 1:
+                    $baris['validasi'] = "Sudah di Validasi ";
+                    break;
+                case 2:
+                    $baris['validasi'] = "Validasi Ditolak";
+                    break;
+                default:
+                    $baris['validasi'] = "";
+            }
+
+            $response[] = $baris;
+        }
+
+        $data = collect($response)->groupBy('kelas')->sortKeys();
+
+        return response()->json([
+            "status"  => 200,
+            "message" => "Berhasil mengambil data",
+            "data"    => $data
+        ], 200);
     }
 }

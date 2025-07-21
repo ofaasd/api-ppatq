@@ -76,6 +76,7 @@ Route::prefix('abah')->group(function () {
     Route::prefix('keuangan')->group(function () {
         
         Route::get('/saku/{kodeKelas}', [AbahKeuanganController::class, 'saku']);
+        Route::get('/lapor-bayar', [AbahKeuanganController::class, 'laporBayar']);
 
         Route::prefix('syahriah')->group(function () {
             Route::get('/{search?}', [AbahKeuanganController::class, 'syahriah']);
