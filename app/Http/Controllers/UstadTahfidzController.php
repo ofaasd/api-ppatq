@@ -257,7 +257,7 @@ class UstadTahfidzController extends Controller
             $getProfil = SantriDetail::where('no_induk', $noInduk)->first();
 
             $data = [
-                'namaSantri'    => $getProfil->nama,
+                'namaSantri'    => $getProfil->nama ?? 'Nama tidak ditemukan',
                 'data'  => $getData
             ];
             return response()->json([
