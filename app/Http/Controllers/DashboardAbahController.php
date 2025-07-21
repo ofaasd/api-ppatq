@@ -308,56 +308,93 @@ class DashboardAbahController extends Controller
     public function alumni($search = null)
     {
         try {
-            $query = SantriDetailAlumni::select(
-                'tb_alumni_santri_detail.no_induk AS noInduk',
-                'tb_alumni_santri_detail.nama',
-                'tb_alumni_santri_detail.no_hp AS noHp',
-                'guru_murroby.nama AS murroby',  
-                'wali_kelas.nama AS waliKelas',
-                'tb_alumni_santri_detail.tahun_lulus AS tahunLulus',
-                'tb_alumni_santri_detail.tahun_msk_mi AS tahunMasukMi',
-                'tb_alumni_santri_detail.nama_pondok_mi AS namaPondokMi',
-                'tb_alumni_santri_detail.thn_msk_menengah AS tahunMasukMenengah',
-                'tb_alumni_santri_detail.nama_sekolah_menengah_pertama AS namaSekolahMenengah',
-                'tb_alumni_santri_detail.tahun_msk_menengah_atas AS tahunMasukMenengahAtas',
-                'tb_alumni_santri_detail.nama_pondok_menengah_atas AS namaPondokMenengahAtas',
-                'tb_alumni_santri_detail.tahun_msk_pt AS tahunMasukPearguruanTinggi',
-                'tb_alumni_santri_detail.nama_pt AS namaPerguruanTinggi',
-                'tb_alumni_santri_detail.nama_pondok_pt AS namaPondokPerguruanTinggi',
-                'tb_alumni_santri_detail.tahun_msk_profesi AS tahunMasukProfesi',
-                'tb_alumni_santri_detail.nama_perusahaan AS namaPerusahaan',
-                'tb_alumni_santri_detail.bidang_profesi AS bidangProfesi',
-                'tb_alumni_santri_detail.posisi_profesi AS posisiProfesi',
-            )
-            ->leftJoin('tb_alumni', 'tb_alumni_santri_detail.no_induk', '=', 'tb_alumni.no_induk')
-            ->leftJoin('ref_kamar', 'tb_alumni_santri_detail.kamar_id', '=', 'ref_kamar.id')
-            ->leftJoin('ref_kelas', 'tb_alumni_santri_detail.kelas', '=', 'ref_kelas.code')
-            ->leftJoin('employee_new AS guru_murroby', 'ref_kamar.employee_id', '=', 'guru_murroby.id')
-            ->leftJoin('employee_new AS wali_kelas', 'ref_kelas.employee_id', '=', 'wali_kelas.id');
+            // Base query builder
+            $baseQuery = SantriDetailAlumni::select(
+                    'tb_alumni_santri_detail.no_induk AS noInduk',
+                    'tb_alumni_santri_detail.nama',
+                    'tb_alumni_santri_detail.no_hp AS noHp',
+                    'guru_murroby.nama AS murroby',
+                    'wali_kelas.nama AS waliKelas',
+                    'tb_alumni_santri_detail.tahun_lulus AS tahunLulus',
+                    'tb_alumni_santri_detail.tahun_msk_mi AS tahunMasukMi',
+                    'tb_alumni_santri_detail.nama_pondok_mi AS namaPondokMi',
+                    'tb_alumni_santri_detail.thn_msk_menengah AS tahunMasukMenengah',
+                    'tb_alumni_santri_detail.nama_sekolah_menengah_pertama AS namaSekolahMenengah',
+                    'tb_alumni_santri_detail.tahun_msk_menengah_atas AS tahunMasukMenengahAtas',
+                    'tb_alumni_santri_detail.nama_pondok_menengah_atas AS namaPondokMenengahAtas',
+                    'tb_alumni_santri_detail.tahun_msk_pt AS tahunMasukPerguruanTinggi',
+                    'tb_alumni_santri_detail.nama_pt AS namaPerguruanTinggi',
+                    'tb_alumni_santri_detail.nama_pondok_pt AS namaPondokPerguruanTinggi',
+                    'tb_alumni_santri_detail.tahun_msk_profesi AS tahunMasukProfesi',
+                    'tb_alumni_santri_detail.nama_perusahaan AS namaPerusahaan',
+                    'tb_alumni_santri_detail.bidang_profesi AS bidangProfesi',
+                    'tb_alumni_santri_detail.posisi_profesi AS posisiProfesi'
+                )
+                ->leftJoin('tb_alumni', 'tb_alumni_santri_detail.no_induk', '=', 'tb_alumni.no_induk')
+                ->leftJoin('ref_kamar', 'tb_alumni_santri_detail.kamar_id', '=', 'ref_kamar.id')
+                ->leftJoin('ref_kelas', 'tb_alumni_santri_detail.kelas', '=', 'ref_kelas.code')
+                ->leftJoin('employee_new AS guru_murroby', 'ref_kamar.employee_id', '=', 'guru_murroby.id')
+                ->leftJoin('employee_new AS wali_kelas', 'ref_kelas.employee_id', '=', 'wali_kelas.id');
 
+            // Tambahkan pencarian kalau ada
             if ($search) {
-                $query->where(function ($q) use ($search) {
+                $baseQuery->where(function ($q) use ($search) {
                     $q->where('tb_alumni_santri_detail.nama', 'like', "%$search%")
-                    ->orWhere('tb_alumni_santri_detail.kelas', 'like', "%$search%");
+                        ->orWhere('tb_alumni_santri_detail.kelas', 'like', "%$search%");
                 });
             }
 
-            $dataSantri = $query->paginate(25);
+            // 1. Data acak semua alumni
+            $randomAlumni = (clone $baseQuery)->inRandomOrder()->paginate(25);
 
+            // 2. Ambil daftar tahun lulus
+            $tahunList = (clone $baseQuery)
+                ->select('tb_alumni_santri_detail.tahun_lulus')
+                ->whereNotNull('tb_alumni_santri_detail.tahun_lulus')
+                ->groupBy('tb_alumni_santri_detail.tahun_lulus')
+                ->orderByRaw('CAST(tb_alumni_santri_detail.tahun_lulus AS UNSIGNED) DESC')
+                ->pluck('tahun_lulus');
+
+            // 3. Ambil data alumni per tahun (misalnya maksimal 5 per tahun)
+            $alumniPerTahun = [];
+
+            foreach ($tahunList as $tahun) {
+                $alumniPerTahun[$tahun] = (clone $baseQuery)
+                    ->where('tb_alumni_santri_detail.tahun_lulus', $tahun)
+                    ->get();
+            }
+
+            // 👇 INI YANG PENTING
+            $alumniPerTahunList = collect($alumniPerTahun)
+            ->sortKeysDesc()
+            ->map(function ($items, $tahun) {
+                return [
+                    'tahun' => $tahun,
+                    'data' => $items
+                ];
+            })
+            ->values() // buang key numerik
+            ->toArray();
+
+            // Response
             return response()->json([
                 "status"  => 200,
                 "message" => "Berhasil mengambil data",
-                "jumlah"  => $dataSantri->count(),
-                "data"    => $dataSantri
-            ], 200);
+                "jumlah"  => $randomAlumni->count(),
+                "data"    => [
+                    'alumni' => $randomAlumni,
+                    'perTahun' => $alumniPerTahunList
+                ]
+            ]);
         } catch (\Exception $e) {
             return response()->json([
                 "status"  => 500,
                 "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
-                "error"   => $e->getMessage() // Uncomment untuk debugging
+                "error"   => $e->getMessage()
             ], 500);
         }
     }
+
 
     public function detailSantri($noInduk)
     {
@@ -413,15 +450,29 @@ class DashboardAbahController extends Controller
                 'tb_kesehatan.keterangan_sembuh AS keteranganSembuh',
                 'tb_kesehatan.tindakan',
             ])
+            ->where('santri_id', $noInduk)
             ->orderBy('created_at', 'desc')
-            ->where('santri_id',$noInduk)
             ->get()
-            ->map(function($item){
-                $item->tanggalSakit = Carbon::parse($item->tanggalSakit)->translatedFormat('d F Y');
-                $item->tanggalSembuh = Carbon::parse($item->tanggalSembuh)->translatedFormat('d F Y');
-
+            ->map(function ($item) {
+                $item->tanggalSakit = $item->tanggalSakit
+                    ? Carbon::parse($item->tanggalSakit)->translatedFormat('d F Y')
+                    : '-';
+                $item->tanggalSembuh = $item->tanggalSembuh
+                    ? Carbon::parse($item->tanggalSembuh)->translatedFormat('d F Y')
+                    : '-';
                 return $item;
             });
+
+            if ($data['riwayatSakit']->isEmpty()) {
+                $data['riwayatSakit'] = [[
+                    'keluhan' => '-',
+                    'tanggalSakit' => '-',
+                    'tanggalSembuh' => '-',
+                    'keteranganSakit' => '-',
+                    'keteranganSembuh' => '-',
+                    'tindakan' => '-',
+                ]];
+            }
 
             $data['pemeriksaan'] = TbPemeriksaan::select([
                 'tb_pemeriksaan.tanggal_pemeriksaan AS tanggalPemeriksaan',
@@ -440,6 +491,17 @@ class DashboardAbahController extends Controller
                 return $item;
             });
 
+            if ($data['pemeriksaan']->isEmpty()) {
+                $data['pemeriksaan'] = [[
+                    'tanggalPemeriksaan' => '-',
+                    'tinggiBadan' => '-',
+                    'beratBadan' => '-',
+                    'lingkarPinggul' => '-',
+                    'lingkarDada' => '-',
+                    'kondisiGigi' => '-',
+                ]];
+            }
+
             $data['rawatInap'] = RawatInap::select([
                 'rawat_inap.tanggal_masuk AS tanggalMasuk',
                 'rawat_inap.keluhan',
@@ -451,9 +513,19 @@ class DashboardAbahController extends Controller
             ->get()
             ->map(function($item){
                 $item->tanggalMasuk = Carbon::parse($item->tanggalMasuk)->translatedFormat('d F Y');
+                $item->tanggalKeluar = Carbon::parse($item->tanggalKeluar)->translatedFormat('d F Y');
 
                 return $item;
             });
+
+            if ($data['rawatInap']->isEmpty()) {
+                $data['rawatInap'] = [[
+                    'tanggalMasuk' => '-',
+                    'keluhan' => '-',
+                    'terapi' => '-',
+                    'tanggalKeluar' => '-'
+                ]];
+            }
 
             $ketahfidzan = DetailSantriTahfidz::select([
                 'detail_santri_tahfidz.tanggal',
@@ -541,6 +613,19 @@ class DashboardAbahController extends Controller
                 return $item;
             });
 
+            if ($data['perilaku']->isEmpty()) {
+                $data['perilaku'] = [[
+                    'tanggal' => '-',
+                    'ketertiban' => '-',
+                    'kebersihan' => '-',
+                    'kedisiplinan' => '-',
+                    'kerapian' => '-',
+                    'kesopanan' => '-',
+                    'kepekaanLingkungan' => '-',
+                    'ketaatanPeraturan' => '-',
+                ]];
+            }
+
             $labelKelengkapan = ['Tidak Lengkap', 'Lengkap & Kurang baik', 'lengkap & baik'];
 
             $data['kelengkapan'] = Kelengkapan::select([
@@ -564,6 +649,18 @@ class DashboardAbahController extends Controller
 
                 return $item;
             });
+
+            if ($data['kelengkapan']->isEmpty()) {
+                $data['kelengkapan'] = [[
+                    'tanggal'   => '-',
+                    'perlengkapanMandi' => '-',
+                    'catatanMandi'  => '-',
+                    'peralatanSekolah'  => '-',
+                    'catatanSekolah'    => '-',
+                    'perlengkapanDiri'  => '-',
+                    'catatanDiri'   => '-',
+                ]];
+            }
 
             $bulan = [
                 1 => 'Januari', 2 => 'Februari', 3 => 'Maret', 4 => 'April',
@@ -656,7 +753,8 @@ class DashboardAbahController extends Controller
                     'id',
                     'photo',
                     'nama',
-                    'jenis_kelamin AS jenisKelamin'
+                    'jenis_kelamin AS jenisKelamin',
+                    'no_hp AS noHp',
                 ]);
 
             if ($search) {
@@ -964,9 +1062,12 @@ class DashboardAbahController extends Controller
                 DB::raw('NULL AS keluhan'),
                 DB::raw('NULL AS terapi'),
                 DB::raw('NULL AS tanggalKeluarRawatInap'),
+                'employee_new.nama AS namaMurroby',
             ])
             ->leftJoin('santri_detail', 'santri_detail.kelas', '=', 'ref_kelas.code')
             ->leftJoin('tb_kesehatan', 'tb_kesehatan.santri_id', '=', 'santri_detail.no_induk')
+            ->leftJoin('ref_kamar', 'ref_kamar.id', '=', 'santri_detail.kamar_id')
+            ->leftJoin('employee_new', 'employee_new.id', '=', 'ref_kamar.employee_id')
             ->whereNotNull('tb_kesehatan.id')
             ->whereBetween('tb_kesehatan.tanggal_sakit', [$startDate, $endDate]);
 
@@ -981,8 +1082,11 @@ class DashboardAbahController extends Controller
                 'rawat_inap.keluhan',
                 'rawat_inap.terapi',
                 'rawat_inap.tanggal_keluar AS tanggalKeluarRawatInap',
+                'employee_new.nama AS namaMurroby',
             ])
             ->leftJoin('santri_detail', 'santri_detail.kelas', '=', 'ref_kelas.code')
+            ->leftJoin('ref_kamar', 'ref_kamar.id', '=', 'santri_detail.kamar_id')
+            ->leftJoin('employee_new', 'employee_new.id', '=', 'ref_kamar.employee_id')
             ->leftJoin('rawat_inap', 'rawat_inap.santri_no_induk', '=', 'santri_detail.no_induk')
             ->whereNotNull('rawat_inap.id')
             ->whereBetween('rawat_inap.tanggal_masuk', [$startDate, $endDate]);
