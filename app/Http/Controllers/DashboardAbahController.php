@@ -1273,7 +1273,8 @@ class DashboardAbahController extends Controller
             $query = RefKamar::select(
                     'ref_kamar.id',
                     'ref_kamar.name AS namaKamar',
-                    'employee_new.nama AS murroby'
+                    'employee_new.nama AS murroby',
+                    'employee_new.photo AS fotoMurroby'
                 )
                 ->leftJoin('employee_new', 'ref_kamar.employee_id', '=', 'employee_new.id');
 
