@@ -34,6 +34,7 @@ class GlobalController extends Controller
             $santri = SantriDetail::select([
                 'santri_detail.nama',
                 'santri_detail.photo',
+                'santri_detail.kelas',
                 'santri_detail.tanggal_lahir AS tanggalLahir',
                 'murroby.nama AS namaMurroby',
                 'murroby.photo AS photoMurroby',
@@ -44,6 +45,7 @@ class GlobalController extends Controller
             ->whereDay('santri_detail.tanggal_lahir', $now->day)
             ->get()
             ->map(function ($item) use ($now) {
+                $item->kelas = strtoupper($item->kelas);
                 $item->ke = $item->tanggalLahir ? $now->year - Carbon::parse($item->tanggalLahir)->year : '-';
                 return $item;
             });
