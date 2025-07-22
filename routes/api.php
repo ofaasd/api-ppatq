@@ -17,6 +17,7 @@ use App\Http\Controllers\KesantrianController;
 use App\Http\Controllers\PelanggaranController;
 use App\Http\Controllers\ReplyKeluhanController;
 use App\Http\Controllers\DashboardAbahController;
+use App\Http\Controllers\GlobalController;
 use App\Http\Controllers\StaffPengasuhController;
 use App\Http\Controllers\KesehatanSantriController;
 use App\Http\Controllers\WaliSantriController;
@@ -91,6 +92,8 @@ Route::get('/kesantrian', [KesantrianController::class, 'index']);
 Route::get('/kelas-kamar', [KelasKamarController::class, 'index']);
 Route::get('/kelas/{id}', [KelasKamarController::class, 'showKelas']);
 Route::get('/kamar/{id}', [KelasKamarController::class, 'showKamar']);
+
+Route::get('/ulang-tahun', [GlobalController::class, 'ulangTahun']);
 
 Route::middleware('update.lastseen')->group(function () {
     // Autentikasi Ustad
