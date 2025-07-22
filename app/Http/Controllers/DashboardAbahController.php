@@ -1392,7 +1392,7 @@ class DashboardAbahController extends Controller
                     'tb_saku_masuk.jumlah AS jumlahMasuk',
                     'tb_saku_masuk.tanggal AS tanggalTransaksi',
                 ])
-                ->whereBetween('tanggalTransaksi', [$startDate, $endDate])
+                ->whereBetween('tb_saku_masuk.tanggal', [$startDate, $endDate])
                 ->orderBy('tanggalTransaksi', 'desc')
                 ->where('no_induk', $noInduk)
                 ->get();
@@ -1413,7 +1413,7 @@ class DashboardAbahController extends Controller
                     'employee_new.nama AS namaMurroby',
                 ])
                 ->leftJoin('employee_new', 'employee_new.id', 'tb_saku_keluar.pegawai_id')
-                ->whereBetween('tanggalTransaksi', [$startDate, $endDate])
+                ->whereBetween('tb_saku_keluar.tanggal', [$startDate, $endDate])
                 ->orderBy('tanggalTransaksi', 'desc')
                 ->where('no_induk', $noInduk)
                 ->get();
@@ -1441,7 +1441,7 @@ class DashboardAbahController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 "status"  => 500,
-                "message" => "Terjadi kesalahan saat menambah uang saku. Hubungi Faiz ganteng",
+                "message" => "Terjadi kesalahan. Hubungi Faiz ganteng",
                 "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
             ], 500);
         }
