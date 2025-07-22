@@ -1374,6 +1374,10 @@ class DashboardAbahController extends Controller
                 ])
                 ->where('no_induk', $noInduk)
                 ->first();
+            
+            $now = Carbon::now();
+            $startDate = $now->copy()->subMonth(2)->startOfDay()->timestamp;
+            $endDate = $now->endOfDay()->timestamp;
 
             $uangMasuk = DB::table('tb_saku_masuk')
                 ->select([
@@ -1388,6 +1392,7 @@ class DashboardAbahController extends Controller
                     'tb_saku_masuk.jumlah AS jumlahMasuk',
                     'tb_saku_masuk.tanggal AS tanggalTransaksi',
                 ])
+                ->whereBetween('tanggalTransaksi', [$startDate, $endDate])
                 ->orderBy('tanggalTransaksi', 'desc')
                 ->where('no_induk', $noInduk)
                 ->get();
@@ -1408,6 +1413,7 @@ class DashboardAbahController extends Controller
                     'employee_new.nama AS namaMurroby',
                 ])
                 ->leftJoin('employee_new', 'employee_new.id', 'tb_saku_keluar.pegawai_id')
+                ->whereBetween('tanggalTransaksi', [$startDate, $endDate])
                 ->orderBy('tanggalTransaksi', 'desc')
                 ->where('no_induk', $noInduk)
                 ->get();
