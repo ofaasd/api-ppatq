@@ -1008,6 +1008,88 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
 
                 return $item;
             });
+
+            if ($data->isEmpty()) {
+                $data = [[
+                    'id' => '-',
+                    'nama' => '-',
+                    'perlengkapan.tanggal' => '-',
+                    'buku' => '-',
+                    'bukuLayak' => '-',
+                    'pensil' => '-',
+                    'pensilLayak' => '-',
+                    'bolpoin' => '-',
+                    'bolpoinLayak' => '-',
+                    'penghapus' => '-',
+                    'penghapusLayak' => '-',
+                    'penyerut' => '-',
+                    'penyerutLayak' => '-',
+                    'penggaris' => '-',
+                    'penggarisLayak' => '-',
+                    'boxPensil' => '-',
+                    'boxPensilLayak' => '-',
+                    'putih' => '-',
+                    'putihLayak' => '-',
+                    'batik' => '-',
+                    'batikLayak' => '-',
+                    'coklat' => '-',
+                    'coklatLayak' => '-',
+                    'kerudung' => '-',
+                    'kerudungLayak' => '-',
+                    'peci' => '-',
+                    'peciLayak' => '-',
+                    'kaosKaki' => '-',
+                    'kaosKakiLayak' => '-',
+                    'sepatu' => '-',
+                    'sepatuLayak' => '-',
+                    'ikatPinggang' => '-',
+                    'ikatPinggangLayak' => '-',
+                    'mukenah' => '-',
+                    'mukenahLayak' => '-',
+                    'alQuran' => '-',
+                    'alQuranLayak' => '-',
+                    'jubahPpatq' => '-',
+                    'jubahPpatqLayak' => '-',
+                    'bajuHijauStel' => '-',
+                    'bajuHijauStelLayak' => '-',
+                    'bajuUnguStel' => '-',
+                    'bajuUnguStelLayak' => '-',
+                    'bajuMerahStel' => '-',
+                    'bajuMerahStelLayak' => '-',
+                    'kaosHijauStel' => '-',
+                    'kaosMerahStelLayak' => '-',
+                    'kaosUnguStel' => '-',
+                    'kaosUnguStelLayak' => '-',
+                    'kaosKuningStel' => '-',
+                    'kaosKuningStelLayak' => '-',
+                    'sabun' => '-',
+                    'sabunLayak' => '-',
+                    'shampo' => '-',
+                    'shampoLayak' => '-',
+                    'sikat' => '-',
+                    'sikatLayak' => '-',
+                    'pastaGigi' => '-',
+                    'pastaGigiLayak' => '-',
+                    'kotakSabun' => '-',
+                    'kotakSabunLayak' => '-',
+                    'handuk' => '-',
+                    'handukLayak' => '-',
+                    'kasur' => '-',
+                    'kasurLayak' => '-',
+                    'bantal' => '-',
+                    'bantalLayak' => '-',
+                    'guling' => '-',
+                    'gulingLayak' => '-',
+                    'sarungBantal' => '-',
+                    'sarungBantalLayak' => '-',
+                    'sarungGuling' => '-',
+                    'sarungGulingLayak' => '-',
+                    'sandal' => '-',
+                    'sandalLayak' => '-',
+                    'keterangan' => '-',
+                    'namaPengisi' => '-'
+                ]];
+            }
             
             return response()->json([
                 "status"  => 200,
@@ -1052,6 +1134,19 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
 
                 return $item;
             });
+
+            if ($data->isEmpty()) {
+                $data = [[
+                    'id' => '-',
+                    'nama' => '-',
+                    'tanggal' => '-',
+                    'jenisPelanggaran' => '-',
+                    'kategori' => '-',
+                    'hukuman' => '-',
+                    'bukti' => '-',
+                    'namaPengisi' => '-',
+                ]];
+            }
             
             return response()->json([
                 "status"  => 200,
@@ -1111,6 +1206,20 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
 
                 return $item;
             });
+
+            if ($data->isEmpty()) {
+                $data = [[
+                    'id' => '-',
+                    'nama' => '-',
+                    'tanggal' => '-',
+                    'keluar' => '-',
+                    'kembali' => '-',
+                    'status' => '-',
+                    'kategori' => '-',
+                    'kategoriPelanggaran' => '-',
+                    'namaPengisi' => '-',
+                ]];
+            }
             
             return response()->json([
                 "status"  => 200,
@@ -1174,6 +1283,20 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
 
                 return $item;
             });
+
+            if ($data->isEmpty()) {
+                $data = [[
+                    'id' => '-',
+                    'tanggal' => '-',
+                    'nama' => '-',
+                    'sandal' => '-',
+                    'sepatu' => '-',
+                    'boxJajan' => '-',
+                    'alatMandi' => '-',
+                    'tindakLanjut' => '-',
+                    'namaPengisi' => '-',
+                ]];
+            }
             
             return response()->json([
                 "status"  => 200,
@@ -1211,6 +1334,18 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
 
                 return $item;
             });
+
+            if ($data->isEmpty()) {
+                $data = [[
+                    'id' => '-',
+                    'tanggal' => '-',
+                    'nama' => '-',
+                    'buangSampah' => '-',
+                    'menataPeralatan' => '-',
+                    'tidakBerseragam' => '-',
+                    'namaPengisi' => '-',
+                ]];
+            }
             
             return response()->json([
                 "status"  => 200,

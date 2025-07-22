@@ -1392,6 +1392,14 @@ class DashboardAbahController extends Controller
                 ->where('no_induk', $noInduk)
                 ->get();
 
+            if ($uangMasuk->isEmpty()) {
+                $uangMasuk = [[
+                    'uangAsal' => '-',
+                    'jumlahMasuk' => '-',
+                    'tanggalTransaksi' => '-',
+                ]];
+            }
+
             $uangkeluar = DB::table('tb_saku_keluar')
                 ->select([
                     'tb_saku_keluar.jumlah AS jumlahKeluar',
@@ -1403,6 +1411,16 @@ class DashboardAbahController extends Controller
                 ->orderBy('tanggalTransaksi', 'desc')
                 ->where('no_induk', $noInduk)
                 ->get();
+            
+            if ($uangkeluar->isEmpty()) {
+                $uangkeluar = [[
+                    'jumlahKeluar' => '-',
+                    'catatan' => '-',
+                    'tanggalTransaksi' => '-',
+                    'namaMurroby' => '-'
+                ]];
+            }
+
             $data = [
                 'saldo' => $saldo ? $saldo->saldo : 0,
                 'uangMasuk' => $uangMasuk,
