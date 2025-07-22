@@ -1272,13 +1272,13 @@ class DashboardAbahController extends Controller
     public function kamar($search = null)
     {
         try {
-            $query = RefKamar::select(
-                    'ref_kamar.id',
-                    'ref_kamar.name AS namaKamar',
-                    'employee_new.nama AS murroby',
-                    'employee_new.photo AS fotoMurroby'
-                )
-                ->leftJoin('employee_new', 'ref_kamar.employee_id', '=', 'employee_new.id');
+            $query = RefKamar::selectRaw("
+                ref_kamar.id,
+                NULLIF(ref_kamar.name, '') AS namaKamar,
+                NULLIF(employee_new.nama, '') AS murroby,
+                NULLIF(employee_new.photo, '') AS fotoMurroby
+            ")
+            ->leftJoin('employee_new', 'ref_kamar.employee_id', '=', 'employee_new.id');
 
             // Jika ada parameter pencarian
             if ($search) {
