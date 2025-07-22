@@ -1429,6 +1429,7 @@ class DashboardAbahController extends Controller
 
             $data = [
                 'saldo' => $saldo ? $saldo->saldo : 0,
+                'waktu' => Carbon::createFromTimestamp($startDate)->translatedFormat('d F Y') . ' - ' . Carbon::createFromTimestamp($endDate)->translatedFormat('d F Y'),
                 'uangMasuk' => $uangMasuk,
                 'uangKeluar' => $uangkeluar,
             ];
