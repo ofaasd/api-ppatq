@@ -14,6 +14,7 @@ use App\Models\AsetRuang;
 use App\Models\AsetTanah;
 use App\Models\Kesehatan;
 use App\Models\RawatInap;
+use App\Models\Tunggakan;
 use App\Models\AsetBarang;
 use App\Models\pembayaran;
 use App\Models\RefTahfidz;
@@ -172,6 +173,11 @@ class DashboardAbahController extends Controller
             ->whereYear('tanggal_validasi', $tahun)
             ->sum('jumlah');
             $jumlahPembayaranLalu = number_format($bayarLalu, 0, ',', '.');
+            
+            $tunggakan = Tunggakan::where('status', 0)
+                ->where('bulan', $bulan)
+                ->where('tahun', $tahun)
+                ->sum('kekurangan');
 
             $kodeTertinggi = KodeJuz::max('urutan');
 
@@ -200,6 +206,7 @@ class DashboardAbahController extends Controller
                 'totalPembayaranUnvalidBulanIni'    => $totalPembayaranUnvalidBulanIni,       
                 'jumlahSantriBelumLapor'            => $jumlahSantriBelumLapor, 
                 'jumlahPembayaranLalu'              => $jumlahPembayaranLalu,
+                'tunggakan'                         => $tunggakan,
                 'tahfidzan'                         => $tahfidzan
             ];
 
