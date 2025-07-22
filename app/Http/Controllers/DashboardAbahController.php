@@ -1407,7 +1407,7 @@ class DashboardAbahController extends Controller
             if ($uangMasuk->isEmpty()) {
                 $uangMasuk = [[
                     'uangAsal' => '-',
-                    'jumlahMasuk' => '-',
+                    'jumlahMasuk' => 0,
                     'tanggalTransaksi' => '-',
                 ]];
             }
@@ -1427,7 +1427,7 @@ class DashboardAbahController extends Controller
             
             if ($uangkeluar->isEmpty()) {
                 $uangkeluar = [[
-                    'jumlahKeluar' => '-',
+                    'jumlahKeluar' => 0,
                     'catatan' => '-',
                     'tanggalTransaksi' => '-',
                     'namaMurroby' => '-'
