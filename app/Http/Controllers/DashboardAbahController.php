@@ -1430,6 +1430,7 @@ class DashboardAbahController extends Controller
                 'ref_kelas.code AS kode',
                 'ref_kelas.name AS namaKelas',
                 'employee_new.nama AS guru',
+                'employee_new.photo AS fotoGuru',
             ])
             ->leftJoin('employee_new', 'ref_kelas.employee_id','=','employee_new.id');
 
@@ -1444,7 +1445,13 @@ class DashboardAbahController extends Controller
             $query->orderByRaw("CAST(SUBSTRING(ref_kelas.code, 1, LENGTH(ref_kelas.code) - 1) AS UNSIGNED) ASC")
                 ->orderByRaw("SUBSTRING(ref_kelas.code, -1) ASC");
 
-            $data = $query->get();
+            $data = $query->get()->map(function ($item) {
+                $item->namaKelas = $item->namaKelas == '' ? null : $item->namaKelas;
+                $item->guru = $item->guru == '' ? null : $item->guru;
+                $item->fotoGuru = $item->fotoGuru == '' ? null : $item->fotoGuru;
+
+                return $item;
+            });
 
             return response()->json([
                 "status"  => 200,
@@ -1504,6 +1511,7 @@ class DashboardAbahController extends Controller
                 'ref_tahfidz.id',
                 'ref_tahfidz.name AS namaKelas',
                 'employee_new.nama AS guruTahfidz',
+                'employee_new.photo AS fotoGuruTahfidz',
             ])
             ->leftJoin('employee_new', 'ref_tahfidz.employee_id', '=', 'employee_new.id');
 
@@ -1518,7 +1526,13 @@ class DashboardAbahController extends Controller
             $query->orderByRaw("CAST(SUBSTRING(ref_tahfidz.code, 1, LENGTH(ref_tahfidz.code) - 1) AS UNSIGNED) ASC")
                 ->orderByRaw("SUBSTRING(ref_tahfidz.code, -1) ASC");
             
-            $data = $query->get();
+            $data = $query->get()->map(function ($item) {
+                $item->namaKelas = $item->namaKelas == '' ? null : $item->namaKelas;
+                $item->guruTahfidz = $item->guruTahfidz == '' ? null : $item->guruTahfidz;
+                $item->fotoGuruTahfidz = $item->fotoGuruTahfidz == '' ? null : $item->fotoGuruTahfidz;
+
+                return $item;
+            });
 
             return response()->json([
                 "status"  => 200,
@@ -1734,19 +1748,26 @@ class DashboardAbahController extends Controller
     {
         try{
 
-            $dataMurroby = EmployeeNew::select([
+            $query = EmployeeNew::select([
                 'photo',
                 'nama',
                 'jenis_kelamin AS jenisKelamin'
             ])
             ->where('status', 1)
-            ->where('jabatan_new', 13)
-            ->get();
+            ->where('jabatan_new', 13);
+
+            $data = $query->get()->map(function ($item) {
+                $item->photo = $item->photo == '' ? null : $item->photo;
+                $item->nama = $item->nama == '' ? null : $item->nama;
+                $item->jenisKelamin = $item->jenisKelamin == '' ? null : $item->jenisKelamin;
+
+                return $item;
+            });
 
             return response()->json([
                 "status"  => 200,
                 "message" => "Berhasil mengambil data",
-                "data"    => $dataMurroby
+                "data"    => $data
             ], 200);
         }catch (\Exception $e) {
             return response()->json([
