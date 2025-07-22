@@ -8,6 +8,7 @@ use App\Models\RefKamar;
 use App\Models\UangSaku;
 use App\Models\SakuMasuk;
 use App\Models\SakuKeluar;
+use App\Models\SantriDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -128,6 +129,9 @@ class UangSakuController extends Controller
                 'no_induk' => $request->noInduk,
                 'tanggal' => date('Y-m-d', strtotime($request->tanggal)),
             ]);
+
+            UangSaku::firstOrCreate(['no_induk' => $request->noInduk]);
+
             $saku = UangSaku::where('no_induk', $request->noInduk)->first();
             // Tambah saldo menggunakan trigger
 
@@ -200,59 +204,69 @@ class UangSakuController extends Controller
                 }
                 if($request->allKamar)
                 {
-                    $dataKamar = RefKamar::where('employee_id', $user->pegawai_id)
-                        ->select([
-                            'santri_detail.no_induk AS noIndukSantri',
-                            'santri_detail.nama AS namaSantri',
-                            'tb_uang_saku.jumlah AS jumlahSaldo',
-                        ])
-                        ->leftJoin('santri_kamar', 'santri_kamar.kamar_id', '=', 'ref_kamar.id')
-                        ->leftJoin('santri_detail', 'santri_detail.id', '=', 'santri_kamar.santri_id')
-                        ->leftJoin('tb_uang_saku', 'tb_uang_saku.no_induk', '=', 'santri_detail.no_induk')
-                        ->get();
+                    $refKamar = RefKamar::where('employee_id', $user->pegawai_id)->first();
+                    if(!$refKamar)
+                    {
+                        return response()->json([
+                            "status"    => 404,
+                            "message"   => "Anda bukan murroby.",
+                        ], 404);
+                    }
+                    
+                    $dataKamar = SantriDetail::select([
+                        'no_induk AS noIndukSantri',
+                        'nama AS namaSantri',
+                    ])
+                    ->where('kamar_id', $refKamar->id)->get();
 
-                        foreach($dataKamar as $row)
+                    foreach($dataKamar as $row)
+                    {
+                        $sakuKeluar = SakuKeluar::create([
+                            'pegawai_id' => $user->pegawai_id,
+                            'jumlah' => $jumlah,
+                            'no_induk' => $row->noIndukSantri,
+                            'note' => $request->note,
+                            'tanggal' => Carbon::parse($request->tanggal)->format('Y-m-d'),
+                        ]);
+                        
+                        UangSaku::firstOrCreate(['no_induk' => $row->noIndukSantri]);
+                        
+                        $saku = UangSaku::where('no_induk', $row->noIndukSantri)->first();
+                        if(!$saku)
                         {
-                            $sakuKeluar = SakuKeluar::create([
-                                'pegawai_id' => $user->pegawai_id,
-                                'jumlah' => $jumlah,
-                                'no_induk' => $row->noIndukSantri,
-                                'note' => $request->note,
-                                'tanggal' => Carbon::parse($request->tanggal)->format('Y-m-d'),
-                            ]);
-                            
-                            $saku = UangSaku::where('no_induk', $row->noIndukSantri)->first();
-                            if(!$saku)
-                            {
-                                return response()->json([
-                                    "status"    => 404,
-                                    "message"   => "Data uang saku {$row->namaSantri} tidak ditemukan.",
-                                ], 404);
-                            }
-                            // if($saku->jumlah <= $jumlah){
-                            //     return response()->json([
-                            //         "status"    => 400,
-                            //         "message"   => "Uang saku cukup {$row->namaSantri} tidak cukup.",
-                            //     ], 400);
-                            // }
-                            
-                            $updateSaku = UangSaku::find($saku->id);
-                            if(!$updateSaku)
-                            {
-                                return response()->json([
-                                    "status"    => 404,
-                                    "message"   => "Data uang saku tidak ditemukan.",
-                                ], 404);
-                            }
-
-                            $updateSaku->jumlah = $saku->jumlah - $jumlah;
-                            $updateSaku->save();
+                            return response()->json([
+                                "status"    => 404,
+                                "message"   => "Data uang saku {$row->namaSantri} tidak ditemukan.",
+                            ], 404);
                         }
+                        // if($saku->jumlah <= $jumlah){
+                        //     return response()->json([
+                        //         "status"    => 400,
+                        //         "message"   => "Uang saku cukup {$row->namaSantri} tidak cukup.",
+                        //     ], 400);
+                        // }
+                        
+                        // $updateSaku = UangSaku::find($saku->id);
+                        // if(!$updateSaku)
+                        // {
+                        //     return response()->json([
+                        //         "status"    => 404,
+                        //         "message"   => "Data uang saku tidak ditemukan.",
+                        //     ], 404);
+                        // }
+
+                        // $updateSaku->jumlah = $saku->jumlah - $jumlah;
+                        // $updateSaku->save();
+
+                        // Kurang saldo menggunakan trigger
+                    }
                     
                     DB::commit();
                     return response()->json("Semua uang saku santri telah dikurangi sebesar " . number_format($jumlah, 0, ',', '.'));
                 }else
                 {
+                    UangSaku::firstOrCreate(['no_induk' => $request->noInduk]);
+
                     $saku = UangSaku::where('no_induk', $request->noInduk)->first();
                     if (!$saku) {
                         return response()->json([
@@ -268,9 +282,11 @@ class UangSakuController extends Controller
                     //     ], 400);
                     // }
 
-                    $updateSaku = UangSaku::find($saku->id);
-                    $updateSaku->jumlah = $saku->jumlah - $jumlah;
-                    $updateSaku->save();
+                    // $updateSaku = UangSaku::find($saku->id);
+                    // $updateSaku->jumlah = $saku->jumlah - $jumlah;
+                    // $updateSaku->save();
+
+                    // Kurang saldo menggunakan trigger
 
                     $sakuKeluar = SakuKeluar::create([
                         'pegawai_id' => $user->pegawai_id,
@@ -280,7 +296,7 @@ class UangSakuController extends Controller
                         'tanggal' => Carbon::parse($request->tanggal)->format('Y-m-d'),
                     ]);
 
-                    $sisaSaldo = $updateSaku->jumlah;
+                    $sisaSaldo = $saku->jumlah;
                     DB::commit();
                     return response()->json('Uang keluar sebesar Rp ' . number_format($jumlah, 0, ',', '.') . ', Sisa Saldo Rp ' . number_format($sisaSaldo, 0, ',', '.'));
                 }
