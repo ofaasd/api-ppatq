@@ -276,7 +276,7 @@ class AbahKeuanganController extends Controller
             $baris['namaSantri'] = $dataSantri->nama ?? '-';
 
             // Kelas
-            $baris['kelas'] = $dataSantri->kelas ?? '-';
+            $baris['kelas'] = strtoupper($dataSantri->kelas) ?? '-';
 
             // Tanggal bayar
             $baris['tanggalBayar'] = Carbon::parse($row->tanggal_bayar)->translatedFormat('d F Y');
