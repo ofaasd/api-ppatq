@@ -76,6 +76,8 @@ Route::prefix('abah')->group(function () {
     // Dawuh Abah
     Route::prefix('keuangan')->group(function () {
         
+        Route::get('/catatan', [AbahKeuanganController::class, 'catatan']);
+
         Route::get('/saku/{idKamar}', [AbahKeuanganController::class, 'saku']);
         Route::get('/lapor-bayar', [AbahKeuanganController::class, 'laporBayar']);
 

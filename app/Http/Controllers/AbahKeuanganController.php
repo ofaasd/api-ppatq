@@ -15,6 +15,8 @@ use App\Models\RefBank;
 use App\Models\SantriDetail;
 use App\Models\RefJenisPembayaran;
 use App\Models\RefKamar;
+use App\Models\UangKeluar;
+use App\Models\UangMasuk;
 
 class AbahKeuanganController extends Controller
 {
@@ -26,6 +28,53 @@ class AbahKeuanganController extends Controller
         $this->bulan = (int) date('m');
         $this->tahun = (int) date('Y');
     }
+
+    public function catatan()
+    {
+        try {
+            $masuk = UangMasuk::select([
+                'tanggal_transaksi AS tanggalTransaksi',
+                'sumber',
+                'jumlah',
+                'nama_kegiatan AS namaKegiatan',
+            ])
+            ->get()
+            ->map(function ($item) {
+                $item->tanggalTransaksi = Carbon::parse($item->tanggalTransaksi)->translatedFormat('d F Y');
+                $item->jumlah = number_format($item->jumlah, 0, ",", ".");
+                return $item;
+            });
+
+            $keluar = UangKeluar::select([
+                'tanggal_transaksi AS tanggalTransaksi',
+                'keterangan',
+                'jumlah',
+                'nama_kegiatan AS namaKegiatan',
+            ])
+            ->get()
+            ->map(function ($item) {
+                $item->tanggalTransaksi = Carbon::parse($item->tanggalTransaksi)->translatedFormat('d F Y');
+                $item->jumlah = number_format($item->jumlah, 0, ",", ".");
+                return $item;
+            });
+
+            return response()->json([
+                "status"  => 200,
+                "message" => "Berhasil mengambil data",
+                "data"    => [
+                    'masuk' => $masuk,
+                    'keluar'   => $keluar,
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                "status"  => 500,
+                "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
+                "error"   => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function saku($idKamar)
     {
         try {

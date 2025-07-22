@@ -236,6 +236,7 @@ class DashboardAbahController extends Controller
                     'psb_peserta_online.jenis_kelamin AS jenisKelamin',
                     'cities.city_name AS asal'
                 ])
+                ->orderBy('psb_peserta_online.nama')
                 ->leftJoin('cities', 'cities.city_id', '=', 'psb_peserta_online.kota_id');
 
             if ($search) {
@@ -280,6 +281,7 @@ class DashboardAbahController extends Controller
                 ->leftJoin('cities', 'cities.city_id', '=', 'santri_detail.kabkota')
                 ->leftJoin('ref_kelas', 'ref_kelas.code', '=', 'santri_detail.kelas')
                 ->leftJoin('employee_new', 'employee_new.id', '=', 'ref_kelas.employee_id')
+                ->orderBy('santri_detail.nama')
                 ->where('santri_detail.status', 0);
 
             if ($search) {
@@ -340,6 +342,7 @@ class DashboardAbahController extends Controller
                     'tb_alumni_santri_detail.bidang_profesi AS bidangProfesi',
                     'tb_alumni_santri_detail.posisi_profesi AS posisiProfesi'
                 )
+                ->orderBy('tb_alumni_santri_detail.nama')
                 ->leftJoin('tb_alumni', 'tb_alumni_santri_detail.no_induk', '=', 'tb_alumni.no_induk')
                 ->leftJoin('ref_kamar', 'tb_alumni_santri_detail.kamar_id', '=', 'ref_kamar.id')
                 ->leftJoin('ref_kelas', 'tb_alumni_santri_detail.kelas', '=', 'ref_kelas.code')
@@ -766,6 +769,7 @@ class DashboardAbahController extends Controller
                     'jenis_kelamin AS jenisKelamin',
                     'no_hp AS noHp',
                 ])
+                ->orderBy('nama')
                 ->where('status', 1);
 
             if ($search) {
@@ -786,6 +790,7 @@ class DashboardAbahController extends Controller
             return response()->json([
                 "status"  => 500,
                 "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
+                "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
             ], 500);
         }
     }
@@ -922,6 +927,7 @@ class DashboardAbahController extends Controller
                 'pelanggaran.bukti',
             ])
             ->where('pelanggaran.kategori', $kodeKategori)
+            ->orderBy('santri_detail.nama')
             ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'pelanggaran.no_induk')
             ->leftJoin('users', 'users.id', '=', 'pelanggaran.by_id')
             ->leftJoin('employee_new', 'employee_new.id', '=', 'users.pegawai_id');
@@ -958,12 +964,127 @@ class DashboardAbahController extends Controller
         try {
             $now = Carbon::now();
 
+            $listData = Kelengkapan::selectRaw("
+                    SUM(perlengkapan_mandi = 0) as mandiTidakLengkap,
+                    SUM(perlengkapan_mandi = 1) as mandiLengkapKurang,
+                    SUM(perlengkapan_mandi = 2) as mandiLengkapBaik,
+
+                    SUM(peralatan_sekolah = 0) as sekolahTidakLengkap,
+                    SUM(peralatan_sekolah = 1) as sekolahLengkapKurang,
+                    SUM(peralatan_sekolah = 2) as sekolahLengkapBaik,
+
+                    SUM(perlengkapan_diri = 0) as diriTidakLengkap,
+                    SUM(perlengkapan_diri = 1) as diriLengkapKurang,
+                    SUM(perlengkapan_diri = 2) as diriLengkapBaik
+                ")
+                ->whereMonth('tanggal', $now->month)
+                ->whereYear('tanggal', $now->year)
+                ->distinct('no_induk')
+                ->get();
+
+            $data = [
+                'bulan' => $now->translatedFormat('F'),
+                'listData' => $listData
+            ];
+
+            return response()->json([
+                "status"  => 200,
+                "message" => "Berhasil mengambil data kelengkapan bulan ini",
+                "data"    => $data
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                "status"  => 500,
+                "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
+                "error"   => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function perlengkapan()
+    {
+        try {
+            $now = Carbon::now();
+
             $rowData = SantriDetail::select([
                 'santri_detail.no_induk AS noInduk',
                 'santri_detail.photo',
                 'santri_detail.nama',
                 'santri_detail.jenis_kelamin AS jenisKelamin',
-                'kode_juz.nama AS capaianTerakhir'
+                'perlengkapan.tanggal',
+                'perlengkapan.buku AS buku',
+                'perlengkapan.buku_layak AS bukuLayak',
+                'perlengkapan.pensil AS pensil',
+                'perlengkapan.pensil_layak AS pensilLayak',
+                'perlengkapan.bolpoin AS bolpoin',
+                'perlengkapan.bolpoin_layak AS bolpoinLayak',
+                'perlengkapan.penghapus AS penghapus',
+                'perlengkapan.penghapus_layak AS penghapusLayak',
+                'perlengkapan.penyerut AS penyerut',
+                'perlengkapan.penyerut_layak AS penyerutLayak',
+                'perlengkapan.penggaris AS penggaris',
+                'perlengkapan.penggaris_layak AS penggarisLayak',
+                'perlengkapan.box_pensil AS boxPensil',
+                'perlengkapan.box_pensil_layak AS boxPensilLayak',
+                'perlengkapan.putih AS putih',
+                'perlengkapan.putih_layak AS putihLayak',
+                'perlengkapan.batik AS batik',
+                'perlengkapan.batik_layak AS batikLayak',
+                'perlengkapan.coklat AS coklat',
+                'perlengkapan.coklat_layak AS coklatLayak',
+                'perlengkapan.kerudung AS kerudung',
+                'perlengkapan.kerudung_layak AS kerudungLayak',
+                'perlengkapan.peci AS peci',
+                'perlengkapan.peci_layak AS peciLayak',
+                'perlengkapan.kaos_kaki AS kaosKaki',
+                'perlengkapan.kaos_kaki_layak AS kaosKakiLayak',
+                'perlengkapan.sepatu AS sepatu',
+                'perlengkapan.sepatu_layak AS sepatuLayak',
+                'perlengkapan.ikat_pinggang AS ikatPinggang',
+                'perlengkapan.ikat_pinggang_layak AS ikatPinggangLayak',
+                'perlengkapan.mukenah AS mukenah',
+                'perlengkapan.mukenah_layak AS mukenahLayak',
+                'perlengkapan.al_quran AS alQuran',
+                'perlengkapan.al_quran_layak AS alQuranLayak',
+                'perlengkapan.jubah_ppatq AS jubahPpatq',
+                'perlengkapan.jubah_ppatq_layak AS jubahPpatqLayak',
+                'perlengkapan.baju_hijau_stel AS bajuHijauStel',
+                'perlengkapan.baju_hijau_stel_layak AS bajuHijauStelLayak',
+                'perlengkapan.baju_ungu_stel AS bajuUnguStel',
+                'perlengkapan.baju_ungu_stel_layak AS bajuUnguStelLayak',
+                'perlengkapan.baju_merah_stel AS bajuMerahStel',
+                'perlengkapan.baju_merah_stel_layak AS bajuMerahStelLayak',
+                'perlengkapan.kaos_hijau_stel AS kaosHijauStel',
+                'perlengkapan.kaos_merah_stel_layak AS kaosMerahStelLayak',
+                'perlengkapan.kaos_ungu_stel AS kaosUnguStel',
+                'perlengkapan.kaos_ungu_stel_layak AS kaosUnguStelLayak',
+                'perlengkapan.kaos_kuning_stel AS kaosKuningStel',
+                'perlengkapan.kaos_kuning_stel_layak AS kaosKuningStelLayak',
+                'perlengkapan.sabun AS sabun',
+                'perlengkapan.sabun_layak AS sabunLayak',
+                'perlengkapan.shampo AS shampo',
+                'perlengkapan.shampo_layak AS shampoLayak',
+                'perlengkapan.sikat AS sikat',
+                'perlengkapan.sikat_layak AS sikatLayak',
+                'perlengkapan.pasta_gigi AS pastaGigi',
+                'perlengkapan.pasta_gigi_layak AS pastaGigiLayak',
+                'perlengkapan.kotak_sabun AS kotakSabun',
+                'perlengkapan.kotak_sabun_layak AS kotakSabunLayak',
+                'perlengkapan.handuk AS handuk',
+                'perlengkapan.handuk_layak AS handukLayak',
+                'perlengkapan.kasur AS kasur',
+                'perlengkapan.kasur_layak AS kasurLayak',
+                'perlengkapan.bantal AS bantal',
+                'perlengkapan.bantal_layak AS bantalLayak',
+                'perlengkapan.guling AS guling',
+                'perlengkapan.guling_layak AS gulingLayak',
+                'perlengkapan.sarung_bantal AS sarungBantal',
+                'perlengkapan.sarung_banta_layakl AS sarungBantalLayak',
+                'perlengkapan.sarung_guling AS sarungGuling',
+                'perlengkapan.sarung_guling_layak AS sarungGulingLayak',
+                'perlengkapan.sandal AS sandal',
+                'perlengkapan.sandal_layak AS sandalLayak',
+                'perlengkapan.keterangan AS keterangan',
             ])
             ->leftJoin('perlengkapan', function($join) {
                 $join->on('perlengkapan.no_induk', '=', 'santri_detail.no_induk');
@@ -980,7 +1101,444 @@ class DashboardAbahController extends Controller
             ->whereMonth('perlengkapan.tanggal', $now->month)
             ->whereYear('perlengkapan.tanggal', $now->year)
             ->distinct('noInduk')
-            ->get();
+            ->get()
+            ->map(function($item){
+                $item->tanggal = Carbon::parse($item->tanggal)->translatedFormat('d F Y');
+
+                $item->buku = match ($item->buku) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->bukuLayak = match ($item->bukuLayak) { // Note: Changed to $item->bukuLayak
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->pensil = match ($item->pensil) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->pensilLayak = match ($item->pensilLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->bolpoin = match ($item->bolpoin) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->bolpoinLayak = match ($item->bolpoinLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->penghapus = match ($item->penghapus) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->penghapusLayak = match ($item->penghapusLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->penyerut = match ($item->penyerut) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->penyerutLayak = match ($item->penyerutLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->penggaris = match ($item->penggaris) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->penggarisLayak = match ($item->penggarisLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->boxPensil = match ($item->boxPensil) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->boxPensilLayak = match ($item->boxPensilLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->putih = match ($item->putih) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->putihLayak = match ($item->putihLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->batik = match ($item->batik) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->batikLayak = match ($item->batikLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->coklat = match ($item->coklat) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->coklatLayak = match ($item->coklatLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->kerudung = match ($item->kerudung) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->kerudungLayak = match ($item->kerudungLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->peci = match ($item->peci) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->peciLayak = match ($item->peciLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->kaosKaki = match ($item->kaosKaki) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->kaosKakiLayak = match ($item->kaosKakiLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->sepatu = match ($item->sepatu) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->sepatuLayak = match ($item->sepatuLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->ikatPinggang = match ($item->ikatPinggang) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->ikatPinggangLayak = match ($item->ikatPinggangLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->mukenah = match ($item->mukenah) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->mukenahLayak = match ($item->mukenahLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->alQuran = match ($item->alQuran) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->alQuranLayak = match ($item->alQuranLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->jubahPpatq = match ($item->jubahPpatq) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->jubahPpatqLayak = match ($item->jubahPpatqLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->bajuHijauStel = match ($item->bajuHijauStel) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->bajuHijauStelLayak = match ($item->bajuHijauStelLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->bajuUnguStel = match ($item->bajuUnguStel) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->bajuUnguStelLayak = match ($item->bajuUnguStelLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->bajuMerahStel = match ($item->bajuMerahStel) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->bajuMerahStelLayak = match ($item->bajuMerahStelLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->kaosHijauStel = match ($item->kaosHijauStel) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->kaosMerahStelLayak = match ($item->kaosMerahStelLayak) { // Corrected from kaos_merah_stel to kaosMerahStelLayak
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->kaosUnguStel = match ($item->kaosUnguStel) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->kaosUnguStelLayak = match ($item->kaosUnguStelLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->kaosKuningStel = match ($item->kaosKuningStel) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->kaosKuningStelLayak = match ($item->kaosKuningStelLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->sabun = match ($item->sabun) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->sabunLayak = match ($item->sabunLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->shampo = match ($item->shampo) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->shampoLayak = match ($item->shampoLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->sikat = match ($item->sikat) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->sikatLayak = match ($item->sikatLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->pastaGigi = match ($item->pastaGigi) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->pastaGigiLayak = match ($item->pastaGigiLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->kotakSabun = match ($item->kotakSabun) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->kotakSabunLayak = match ($item->kotakSabunLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->handuk = match ($item->handuk) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->handukLayak = match ($item->handukLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->kasur = match ($item->kasur) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->kasurLayak = match ($item->kasurLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->bantal = match ($item->bantal) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->bantalLayak = match ($item->bantalLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->guling = match ($item->guling) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->gulingLayak = match ($item->gulingLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->sarungBantal = match ($item->sarungBantal) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->sarungBantalLayak = match ($item->sarungBantalLayak) { // Corrected from sarung_banta_layakl to sarungBantalLayak
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->sarungGuling = match ($item->sarungGuling) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->sarungGulingLayak = match ($item->sarungGulingLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                $item->sandal = match ($item->sandal) {
+                    0 => "Tidak Punya",
+                    1 => "Punya",
+                    default => "-"
+                };
+
+                $item->sandalLayak = match ($item->sandalLayak) {
+                    0 => "Tidak Layak",
+                    1 => "Layak",
+                    default => "-"
+                };
+
+                return $item;
+            });
 
 
             $data = [
@@ -990,7 +1548,7 @@ class DashboardAbahController extends Controller
 
             return response()->json([
                 "status"  => 200,
-                "message" => "Berhasil mengambil data kelengkapan bulan ini",
+                "message" => "Berhasil mengambil data perlengkapan bulan ini",
                 "data"    => $data
             ], 200);
         } catch (\Exception $e) {
@@ -1017,6 +1575,7 @@ class DashboardAbahController extends Controller
                 ])
                 ->whereBetween('tanggal_sakit', [$startDate, $endDate])
                 ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'tb_kesehatan.santri_id')
+                ->orderBy('santri_detail.nama')
                 ->get();
 
             $getSantriRawatInap = RawatInap::select([
@@ -1285,6 +1844,7 @@ class DashboardAbahController extends Controller
                 NULLIF(employee_new.nama, '') AS murroby,
                 NULLIF(employee_new.photo, '') AS fotoMurroby
             ")
+            ->orderBy('murroby')
             ->leftJoin('employee_new', 'ref_kamar.employee_id', '=', 'employee_new.id');
 
             // Jika ada parameter pencarian
@@ -1545,6 +2105,7 @@ class DashboardAbahController extends Controller
                 'employee_new.nama AS guruTahfidz',
                 'employee_new.photo AS fotoGuruTahfidz',
             ])
+            ->orderBy('guruTahfidz')
             ->leftJoin('employee_new', 'ref_tahfidz.employee_id', '=', 'employee_new.id');
 
             // Jika ada parameter pencarian
@@ -1760,6 +2321,7 @@ class DashboardAbahController extends Controller
             ])
             ->where('status', 1)
             ->where('jabatan_new', 12)
+            ->orderBy('nama')
             ->get();
 
             return response()->json([
@@ -1786,6 +2348,7 @@ class DashboardAbahController extends Controller
                 'jenis_kelamin AS jenisKelamin'
             ])
             ->where('status', 1)
+            ->orderBy('nama')
             ->where('jabatan_new', 13);
 
             $data = $query->get()->map(function ($item) {
@@ -1880,6 +2443,7 @@ class DashboardAbahController extends Controller
             ->leftJoin('santri_detail', 'santri_detail.id', '=', 'kurban.id_santri')
             ->where('jenis', $kodeJenis)
             ->where('tahun_hijriah', $maxTahun)
+            ->orderBy('santri_detail.nama')
             ->get();
 
             $data = [
