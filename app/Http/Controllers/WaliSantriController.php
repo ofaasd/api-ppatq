@@ -255,7 +255,13 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                 'tb_kesehatan.tindakan',
             ])
             ->where('santri_id',$noInduk)
-            ->get();
+            ->get()
+            ->map(function ($item) {
+                $item->tanggalSakit = $item->tanggalSakit ? Carbon::parse($item->tanggalSakit)->translatedFormat('d F Y') : '-';
+                $item->tanggalSembuh = $item->tanggalSembuh ? Carbon::parse($item->tanggalSembuh)->translatedFormat('d F Y') : '-';
+
+                return $item;
+            });
 
             $Pemeriksaan = TbPemeriksaan::select([
                 'tb_pemeriksaan.tanggal_pemeriksaan AS tanggalPemeriksaan',
@@ -266,7 +272,12 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                 'tb_pemeriksaan.kondisi_gigi AS kondisiGigi',
             ])
             ->where('no_induk',$noInduk)
-            ->get();
+            ->get()
+            ->map(function ($item) {
+                $item->tanggalPemeriksaan = $item->tanggalPemeriksaan ? Carbon::parse($item->tanggalPemeriksaan)->translatedFormat('d F Y') : '-';
+
+                return $item;
+            });
 
             $rawatInap = RawatInap::select([
                 'rawat_inap.tanggal_masuk AS tanggalMasuk',
@@ -275,7 +286,13 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                 'rawat_inap.tanggal_keluar AS tanggalKeluar',
             ])
             ->where('santri_no_induk',$noInduk)
-            ->get();
+            ->get()
+            ->map(function ($item) {
+                $item->tanggalMasuk = $item->tanggalMasuk ? Carbon::parse($item->tanggalMasuk)->translatedFormat('d F Y') : '-';
+                $item->tanggalKeluar = $item->tanggalKeluar ? Carbon::parse($item->tanggalKeluar)->translatedFormat('d F Y') : '-';
+
+                return $item;
+            });
 
             $data = [
                 'status'   => 200,
@@ -412,7 +429,7 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
             ->where('no_induk', $noInduk)
             ->get()
             ->map(function ($item) use ($labelPerilaku) {
-                $item->tanggal = $item->tanggal ? Carbon::parse($item->tanggal)->format('Y-m-d') : '-';
+                $item->tanggal = $item->tanggal ? Carbon::parse($item->tanggal)->translatedFormat('d F Y') : '-';
 
                 $item->ketertiban = $labelPerilaku[$item->ketertiban] ?? '-';
                 $item->kebersihan = $labelPerilaku[$item->kebersihan] ?? '-';
@@ -459,7 +476,7 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
             ->where('no_induk', $noInduk)
             ->get()
             ->map(function ($item) use ($labelKelengkapan) {
-                $item->tanggal = $item->tanggal ? Carbon::parse($item->tanggal)->format('Y-m-d') : '-';
+                $item->tanggal = $item->tanggal ? Carbon::parse($item->tanggal)->translatedFormat('d F Y') : '-';
 
                 $item->perlengkapanMandi = $labelKelengkapan[$item->perlengkapanMandi] ?? '-';
                 $item->peralatanSekolah = $labelKelengkapan[$item->peralatanSekolah] ?? '-';
