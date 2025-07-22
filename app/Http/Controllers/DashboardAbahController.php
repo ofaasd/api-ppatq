@@ -70,6 +70,7 @@ class DashboardAbahController extends Controller
         if (is_null($capaianData)) {
             return [
                 'capaian' => 'Belum ada aktivitas ketahfidzan',
+                'jumlah' => 0,
                 'santri' => collect(), // Return an empty collection
             ];
         }
@@ -102,6 +103,7 @@ class DashboardAbahController extends Controller
 
         return [
             'capaian' => $capaianData->capaian_text ?? 'Belum ada aktivitas ketahfidzan',
+            'jumlah' => $santri->count(),
             'santri' => $santri,
         ];
     }
