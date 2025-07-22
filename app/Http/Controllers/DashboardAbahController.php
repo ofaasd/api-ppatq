@@ -1399,7 +1399,7 @@ class DashboardAbahController extends Controller
                     'tb_saku_masuk.jumlah AS jumlahMasuk',
                     'tb_saku_masuk.tanggal AS tanggalTransaksi',
                 ])
-                ->whereBetween('tb_saku_masuk.tanggal', [$startDate, $endDate])
+                // ->whereBetween('tb_saku_masuk.tanggal', [$startDate, $endDate])
                 ->orderBy('tanggalTransaksi', 'desc')
                 ->where('no_induk', $noInduk)
                 ->get();
@@ -1420,7 +1420,7 @@ class DashboardAbahController extends Controller
                     'employee_new.nama AS namaMurroby',
                 ])
                 ->leftJoin('employee_new', 'employee_new.id', 'tb_saku_keluar.pegawai_id')
-                ->whereBetween('tb_saku_keluar.tanggal', [$startDate, $endDate])
+                // ->whereBetween('tb_saku_keluar.tanggal', [$startDate, $endDate])
                 ->orderBy('tanggalTransaksi', 'desc')
                 ->where('no_induk', $noInduk)
                 ->get();
