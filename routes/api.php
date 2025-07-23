@@ -99,6 +99,9 @@ Route::get('/ulang-tahun', [GlobalController::class, 'ulangTahun']);
 // Capaian Tahfidz
 Route::get('/capaian-tahfidz', [GlobalController::class, 'capaianTahfidz']);
 
+// Alumni
+Route::get('/alumni/{search?}', [DashboardAbahController::class, 'alumni']);
+
 Route::middleware('update.lastseen')->group(function () {
     // Autentikasi Ustad
     Route::post('/ustad/login', [MurrobyController::class, 'login']);

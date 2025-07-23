@@ -66,5 +66,6 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'update.lastseen' => \App\Http\Middleware\UpdateLastSeen::class,
+        'api-abah' => \App\Http\Middleware\AksesAbah::class,
     ];
 }

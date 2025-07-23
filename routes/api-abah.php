@@ -7,7 +7,7 @@ use App\Http\Controllers\ReplyKeluhanController;
 use App\Http\Controllers\UstadTahfidzController;
 use App\Http\Controllers\DashboardAbahController;
 
-Route::prefix('abah')->group(function () {
+Route::middleware(['api-abah'])->prefix('abah')->group(function () {
     Route::get('/dashboard', [DashboardAbahController::class, 'index']);
     Route::get('/psb/{search?}', [DashboardAbahController::class, 'psb']);
 
