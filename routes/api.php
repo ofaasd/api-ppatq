@@ -93,7 +93,11 @@ Route::get('/kelas-kamar', [KelasKamarController::class, 'index']);
 Route::get('/kelas/{id}', [KelasKamarController::class, 'showKelas']);
 Route::get('/kamar/{id}', [KelasKamarController::class, 'showKamar']);
 
+// Ulang Tahun  
 Route::get('/ulang-tahun', [GlobalController::class, 'ulangTahun']);
+
+// Capaian Tahfidz
+Route::get('/capaian-tahfidz', [GlobalController::class, 'capaianTahfidz']);
 
 Route::middleware('update.lastseen')->group(function () {
     // Autentikasi Ustad
