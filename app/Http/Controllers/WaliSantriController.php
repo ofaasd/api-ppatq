@@ -221,6 +221,31 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
         }
     }
 
+    public function saldo($noInduk)
+    {
+        $saldo = DetailSantri::select([
+            'santri_detail.nama',
+            'santri_detail.photo',
+            'tb_uang_saku.jumlah AS saldo',
+        ])
+        ->leftJoin('tb_uang_saku', 'tb_uang_saku.no_induk', '=', 'santri_detail.no_induk')
+        ->where('santri_detail.no_induk', $noInduk)
+        ->first();
+
+        if ($saldo) {
+            return response()->json([
+                'status' => 200,
+                'message' => 'Berhasil mengambil data.',
+                'data' => $saldo
+            ], 200);
+        }
+
+        return response()->json([
+            'status' => 404,
+            'message' => 'Data saldo tidak ditemukan'
+        ], 404);
+    }
+
     public function logout(Request $request)
     {
         $user = $request->user();

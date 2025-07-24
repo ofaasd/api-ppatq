@@ -9,7 +9,9 @@ Route::prefix('wali-santri')->group(function () {
 
     Route::middleware(['auth:api-siswa', 'update.lastseen'])->group(function () {
         Route::post('/logout', [WaliSantriController::class, 'logout']);
-        
+
+        Route::get('/saldo/{noInduk}', [WaliSantriController::class, 'saldo']);
+
         Route::get('/kesehatan/{noInduk}', [WaliSantriController::class, 'kesehatan']);
         Route::get('/ketahfidzan/{noInduk}', [WaliSantriController::class, 'ketahfidzan']);
         Route::get('/perilaku/{noInduk}', [WaliSantriController::class, 'perilaku']);
