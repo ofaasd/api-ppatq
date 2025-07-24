@@ -38,6 +38,7 @@ use Illuminate\Validation\Rules\File;
 use Intervention\Image\Facades\Image;
 use App\Http\Resources\WaliSantriResource;
 use App\Http\Requests\LoginWaliSantriRequest;
+use App\Models\JenisPembayaran;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 class WaliSantriController extends Controller
@@ -1433,51 +1434,16 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
 
     public function laporBayar(Request $request)
     {
-        if($request->validate([
-            'bukti' => [
-                'required',
-                File::types(['jpg', 'jpeg', 'png', 'pdf'])->max(10 * 1024), // maks 10MB
-            ],
-        ]))
-        {
-            $data2 = [
-                'nama_santri' => $request->noInduk,
-                'jumlah' => $request->jumlah,
-                'tanggal_bayar' => $request->tanggalBayar,
-                'periode' => $request->periode,
-                'tahun' => $request->tahun,
-                'bank_pengirim' => $request->bankPengirim,
-                'atas_nama' => $request->atasNama,
-                'no_wa' => $request->noWa,
-                'is_hapus' => 0,
-            ];
-            $cek = pembayaran::where($data2)->count();
-            $data = [];
-            if($cek > 0){
-                return response()->json([
-                    'status'    => 409,
-                    'message'   => 'Data sudah ada.',
-                ], 409);
-            }
-
-            if($request->file('bukti')){
-
-                $file = $request->file('bukti');
-                $ekstensi = $file->extension();
-                if(strtolower($ekstensi) == 'jpg' || strtolower($ekstensi) == 'png' || strtolower($ekstensi) == 'jpeg'){
-                    $filename = date('YmdHis') . $file->getClientOriginalName();
-
-                    $kompres = Image::make($file)
-                    ->resize(800, null, function ($constraint) {
-                        $constraint->aspectRatio();
-                    })
-                    ->save('assets/upload/bukti_bayar/' . $filename);
-
-                }else{
-                    $filename = date('YmdHis') . $file->getClientOriginalName();
-                    $file->move('assets/upload/bukti_bayar/',$filename);
-                }
-                $data = [
+        DB::beginTransaction();
+        try{
+            if($request->validate([
+                'bukti' => [
+                    'required',
+                    File::types(['jpg', 'jpeg', 'png', 'pdf'])->max(10 * 1024), // maks 10MB
+                ],
+            ]))
+            {
+                $data2 = [
                     'nama_santri' => $request->noInduk,
                     'jumlah' => $request->jumlah,
                     'tanggal_bayar' => $request->tanggalBayar,
@@ -1486,52 +1452,113 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                     'bank_pengirim' => $request->bankPengirim,
                     'atas_nama' => $request->atasNama,
                     'no_wa' => $request->noWa,
-                    'catatan' => $request->catatan,
-                    'tipe' => 'Bank',
-                    'created_at' => date('Y-m-d H:i:s'),
-                    'bukti' => $filename,
-                    'input_by' => 3, //input lewat api / aplikasi
+                    'is_hapus' => 0,
                 ];
-                $insertPembayaran = pembayaran::insert($data);
-                $id = DB::getPdo()->lastInsertId();
-                $jenisPembayaran = $request->jenisPembayaran;
-                $idJenisPembayaran = $request->idJenisPembayaran;
-                $totalRincian = 0;
-
-                foreach($jenisPembayaran as $key=>$value){
-                    if($value != 0 && !empty($value)){
-
-                        $dataDetail = [
-                            'id_pembayaran'=>$id,
-                            'id_jenis_pembayaran' => $idJenisPembayaran[$key],
-                            'nominal' => $value,
-                        ];
-                        $query = detailPembayaran::insert($dataDetail);
-                        $totalRincian += $value;
-                    }
-
-                    if($idJenisPembayaran == 3){
-                        $data_saku = [
-                            'dari' => 1,
-                            'jumlah' => $value,
-                            'tanggal' => $request->tanggalBayar,
-                            'no_induk' => $request->noInduk,
-                            'id_pembayaran' => $id,
-                            'status_pembayaran' => 0
-                        ];
-                        $query2 = SakuMasuk::insert($data_saku);
-                    }
-                }
-
-                if($totalRincian != $request->jumlah)
-                {
+                $cek = pembayaran::where($data2)->count();
+                $data = [];
+                if($cek > 0){
                     return response()->json([
-                        'status'    => 422,
-                        'message'   => 'Total pembayaran dan rincian pembayaran tidak sama.',
-                    ], 422);
+                        'status'    => 409,
+                        'message'   => 'Data sudah ada.',
+                    ], 409);
                 }
 
-                $dataSantri = DetailSantri::where('no_induk', $request->noInduk)->first();
+                if($request->file('bukti')){
+
+                    $file = $request->file('bukti');
+                    $ekstensi = $file->extension();
+                    if(strtolower($ekstensi) == 'jpg' || strtolower($ekstensi) == 'png' || strtolower($ekstensi) == 'jpeg'){
+                        $fileName = date('YmdHis') . $file->getClientOriginalName();
+
+                        $kompres = Image::make($file)
+                        ->resize(800, null, function ($constraint) {
+                            $constraint->aspectRatio();
+                        })
+                        ->save('assets/upload/bukti_bayar/' . $fileName);
+
+                    }else{
+                        $fileName = date('YmdHis') . $file->getClientOriginalName();
+                        $file->move('assets/upload/bukti_bayar/',$fileName);
+                    }
+
+                    $fileName = $request->bukti;
+
+                    $data = [
+                        'nama_santri' => $request->noInduk,
+                        'jumlah' => $request->jumlah,
+                        'tanggal_bayar' => $request->tanggalBayar,
+                        'periode' => $request->periode,
+                        'tahun' => $request->tahun,
+                        'bank_pengirim' => $request->bankPengirim,
+                        'atas_nama' => $request->atasNama,
+                        'no_wa' => $request->noWa,
+                        'catatan' => $request->catatan,
+                        'tipe' => 'Bank',
+                        'created_at' => date('Y-m-d H:i:s'),
+                        'bukti' => $fileName,
+                        'input_by' => 3, //input lewat api / aplikasi
+                    ];
+                    $insertPembayaran = pembayaran::insert($data);
+                    $id = DB::getPdo()->lastInsertId();
+                    $jenisPembayaran = $request->jenisPembayaran;
+                    $idJenisPembayaran = $request->idJenisPembayaran;
+                    $totalRincian = 0;
+
+                    $idsJenisPembayaran = collect($idJenisPembayaran)->unique()->values()->all();
+                    $refJenisPembayaran = RefJenisPembayaran::whereIn('id', $idsJenisPembayaran)
+                                                                ->get()
+                                                                ->keyBy('id'); // Mengindeks koleksi berdasarkan ID untuk akses cepat
+                                                                
+                    foreach($jenisPembayaran as $key=>$value){
+                        $nominal = $refJenisPembayaran->get($idJenisPembayaran[$key])->harga ?? 0;
+                        
+                        if($idJenisPembayaran[$key] == 3){
+                            if($value >= $nominal)
+                            {
+                                $dataSaku = [
+                                    'dari' => 1,
+                                    'jumlah' => $value,
+                                    'tanggal' => $request->tanggalBayar,
+                                    'no_induk' => $request->noInduk,
+                                    'id_pembayaran' => $id,
+                                    'status_pembayaran' => 0
+                                ];
+                                $query2 = SakuMasuk::insert($dataSaku);
+                            }else{
+                                return response()->json([
+                                    'status'    => 422,
+                                    'message'   => 'Nominal rincian pembayaran tidak boleh kurang dari harga jenis pembayaran.',
+                                ], 422);
+                            }
+                        }
+
+                        if($value != 0 && !empty($value)){
+                            if($value >= $nominal){
+                                $dataDetail = [
+                                    'id_pembayaran'=>$id,
+                                    'id_jenis_pembayaran' => $idJenisPembayaran[$key],
+                                    'nominal' => $value,
+                                ];
+                                $query = detailPembayaran::insert($dataDetail);
+                                $totalRincian += $value;
+                            }else{
+                                return response()->json([
+                                    'status'    => 422,
+                                    'message'   => 'Nominal rincian pembayaran tidak boleh kurang dari harga jenis pembayaran.',
+                                ], 422);
+                            }
+                        }
+                    }
+
+                    if($totalRincian != $request->jumlah)
+                    {
+                        return response()->json([
+                            'status'    => 422,
+                            'message'   => 'Total pembayaran dan rincian pembayaran tidak sama.',
+                        ], 422);
+                    }
+
+                    $dataSantri = DetailSantri::where('no_induk', $request->noInduk)->first();
 $message = '[     dari mobile PPATQ-RF ku   ]
 
 Dapatkan Aplikasi Mobile Wali Santri
@@ -1574,51 +1601,59 @@ Semoga pekerjaan dan usahanya diberikan kelancaran dan menghasilkan Rizqi yang b
 ';
 
                 
-                if($insertPembayaran){
+                    if($insertPembayaran){
 
-                    try {
-                        $data = [
-                            'id_pembayaran' => $id,
-                            'nama' => $request->atasNama,
-                            'no_wa' => $request->noWa,
-                            'pesan' => $message,
-                            'tanggal_kirim' => now(),
-                        ];
+                        try {
+                            $data = [
+                                'id_pembayaran' => $id,
+                                'nama' => $request->atasNama,
+                                'no_wa' => $request->noWa,
+                                'pesan' => $message,
+                                'tanggal_kirim' => now(),
+                            ];
 
-                        $hasil = SendWA::create($data);
-                        $sendWa = Helpers_wa::send_wa($data);
+                            $hasil = SendWA::create($data);
+                            $sendWa = Helpers_wa::send_wa($data);
 
-                        $responseDecoded = json_decode($sendWa, true);
+                            $responseDecoded = json_decode($sendWa, true);
 
-                        return response()->json([
-                            'status' => 201,
-                            'message' => 'Data berhasil dimasukkan',
-                            'data' => $responseDecoded
-                        ], 201);
-
-                    } catch (\Exception $e) {
+                            DB::commit();
+                            return response()->json([
+                                'status' => 201,
+                                'message' => 'Data berhasil dimasukkan',
+                                'data' => $responseDecoded
+                            ], 201);
+                        } catch (\Exception $e) {
+                            return response()->json([
+                                'status' => 500,
+                                'message' => 'Terjadi kesalahan saat mengirim pesan WA',
+                                'error' => $e->getMessage() // Boleh di-nonaktifkan di production untuk alasan keamanan
+                            ], 500);
+                        }
+                    }else{
                         return response()->json([
                             'status' => 500,
                             'message' => 'Terjadi kesalahan saat mengirim pesan WA',
-                            // 'error' => $e->getMessage() // Boleh di-nonaktifkan di production untuk alasan keamanan
                         ], 500);
                     }
                 }else{
                     return response()->json([
-                        'status' => 500,
-                        'message' => 'Terjadi kesalahan saat mengirim pesan WA',
-                    ], 500);
+                        'status' => 400,
+                        'message' => 'File yang di upload tidak valid',
+                    ], 400);
                 }
             }else{
                 return response()->json([
-                    'status' => 400,
-                    'message' => 'File yang di upload tidak valid',
-                ], 400);
+                    'message'   => "Bukti pembayaran tidak valid"
+                ], 402);
             }
-        }else{
+        } catch (\Exception $e) {
+            DB::rollback();
             return response()->json([
-                'message'   => "masuk elsess"
-            ], 402);
+                'status' => 500,
+                'message' => 'Terjadi kesalahan saat memproses permintaan',
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 

@@ -2,21 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
-use App\Models\detailPembayaran;
+use App\Models\RefBank;
+use App\Models\RefKamar;
+
 use App\Models\RefKelas;
 use App\Models\Tunggakan;
-use App\Models\pembayaran;
-use App\Models\RefBank;
-use App\Models\SantriDetail;
-use App\Models\RefJenisPembayaran;
-use App\Models\RefKamar;
-use App\Models\UangKeluar;
 use App\Models\UangMasuk;
+use App\Models\pembayaran;
+use App\Models\UangKeluar;
+use App\Models\SantriDetail;
+use Illuminate\Http\Request;
+use App\Models\JenisPembayaran;
+use App\Models\detailPembayaran;
+use App\Models\RefJenisPembayaran;
+use Illuminate\Support\Facades\DB;
 
 class AbahKeuanganController extends Controller
 {
