@@ -1443,15 +1443,24 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                 ],
             ]))
             {
+                $noInduk = $request->noInduk;
+                $atasNama = ucfirst($request->atasNama);
+                $jumlah = $request->jumlah;
+                $tanggalBayar = $request->tanggalBayar;
+                $periode = $request->periode;
+                $tahun = $request->tahun;
+                $bankPengirim = $request->bankPengirim;
+                $noWa = $request->noWa;
+
                 $data2 = [
-                    'nama_santri' => $request->noInduk,
-                    'jumlah' => $request->jumlah,
-                    'tanggal_bayar' => $request->tanggalBayar,
-                    'periode' => $request->periode,
-                    'tahun' => $request->tahun,
-                    'bank_pengirim' => $request->bankPengirim,
-                    'atas_nama' => $request->atasNama,
-                    'no_wa' => $request->noWa,
+                    'nama_santri' => $noInduk,
+                    'jumlah' => $jumlah,
+                    'tanggal_bayar' => $tanggalBayar,
+                    'periode' => $periode,
+                    'tahun' => $tahun,
+                    'bank_pengirim' => $bankPengirim,
+                    'atas_nama' => $atasNama,
+                    'no_wa' => $noWa,
                     'is_hapus' => 0,
                 ];
                 $cek = pembayaran::where($data2)->count();
@@ -1489,14 +1498,14 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                     }
 
                     $data = [
-                        'nama_santri' => $request->noInduk,
-                        'jumlah' => $request->jumlah,
-                        'tanggal_bayar' => $request->tanggalBayar,
-                        'periode' => $request->periode,
-                        'tahun' => $request->tahun,
-                        'bank_pengirim' => $request->bankPengirim,
-                        'atas_nama' => $request->atasNama,
-                        'no_wa' => $request->noWa,
+                        'nama_santri' => $noInduk,
+                        'jumlah' => $jumlah,
+                        'tanggal_bayar' => $tanggalBayar,
+                        'periode' => $periode,
+                        'tahun' => $tahun,
+                        'bank_pengirim' => $bankPengirim,
+                        'atas_nama' => $atasNama,
+                        'no_wa' => $noWa,
                         'catatan' => $request->catatan,
                         'tipe' => 'Bank',
                         'created_at' => date('Y-m-d H:i:s'),
@@ -1523,8 +1532,8 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                                 $dataSaku = [
                                     'dari' => 1,
                                     'jumlah' => $value,
-                                    'tanggal' => $request->tanggalBayar,
-                                    'no_induk' => $request->noInduk,
+                                    'tanggal' => $tanggalBayar,
+                                    'no_induk' => $noInduk,
                                     'id_pembayaran' => $id,
                                     'status_pembayaran' => 0
                                 ];
@@ -1555,7 +1564,7 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                         }
                     }
 
-                    if($totalRincian != $request->jumlah)
+                    if($totalRincian != $jumlah)
                     {
                         return response()->json([
                             'status'    => 422,
@@ -1563,14 +1572,14 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                         ], 422);
                     }
 
-                    $dataSantri = DetailSantri::where('no_induk', $request->noInduk)->first();
+                    $dataSantri = DetailSantri::where('no_induk', $noInduk)->first();
 $message = '[     dari mobile PPATQ-RF ku   ]
 
 Dapatkan Aplikasi Mobile Wali Santri
 https://new.ppatq-rf.sch.id/app-wali-santri
 
-Yth. Bp/Ibu *' . ucfirst($request->atasNama) . '*, Wali Santri *' . $dataSantri->nama . '* kelas *' . strtoupper($dataSantri->kelas) . '* telah melaporkan pembayaran bulan *' .   $this->getNamaBulan($request->periode) . '* 
-Rp. ' . number_format($request->jumlah, 0, ',', '.') . ' rincian sbb : 
+Yth. Bp/Ibu *' . $atasNama . '*, Wali Santri *' . $dataSantri->nama . '* kelas *' . strtoupper($dataSantri->kelas) . '* telah melaporkan pembayaran bulan *' .   $this->getNamaBulan($periode) . '* 
+Rp. ' . number_format($jumlah, 0, ',', '.') . ' rincian sbb : 
 ';
 $jenis = RefJenisPembayaran::orderBy('urutan', 'asc')->get();
 $listJenis = [];
@@ -1600,7 +1609,7 @@ Informasi mengenai informasi, berita dan detail santri melalui media yang lebih 
 ';
 
 $message .= '
-Kami ucapkan banyak terima kasih kepada (Bp/Ibu) ' . ucfirst($request->atasNama) . ', salam kami kepada keluarga.
+Kami ucapkan banyak terima kasih kepada (Bp/Ibu) ' . $atasNama . ', salam kami kepada keluarga.
 
 Semoga pekerjaan dan usahanya diberikan kelancaran dan menghasilkan Rizqi yang banyak dan berkah, aamiin.
 ';
@@ -1611,8 +1620,8 @@ Semoga pekerjaan dan usahanya diberikan kelancaran dan menghasilkan Rizqi yang b
                         try {
                             $data = [
                                 'id_pembayaran' => $id,
-                                'nama' => ucfirst($request->atasNama),
-                                'no_wa' => $request->noWa,
+                                'nama' => $atasNama,
+                                'no_wa' => $noWa,
                                 'pesan' => $message,
                                 'tanggal_kirim' => now(),
                             ];
