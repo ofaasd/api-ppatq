@@ -29,31 +29,39 @@ class AbahKeuanganController extends Controller
         $this->tahun = (int) date('Y');
     }
 
-    public function catatan()
+    public function catatan($waktuAwal = null, $waktuAkhir = null)
     {
         try {
-            $masuk = UangMasuk::select([
-                'tanggal_transaksi AS tanggalTransaksi',
+            $startCarbon = $waktuAwal ? Carbon::parse($waktuAwal) : Carbon::now()->subDays(30);
+            $endCarbon = $waktuAkhir ? Carbon::parse($waktuAkhir) : Carbon::now();
+
+            $waktuAwalFormatted = $startCarbon->timestamp;
+            $waktuAkhirFormatted = $endCarbon->timestamp;
+
+            $queryMasuk = UangMasuk::select([
+                'tanggal_transaksi AS tanggal',
                 'sumber',
                 'jumlah',
                 'nama_kegiatan AS namaKegiatan',
-            ])
-            ->get()
-            ->map(function ($item) {
-                $item->tanggalTransaksi = Carbon::parse($item->tanggalTransaksi)->translatedFormat('d F Y');
+            ]);
+            $queryKeluar = UangKeluar::select([
+                'tanggal_transaksi AS tanggal',
+                'keterangan',
+                'jumlah',
+                'nama_kegiatan AS namaKegiatan',
+            ]);
+
+            $queryMasuk->whereBetween('tanggal_transaksi', [$waktuAwalFormatted, $waktuAkhirFormatted]);
+            $queryKeluar->whereBetween('tanggal_transaksi', [$waktuAwalFormatted, $waktuAkhirFormatted]);
+
+            $masuk = $queryMasuk->get()->map(function ($item) {
+                $item->tanggal = Carbon::createFromTimestamp($item->tanggal)->format('d M Y');
                 $item->jumlah = number_format($item->jumlah, 0, ",", ".");
                 return $item;
             });
 
-            $keluar = UangKeluar::select([
-                'tanggal_transaksi AS tanggalTransaksi',
-                'keterangan',
-                'jumlah',
-                'nama_kegiatan AS namaKegiatan',
-            ])
-            ->get()
-            ->map(function ($item) {
-                $item->tanggalTransaksi = Carbon::parse($item->tanggalTransaksi)->translatedFormat('d F Y');
+            $keluar = $queryKeluar->get()->map(function ($item) {
+                $item->tanggal = Carbon::createFromTimestamp($item->tanggal)->format('d M Y');
                 $item->jumlah = number_format($item->jumlah, 0, ",", ".");
                 return $item;
             });
@@ -62,8 +70,8 @@ class AbahKeuanganController extends Controller
                 "status"  => 200,
                 "message" => "Berhasil mengambil data",
                 "data"    => [
-                    'masuk' => $masuk,
-                    'keluar'   => $keluar,
+                    'masuk'  => $masuk,
+                    'keluar' => $keluar,
                 ]
             ], 200);
         } catch (\Exception $e) {

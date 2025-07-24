@@ -76,7 +76,7 @@ Route::middleware(['api-abah'])->prefix('abah')->group(function () {
     // keuangan
     Route::prefix('keuangan')->group(function () {
         
-        Route::get('/catatan', [AbahKeuanganController::class, 'catatan']);
+        Route::get('/catatan/{awal?}/{akhir?}', [AbahKeuanganController::class, 'catatan']);
 
         Route::get('/saku/{idKamar}', [AbahKeuanganController::class, 'saku']);
         Route::get('/lapor-bayar', [AbahKeuanganController::class, 'laporBayar']);
