@@ -1562,7 +1562,7 @@ $message = '[     dari mobile PPATQ-RF ku   ]
 Dapatkan Aplikasi Mobile Wali Santri
 https://new.ppatq-rf.sch.id/app-wali-santri
 
-Yth. Bp/Ibu *' . $request->atasNama . '*, Wali Santri *' . $dataSantri->nama . '* kelas *' . $dataSantri->kelas . '* telah melaporkan pembayaran bulan *' .   $this->getNamaBulan($request->periode) . '* 
+Yth. Bp/Ibu *' . ucfirst($request->atasNama) . '*, Wali Santri *' . $dataSantri->nama . '* kelas *' . strtoupper($dataSantri->kelas) . '* telah melaporkan pembayaran bulan *' .   $this->getNamaBulan($request->periode) . '* 
 Rp. ' . number_format($request->jumlah, 0, ',', '.') . ' rincian sbb : 
 ';
 $jenis = RefJenisPembayaran::orderBy('urutan', 'asc')->get();
@@ -1593,7 +1593,7 @@ Informasi mengenai informasi, berita dan detail santri melalui media yang lebih 
 ';
 
 $message .= '
-Kami ucapkan banyak terima kasih kepada (Bp/Ibu) ' . $request->atasNama . ', salam kami kepada keluarga.
+Kami ucapkan banyak terima kasih kepada (Bp/Ibu) ' . ucfirst($request->atasNama) . ', salam kami kepada keluarga.
 
 Semoga pekerjaan dan usahanya diberikan kelancaran dan menghasilkan Rizqi yang banyak dan berkah, aamiin.
 ';
@@ -1604,7 +1604,7 @@ Semoga pekerjaan dan usahanya diberikan kelancaran dan menghasilkan Rizqi yang b
                         try {
                             $data = [
                                 'id_pembayaran' => $id,
-                                'nama' => $request->atasNama,
+                                'nama' => ucfirst($request->atasNama),
                                 'no_wa' => $request->noWa,
                                 'pesan' => $message,
                                 'tanggal_kirim' => now(),
