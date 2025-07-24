@@ -384,6 +384,152 @@ class DashboardAbahController extends Controller
         }
     }
 
+    public function khotimin($search = null)
+    {
+        try {
+            $baseQuery = SantriDetailAlumni::select([
+            'tb_alumni_santri_detail.no_induk AS noInduk',
+            'tb_alumni_santri_detail.nama',
+            'tb_alumni_santri_detail.no_hp AS noHp',
+            'guru_murroby.nama AS murroby',
+            'wali_kelas.nama AS waliKelas',
+            'kode_juz.nama AS capaianTerakhir',
+            'tb_alumni_santri_detail.tahun_lulus AS tahunLulus',
+            'tb_alumni_santri_detail.tahun_msk_mi AS tahunMasukMi',
+            'tb_alumni_santri_detail.nama_pondok_mi AS namaPondokMi',
+            'tb_alumni_santri_detail.thn_msk_menengah AS tahunMasukMenengah',
+            'tb_alumni_santri_detail.nama_sekolah_menengah_pertama AS namaSekolahMenengah',
+            'tb_alumni_santri_detail.tahun_msk_menengah_atas AS tahunMasukMenengahAtas',
+            'tb_alumni_santri_detail.nama_pondok_menengah_atas AS namaPondokMenengahAtas',
+            'tb_alumni_santri_detail.tahun_msk_pt AS tahunMasukPerguruanTinggi',
+            'tb_alumni_santri_detail.nama_pt AS namaPerguruanTinggi',
+            'tb_alumni_santri_detail.nama_pondok_pt AS namaPondokPerguruanTinggi',
+            'tb_alumni_santri_detail.tahun_msk_profesi AS tahunMasukProfesi',
+            'tb_alumni_santri_detail.nama_perusahaan AS namaPerusahaan',
+            'tb_alumni_santri_detail.bidang_profesi AS bidangProfesi',
+            'tb_alumni_santri_detail.posisi_profesi AS posisiProfesi',
+            DB::raw("
+            CASE 
+                WHEN tb_alumni_santri_detail.masa_tahun IS NULL 
+                  AND tb_alumni_santri_detail.masa_bulan IS NULL 
+                  AND tb_alumni_santri_detail.masa_hari IS NULL 
+                THEN '- Tahun - Bulan - Hari'
+                ELSE CONCAT_WS(' ', 
+                IFNULL(tb_alumni_santri_detail.masa_tahun, '-'), 'Tahun', 
+                IFNULL(tb_alumni_santri_detail.masa_bulan, '-'), 'Bulan', 
+                IFNULL(tb_alumni_santri_detail.masa_hari, '-'), 'Hari'
+                )
+            END AS masaTempuh
+            "),
+            DB::raw("
+            CASE 
+                WHEN 
+                (tb_alumni_santri_detail.masa_tahun IS NOT NULL OR tb_alumni_santri_detail.masa_bulan IS NOT NULL OR tb_alumni_santri_detail.masa_hari IS NOT NULL)
+                AND tb_alumni_santri_detail.khotmil_quran IS NOT NULL AND tb_alumni_santri_detail.khotmil_quran != ''
+                THEN 
+                CASE 
+                WHEN tb_alumni_santri_detail.jenis_kelamin = 'L' THEN 'Khotimin'
+                WHEN tb_alumni_santri_detail.jenis_kelamin = 'P' THEN 'Khotimat'
+                ELSE 'Tidak'
+                END
+                ELSE 'Tidak'
+            END AS khotimin
+            "),
+            ])
+            ->leftJoin('tb_alumni', 'tb_alumni_santri_detail.no_induk', '=', 'tb_alumni.no_induk')
+            ->leftJoin('ref_kamar', 'tb_alumni_santri_detail.kamar_id', '=', 'ref_kamar.id')
+            ->leftJoin('ref_kelas', 'tb_alumni_santri_detail.kelas', '=', 'ref_kelas.code')
+            ->leftJoin('employee_new AS guru_murroby', 'ref_kamar.employee_id', '=', 'guru_murroby.id')
+            ->leftJoin('employee_new AS wali_kelas', 'ref_kelas.employee_id', '=', 'wali_kelas.id')
+            ->leftJoin('detail_santri_tahfidz', function($join) {
+            $join->on('detail_santri_tahfidz.no_induk', '=', 'tb_alumni_santri_detail.no_induk');
+            })
+            ->leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
+            ->where(function($q) {
+            $q->whereNull('detail_santri_tahfidz.kode_juz_surah')
+            ->orWhereRaw('detail_santri_tahfidz.kode_juz_surah = (
+            SELECT dst_inner.kode_juz_surah
+            FROM detail_santri_tahfidz dst_inner
+            JOIN kode_juz kj_inner ON kj_inner.kode = dst_inner.kode_juz_surah
+            WHERE dst_inner.no_induk = tb_alumni_santri_detail.no_induk
+            ORDER BY kj_inner.urutan DESC, dst_inner.kode_juz_surah DESC
+            LIMIT 1
+            )');
+            })
+            ->whereNotNull('tb_alumni_santri_detail.khotmil_quran')
+            ->where('tb_alumni_santri_detail.khotmil_quran', '!=', '')
+            ->whereIn('tb_alumni_santri_detail.jenis_kelamin', ['L', 'P']);
+
+            // Tambahkan pencarian kalau ada
+            if ($search) {
+            $baseQuery->where(function ($q) use ($search) {
+                $q->where('tb_alumni_santri_detail.nama', 'like', "%$search%")
+                ->orWhere('tb_alumni_santri_detail.kelas', 'like', "%$search%");
+            });
+            }
+
+            // Ambil hanya yang khotimin/khotimat (bukan 'Tidak')
+            $baseQuery->where(function($q) {
+                $q->where(function($sub) {
+                    $sub->whereNotNull('tb_alumni_santri_detail.khotmil_quran')
+                        ->where('tb_alumni_santri_detail.khotmil_quran', '!=', '')
+                        ->whereIn('tb_alumni_santri_detail.jenis_kelamin', ['L', 'P'])
+                        ->where(function($sub2) {
+                            $sub2->whereNotNull('tb_alumni_santri_detail.masa_tahun')
+                                ->orWhereNotNull('tb_alumni_santri_detail.masa_bulan')
+                                ->orWhereNotNull('tb_alumni_santri_detail.masa_hari');
+                        });
+                });
+            });
+
+            // 1. Data acak semua alumni khotimin/khotimat
+            $randomAlumni = (clone $baseQuery)->orderBy('tb_alumni_santri_detail.nama')->inRandomOrder()->paginate(25);
+            // 2. Ambil daftar tahun lulus
+            $tahunList = (clone $baseQuery)
+            ->select('tb_alumni_santri_detail.tahun_lulus')
+            ->whereNotNull('tb_alumni_santri_detail.tahun_lulus')
+            ->groupBy('tb_alumni_santri_detail.tahun_lulus')
+            ->orderByRaw('CAST(tb_alumni_santri_detail.tahun_lulus AS UNSIGNED) DESC')
+            ->pluck('tahun_lulus');
+
+            // 3. Ambil data alumni per tahun
+            $alumniPerTahun = [];
+
+            foreach ($tahunList as $tahun) {
+            $alumniPerTahun[$tahun] = (clone $baseQuery)
+                ->where('tb_alumni_santri_detail.tahun_lulus', $tahun)
+                ->get();
+            }
+
+            $alumniPerTahunList = collect($alumniPerTahun)
+            ->sortKeysDesc()
+            ->map(function ($items, $tahun) {
+                return [
+                'tahun' => $tahun,
+                'data' => $items
+                ];
+            })
+            ->values()
+            ->toArray();
+
+            return response()->json([
+            "status"  => 200,
+            "message" => "Berhasil mengambil data",
+            "jumlah"  => $randomAlumni->count(),
+            "data"    => [
+                'alumni' => $randomAlumni,
+                'perTahun' => $alumniPerTahunList
+            ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                "status"  => 500,
+                "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
+                "error"   => $e->getMessage()
+            ], 500);
+        }
+    }
+
 
     public function detailSantri($noInduk)
     {

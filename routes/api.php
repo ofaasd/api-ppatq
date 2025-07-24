@@ -102,6 +102,9 @@ Route::get('/capaian-tahfidz', [GlobalController::class, 'capaianTahfidz']);
 // Alumni
 Route::get('/alumni/{search?}', [DashboardAbahController::class, 'alumni']);
 
+// Khotimin
+Route::get('/khotimin/{search?}', [DashboardAbahController::class, 'khotimin']);
+
 Route::middleware('update.lastseen')->group(function () {
     // Autentikasi Ustad
     Route::post('/ustad/login', [MurrobyController::class, 'login']);

@@ -73,7 +73,7 @@ Route::middleware(['api-abah'])->prefix('abah')->group(function () {
     Route::get('/murroby', [DashboardAbahController::class, 'murroby']);
     Route::get('/ustad-tahfidz', [DashboardAbahController::class, 'ustadTahfidz']);
     
-    // Dawuh Abah
+    // keuangan
     Route::prefix('keuangan')->group(function () {
         
         Route::get('/catatan', [AbahKeuanganController::class, 'catatan']);
