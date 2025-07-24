@@ -14,58 +14,112 @@ class GlobalController extends Controller
 {
     private function getCapaian($noIndukList, $referenceUrutan, $direction = 'ASC')
     {
-        // First, find the single best/worst capaian based on kode_juz.urutan
-        $capaianData = DetailSantriTahfidz::select([
-                'detail_santri_tahfidz.kode_juz_surah',
-                'kode_juz.nama AS capaian_text', // Alias to avoid conflict if 'nama' is used elsewhere
-                'kode_juz.urutan as juz_urutan' // Get the urutan to verify
+        // Ambil capaian tertinggi/rendah setiap santri
+        $sub = DetailSantriTahfidz::select([
+                'detail_santri_tahfidz.no_induk',
+                DB::raw('MAX(kode_juz.urutan) as max_urutan'),
+                DB::raw('MIN(kode_juz.urutan) as min_urutan')
             ])
-            ->join('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah') // JOIN first
+            ->join('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
             ->whereIn('detail_santri_tahfidz.no_induk', $noIndukList)
             ->whereNotNull('detail_santri_tahfidz.kode_juz_surah')
-            ->orderBy('juz_urutan', $direction) // ORDER BY the actual 'urutan'
-            ->first();
+            ->groupBy('detail_santri_tahfidz.no_induk');
 
-        // Handle case where no capaian data is found
-        if (is_null($capaianData)) {
+        // Pilih urutan berdasarkan direction
+        $urutanField = $direction === 'ASC' ? 'min_urutan' : 'max_urutan';
+
+        $santriCapaian = DB::table(DB::raw("({$sub->toSql()}) as capaian"))
+            ->mergeBindings($sub->getQuery())
+            ->get()
+            ->pluck($urutanField, 'no_induk');
+
+        if ($santriCapaian->isEmpty()) {
             return [
                 'capaian' => 'Belum ada aktivitas ketahfidzan',
                 'jumlah' => 0,
-                'santri' => collect(), // Return an empty collection
+                'santri' => collect(),
             ];
         }
 
-        // Now, get all santri who have this specific capaian (kode_juz_surah and urutan)
-        $santri = DetailSantriTahfidz::join('santri_detail', 'detail_santri_tahfidz.no_induk', '=', 'santri_detail.no_induk')
-            ->leftJoin('ref_tahfidz', 'ref_tahfidz.id', '=', 'santri_detail.tahfidz_id')
-            ->leftJoin('employee_new', 'employee_new.id', '=', 'ref_tahfidz.employee_id')
-            ->whereIn('detail_santri_tahfidz.no_induk', $noIndukList)
-            // Match both the kode_juz_surah and its corresponding urutan for precision
-            ->where('detail_santri_tahfidz.kode_juz_surah', $capaianData->kode_juz_surah)
-            ->whereExists(function ($query) use ($capaianData) {
-                $query->select(DB::raw(1))
-                    ->from('kode_juz')
-                    ->whereRaw('kode_juz.kode = detail_santri_tahfidz.kode_juz_surah')
-                    ->where('kode_juz.urutan', $capaianData->juz_urutan);
-            })
+        // Ambil urutan capaian yang paling tinggi/rendah
+        $targetUrutan = $direction === 'ASC'
+            ? $santriCapaian->min()
+            : $santriCapaian->max();
+
+        // Ambil kode_juz_surah yang sesuai urutan
+        $kodeJuz = KodeJuz::where('urutan', $targetUrutan)->first();
+
+        if (!$kodeJuz) {
+            return [
+                'capaian' => 'Belum ada aktivitas ketahfidzan',
+                'jumlah' => 0,
+                'santri' => collect(),
+            ];
+        }
+
+        // Ambil santri yang capaian tertinggi/rendahnya sama dengan urutan target
+        $santri = SantriDetail::whereIn('no_induk', $santriCapaian->filter(fn($u) => $u == $targetUrutan)->keys())
             ->select([
                 'santri_detail.nama',
                 'santri_detail.photo',
                 'santri_detail.kelas',
-                'employee_new.nama AS guruTahfidz'
+                'employee_new.nama AS guruTahfidz',
+                'employee_new.photo AS photoUstadTahfidz'
             ])
-            ->distinct('santri_detail.no_induk') // Use distinct on no_induk to get unique santri
+            ->leftJoin('ref_tahfidz', 'ref_tahfidz.id', '=', 'santri_detail.tahfidz_id')
+            ->leftJoin('employee_new', 'employee_new.id', '=', 'ref_tahfidz.employee_id')
             ->get()
             ->map(function ($item) {
-                $item->kelas = strtoupper($item->kelas); // Kapital semua
+                $item->kelas = strtoupper($item->kelas);
                 return $item;
             });
 
         return [
-            'capaian' => $capaianData->capaian_text ?? 'Belum ada aktivitas ketahfidzan',
+            'capaian' => $kodeJuz->nama ?? 'Belum ada aktivitas ketahfidzan',
             'jumlah' => $santri->count(),
             'santri' => $santri,
         ];
+    }
+
+    private function getCapaianTertinggiKhusus($noIndukList, $kodeList)
+    {
+        $result = [];
+        foreach ($kodeList as $kode) {
+            $capaianData = KodeJuz::where('kode', $kode)->first();
+            if (!$capaianData) continue;
+
+            // Cari santri yang capaian tertingginya adalah kode ini berdasarkan urutan tertinggi
+            $santri = SantriDetail::whereIn('no_induk', $noIndukList)
+                ->whereIn('no_induk', function($query) use ($kode) {
+                    $query->select('no_induk')
+                        ->from('detail_santri_tahfidz')
+                        ->join('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
+                        ->whereNotNull('detail_santri_tahfidz.kode_juz_surah')
+                        ->groupBy('no_induk')
+                        ->havingRaw('MAX(kode_juz.urutan) = (SELECT urutan FROM kode_juz WHERE kode = ?)', [$kode]);
+                })
+                ->select([
+                    'santri_detail.nama',
+                    'santri_detail.photo',
+                    'santri_detail.kelas',
+                    'employee_new.nama AS guruTahfidz',
+                    'employee_new.photo AS photoUstadTahfidz'
+                ])
+                ->leftJoin('ref_tahfidz', 'ref_tahfidz.id', '=', 'santri_detail.tahfidz_id')
+                ->leftJoin('employee_new', 'employee_new.id', '=', 'ref_tahfidz.employee_id')
+                ->get()
+                ->map(function ($item) {
+                    $item->kelas = strtoupper($item->kelas);
+                    return $item;
+                });
+
+            $result[] = [
+                'capaian' => $capaianData->nama,
+                'jumlah' => $santri->count(),
+                'santri' => $santri,
+            ];
+        }
+        return $result;
     }
 
     public function capaianTahfidz()
@@ -74,8 +128,9 @@ class GlobalController extends Controller
             $kodeTertinggi = KodeJuz::max('urutan');
             $noIndukList = SantriDetail::pluck('no_induk');
 
+            $kodeJuz7Terakhir = [164, 125, 113, 98, 83, 68, 53];
             $data = [
-                'tertinggi' => $this->getCapaian($noIndukList, $kodeTertinggi, 'DESC'),
+                'capaianCustom'  => $this->getCapaianTertinggiKhusus($noIndukList, $kodeJuz7Terakhir),
                 'terendah' => $this->getCapaian($noIndukList, $kodeTertinggi, 'ASC'),
             ];
 
