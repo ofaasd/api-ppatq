@@ -253,13 +253,14 @@ class DashboardAbahController extends Controller
     public function alumni($search = null)
     {
         try {
-            // Base query builder
-            $baseQuery = SantriDetailAlumni::select(
+            $baseQuery = SantriDetailAlumni::select([
                     'tb_alumni_santri_detail.no_induk AS noInduk',
                     'tb_alumni_santri_detail.nama',
                     'tb_alumni_santri_detail.no_hp AS noHp',
                     'guru_murroby.nama AS murroby',
                     'wali_kelas.nama AS waliKelas',
+                    'kode_juz.nama AS capaianTerakhir',
+                    DB::raw("CASE WHEN tb_alumni_santri_detail.khotimin = 1 THEN 'Khotimin' ELSE 'Tidak' END AS khotimin"),
                     'tb_alumni_santri_detail.tahun_lulus AS tahunLulus',
                     'tb_alumni_santri_detail.tahun_msk_mi AS tahunMasukMi',
                     'tb_alumni_santri_detail.nama_pondok_mi AS namaPondokMi',
@@ -274,13 +275,27 @@ class DashboardAbahController extends Controller
                     'tb_alumni_santri_detail.nama_perusahaan AS namaPerusahaan',
                     'tb_alumni_santri_detail.bidang_profesi AS bidangProfesi',
                     'tb_alumni_santri_detail.posisi_profesi AS posisiProfesi'
-                )
-                ->orderBy('tb_alumni_santri_detail.nama')
+                ])
                 ->leftJoin('tb_alumni', 'tb_alumni_santri_detail.no_induk', '=', 'tb_alumni.no_induk')
                 ->leftJoin('ref_kamar', 'tb_alumni_santri_detail.kamar_id', '=', 'ref_kamar.id')
                 ->leftJoin('ref_kelas', 'tb_alumni_santri_detail.kelas', '=', 'ref_kelas.code')
                 ->leftJoin('employee_new AS guru_murroby', 'ref_kamar.employee_id', '=', 'guru_murroby.id')
-                ->leftJoin('employee_new AS wali_kelas', 'ref_kelas.employee_id', '=', 'wali_kelas.id');
+                ->leftJoin('employee_new AS wali_kelas', 'ref_kelas.employee_id', '=', 'wali_kelas.id')
+                ->leftJoin('detail_santri_tahfidz', function($join) {
+                    $join->on('detail_santri_tahfidz.no_induk', '=', 'tb_alumni_santri_detail.no_induk');
+                })
+                ->leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
+                ->where(function($q) {
+                    $q->whereNull('detail_santri_tahfidz.kode_juz_surah')
+                    ->orWhereRaw('detail_santri_tahfidz.kode_juz_surah = (
+                        SELECT dst_inner.kode_juz_surah
+                        FROM detail_santri_tahfidz dst_inner
+                        JOIN kode_juz kj_inner ON kj_inner.kode = dst_inner.kode_juz_surah
+                        WHERE dst_inner.no_induk = tb_alumni_santri_detail.no_induk
+                        ORDER BY kj_inner.urutan DESC, dst_inner.kode_juz_surah DESC
+                        LIMIT 1
+                    )');
+                });
 
             // Tambahkan pencarian kalau ada
             if ($search) {
@@ -291,8 +306,7 @@ class DashboardAbahController extends Controller
             }
 
             // 1. Data acak semua alumni
-            $randomAlumni = (clone $baseQuery)->inRandomOrder()->paginate(25);
-
+            $randomAlumni = (clone $baseQuery)->orderBy('tb_alumni_santri_detail.nama')->inRandomOrder()->paginate(25);
             // 2. Ambil daftar tahun lulus
             $tahunList = (clone $baseQuery)
                 ->select('tb_alumni_santri_detail.tahun_lulus')
