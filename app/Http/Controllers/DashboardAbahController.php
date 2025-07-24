@@ -335,8 +335,16 @@ class DashboardAbahController extends Controller
             }
 
             // 1. Data acak semua alumni
-            $randomAlumni = (clone $baseQuery)->orderBy('tb_alumni_santri_detail.nama')->inRandomOrder()->paginate(25);
-            // 2. Ambil daftar tahun lulus
+            // Ambil alumni yang memiliki tahun_msk_mi (tidak null dan tidak kosong) terlebih dahulu
+            $randomAlumni = (clone $baseQuery)
+                ->whereNotNull('tb_alumni_santri_detail.tahun_msk_mi')
+                ->where('tb_alumni_santri_detail.tahun_msk_mi', '!=', '')
+                ->orderBy('tb_alumni_santri_detail.nama')
+                ->inRandomOrder()
+                ->paginate(25)
+                ->sortBy('tb_alumni_santri_detail.tahun_msk_mi');
+
+            // 2. Ambil daftar tahun tb_alumni_santri_detail.masa_tahun
             $tahunList = (clone $baseQuery)
                 ->select('tb_alumni_santri_detail.tahun_lulus')
                 ->whereNotNull('tb_alumni_santri_detail.tahun_lulus')
