@@ -1525,6 +1525,7 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                                                                 
                     foreach($jenisPembayaran as $key=>$value){
                         $nominal = $refJenisPembayaran->get($idJenisPembayaran[$key])->harga ?? 0;
+                        $teksJenisPembayaran = $refJenisPembayaran->get($idJenisPembayaran[$key])->jenis ?? "Jenis Pembayaran Tidak Ditemukan";
                         
                         if($idJenisPembayaran[$key] == 3){
                             if($value >= $nominal)
@@ -1541,7 +1542,7 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                             }else{
                                 return response()->json([
                                     'status'    => 422,
-                                    'message'   => 'Nominal rincian pembayaran tidak boleh kurang dari harga jenis pembayaran.',
+                                    'message'   => 'Nominal rincian pembayaran ' . $teksJenisPembayaran . ' tidak boleh kurang dari ' . $nominal . '.',
                                 ], 422);
                             }
                         }
@@ -1558,7 +1559,7 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                             }else{
                                 return response()->json([
                                     'status'    => 422,
-                                    'message'   => 'Nominal rincian pembayaran tidak boleh kurang dari harga jenis pembayaran.',
+                                    'message'   => 'Nominal rincian pembayaran ' . $teksJenisPembayaran . ' tidak boleh kurang dari ' . $nominal . '.',
                                 ], 422);
                             }
                         }
