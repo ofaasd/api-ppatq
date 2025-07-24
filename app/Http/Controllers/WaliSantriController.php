@@ -1542,7 +1542,7 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                             }else{
                                 return response()->json([
                                     'status'    => 422,
-                                    'message'   => 'Nominal rincian pembayaran ' . $teksJenisPembayaran . ' tidak boleh kurang dari ' . $nominal . '.',
+                                    'message'   => 'Nominal rincian pembayaran ' . $teksJenisPembayaran . ' tidak boleh kurang dari Rp' . number_format($nominal, 0, ',', '.') . ',00.',
                                 ], 422);
                             }
                         }
@@ -1559,7 +1559,7 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                             }else{
                                 return response()->json([
                                     'status'    => 422,
-                                    'message'   => 'Nominal rincian pembayaran ' . $teksJenisPembayaran . ' tidak boleh kurang dari ' . $nominal . '.',
+                                    'message'   => 'Nominal rincian pembayaran ' . $teksJenisPembayaran . ' tidak boleh kurang dari Rp' . number_format($nominal, 0, ',', '.') . ',00.',
                                 ], 422);
                             }
                         }
