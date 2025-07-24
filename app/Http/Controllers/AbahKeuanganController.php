@@ -32,7 +32,7 @@ class AbahKeuanganController extends Controller
     public function catatan($waktuAwal = null, $waktuAkhir = null)
     {
         try {
-            $startCarbon = $waktuAwal ? Carbon::parse($waktuAwal) : Carbon::now()->subDays(30);
+            $startCarbon = $waktuAwal ? Carbon::parse($waktuAwal) : Carbon::now()->subDays(7);
             $endCarbon = $waktuAkhir ? Carbon::parse($waktuAkhir) : Carbon::now();
 
             $waktuAwalFormatted = $startCarbon->timestamp;
