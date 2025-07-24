@@ -1481,8 +1481,6 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                         $file->move('assets/upload/bukti_bayar/',$fileName);
                     }
 
-                    $fileName = $request->bukti;
-
                     $data = [
                         'nama_santri' => $request->noInduk,
                         'jumlah' => $request->jumlah,
