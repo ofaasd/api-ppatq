@@ -1481,6 +1481,13 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                         $file->move('assets/upload/bukti_bayar/',$fileName);
                     }
 
+                    if(is_null($request->catatan)){
+                        return response()->json([
+                            'status'    => 422,
+                            'message'   => 'Catatan tidak boleh kosong.',
+                        ], 422);
+                    }
+
                     $data = [
                         'nama_santri' => $request->noInduk,
                         'jumlah' => $request->jumlah,
