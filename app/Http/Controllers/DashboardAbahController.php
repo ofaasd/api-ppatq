@@ -263,7 +263,6 @@ class DashboardAbahController extends Controller
                     'guru_murroby.nama AS murroby',
                     'wali_kelas.nama AS waliKelas',
                     'kode_juz.nama AS capaianTerakhir',
-                    DB::raw("CASE WHEN tb_alumni_santri_detail.khotimin = 1 THEN 'Khotimin' ELSE 'Tidak' END AS khotimin"),
                     'tb_alumni_santri_detail.tahun_lulus AS tahunLulus',
                     'tb_alumni_santri_detail.tahun_msk_mi AS tahunMasukMi',
                     'tb_alumni_santri_detail.nama_pondok_mi AS namaPondokMi',
@@ -277,7 +276,34 @@ class DashboardAbahController extends Controller
                     'tb_alumni_santri_detail.tahun_msk_profesi AS tahunMasukProfesi',
                     'tb_alumni_santri_detail.nama_perusahaan AS namaPerusahaan',
                     'tb_alumni_santri_detail.bidang_profesi AS bidangProfesi',
-                    'tb_alumni_santri_detail.posisi_profesi AS posisiProfesi'
+                    'tb_alumni_santri_detail.posisi_profesi AS posisiProfesi',
+                    DB::raw("
+                        CASE 
+                            WHEN tb_alumni_santri_detail.masa_tahun IS NULL 
+                              AND tb_alumni_santri_detail.masa_bulan IS NULL 
+                              AND tb_alumni_santri_detail.masa_hari IS NULL 
+                            THEN '- Tahun - Bulan - Hari'
+                            ELSE CONCAT_WS(' ', 
+                                IFNULL(tb_alumni_santri_detail.masa_tahun, '-'), 'Tahun', 
+                                IFNULL(tb_alumni_santri_detail.masa_bulan, '-'), 'Bulan', 
+                                IFNULL(tb_alumni_santri_detail.masa_hari, '-'), 'Hari'
+                            )
+                        END AS masaTempuh
+                    "),
+                    DB::raw("
+                        CASE 
+                            WHEN 
+                                (tb_alumni_santri_detail.masa_tahun IS NOT NULL OR tb_alumni_santri_detail.masa_bulan IS NOT NULL OR tb_alumni_santri_detail.masa_hari IS NOT NULL)
+                                AND tb_alumni_santri_detail.khotmil_quran IS NOT NULL AND tb_alumni_santri_detail.khotmil_quran != ''
+                            THEN 
+                                CASE 
+                                    WHEN tb_alumni_santri_detail.jenis_kelamin = 'L' THEN 'Khotimin'
+                                    WHEN tb_alumni_santri_detail.jenis_kelamin = 'P' THEN 'Khotimat'
+                                    ELSE 'Tidak'
+                                END
+                            ELSE 'Tidak'
+                        END AS khotimin
+                    "),
                 ])
                 ->leftJoin('tb_alumni', 'tb_alumni_santri_detail.no_induk', '=', 'tb_alumni.no_induk')
                 ->leftJoin('ref_kamar', 'tb_alumni_santri_detail.kamar_id', '=', 'ref_kamar.id')
