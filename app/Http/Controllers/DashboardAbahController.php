@@ -79,6 +79,8 @@ class DashboardAbahController extends Controller
             $jumlahSantriLaki = (clone $qSantri)->where('jenis_kelamin', 'L')->count();
             $jumlahSantriPerempuan = (clone $qSantri)->where('jenis_kelamin', 'P')->count();
 
+            $refJenisPembayaran = RefJenisPembayaran::find(1);
+            $nominalTagihanSyahriah = $refJenisPembayaran ? number_format($refJenisPembayaran->harga, 0, ',', '.') : 0;
             $syahriah = TagihanSyahriah::sum('jumlah');
             $totalTagihanSyahriah = number_format($syahriah, 0, ',', '.');
 
@@ -124,6 +126,7 @@ class DashboardAbahController extends Controller
                 ->sum('kekurangan');
 
             $data = [
+                'nominalTagihanSyahriah'            => $nominalTagihanSyahriah,              
                 'bulanIni'                          => $bulanIni,              
                 'totalTagihanSyahriah'              => $totalTagihanSyahriah,              
                 'jumlahPsbTahunLalu'                => $jumlahPsbTahunLalu,              
