@@ -246,19 +246,18 @@ class UangSakuController extends Controller
                         //     ], 400);
                         // }
                         
-                        // $updateSaku = UangSaku::find($saku->id);
-                        // if(!$updateSaku)
-                        // {
-                        //     return response()->json([
-                        //         "status"    => 404,
-                        //         "message"   => "Data uang saku tidak ditemukan.",
-                        //     ], 404);
-                        // }
+                        $updateSaku = UangSaku::find($saku->id);
+                        if(!$updateSaku)
+                        {
+                            return response()->json([
+                                "status"    => 404,
+                                "message"   => "Data uang saku tidak ditemukan.",
+                            ], 404);
+                        }
 
-                        // $updateSaku->jumlah = $saku->jumlah - $jumlah;
-                        // $updateSaku->save();
+                        $updateSaku->jumlah = $saku->jumlah - $jumlah;
+                        $updateSaku->save();
 
-                        // Kurang saldo menggunakan trigger
                     }
                     
                     DB::commit();
@@ -282,11 +281,9 @@ class UangSakuController extends Controller
                     //     ], 400);
                     // }
 
-                    // $updateSaku = UangSaku::find($saku->id);
-                    // $updateSaku->jumlah = $saku->jumlah - $jumlah;
-                    // $updateSaku->save();
-
-                    // Kurang saldo menggunakan trigger
+                    $updateSaku = UangSaku::find($saku->id);
+                    $updateSaku->jumlah = $saku->jumlah - $jumlah;
+                    $updateSaku->save();
 
                     $sakuKeluar = SakuKeluar::create([
                         'pegawai_id' => $user->pegawai_id,
@@ -296,7 +293,7 @@ class UangSakuController extends Controller
                         'tanggal' => Carbon::parse($request->tanggal)->format('Y-m-d'),
                     ]);
 
-                    $sisaSaldo = $saku->jumlah;
+                    $sisaSaldo = $updateSaku->jumlah;
                     DB::commit();
                     return response()->json('Uang keluar sebesar Rp ' . number_format($jumlah, 0, ',', '.') . ', Sisa Saldo Rp ' . number_format($sisaSaldo, 0, ',', '.'));
                 }
