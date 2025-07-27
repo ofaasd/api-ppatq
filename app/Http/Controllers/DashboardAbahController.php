@@ -2073,8 +2073,8 @@ class DashboardAbahController extends Controller
                 ->first();
             
             $now = Carbon::now();
-            $startDate = $now->copy()->subMonth(2)->startOfDay()->timestamp;
-            $endDate = $now->endOfDay()->timestamp;
+            $startDate = $now->copy()->subMonth(2)->startOfDay()->toDateTimeString();
+            $endDate = $now->endOfDay()->toDateTimeString();
 
             $uangMasuk = DB::table('tb_saku_masuk')
                 ->select([
@@ -2126,7 +2126,7 @@ class DashboardAbahController extends Controller
 
             $data = [
                 'saldo' => $saldo ? $saldo->saldo : 0,
-                'waktu' => Carbon::createFromTimestamp($startDate)->translatedFormat('d F Y') . ' - ' . Carbon::createFromTimestamp($endDate)->translatedFormat('d F Y'),
+                'waktu' => Carbon::parse($startDate)->translatedFormat('d F Y') . ' - ' . Carbon::parse($endDate)->translatedFormat('d F Y'),
                 'uangMasuk' => $uangMasuk,
                 'uangKeluar' => $uangkeluar,
             ];

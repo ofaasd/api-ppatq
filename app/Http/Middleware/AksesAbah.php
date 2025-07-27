@@ -22,9 +22,8 @@ class AksesAbah
             120, //Kuntono
             121, //Dani
             122 //Sholihatun
-
-        ]; // Contoh: Hanya user dengan ID 63 danyang diizinkan
-
+        ];
+        
         if (Auth::guard('api')->check() && in_array(Auth::guard('api')->id(), $allowedUserIds)) {
             return $next($request);
         }
