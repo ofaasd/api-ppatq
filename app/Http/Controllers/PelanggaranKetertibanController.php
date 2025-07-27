@@ -23,6 +23,7 @@ class PelanggaranKetertibanController extends Controller
             ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'pelanggaran_ketertiban.no_induk')
             ->leftJoin('users', 'users.id', '=', 'pelanggaran_ketertiban.by_id')
             ->leftJoin('employee_new', 'employee_new.id', '=', 'users.pegawai_id')
+            ->orderBy('pelanggaran_ketertiban.tanggal', 'desc')
             ->get()
             ->map(function($item){
                 $item->tanggal = Carbon::parse($item->tanggal)->translatedFormat('d F Y');

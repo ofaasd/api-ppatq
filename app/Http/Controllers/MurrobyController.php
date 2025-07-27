@@ -255,7 +255,7 @@ class MurrobyController extends Controller
                 'tb_pemeriksaan.kondisi_gigi AS kondisiGigi',
             ])
             ->where('no_induk', $noInduk)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('tb_pemeriksaan.tanggal_pemeriksaan', 'desc')
             ->get()
             ->map(function ($item) {
                     $item->tanggalPemeriksaanFormatted = date('Y-m-d', $item->tanggalPemeriksaan);

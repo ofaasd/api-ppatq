@@ -93,6 +93,7 @@ class PerlengkapanController extends Controller
             ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'perlengkapan.no_induk')
             ->leftJoin('users', 'users.id', '=', 'perlengkapan.by_id')
             ->leftJoin('employee_new', 'employee_new.id', '=', 'users.pegawai_id')
+            ->orderBy('perlengkapan.tanggal', 'desc')
             ->get()
             ->map(function($item){
                 $item->tanggal = Carbon::parse($item->tanggal)->translatedFormat('d F Y');

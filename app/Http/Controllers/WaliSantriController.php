@@ -298,6 +298,7 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                 'tb_pemeriksaan.kondisi_gigi AS kondisiGigi',
             ])
             ->where('no_induk',$noInduk)
+            ->orderBy('tb_pemeriksaan.tanggal_pemeriksaan', 'desc')
             ->get()
             ->map(function ($item) {
                 $item->tanggalPemeriksaan = $item->tanggalPemeriksaan ? Carbon::parse($item->tanggalPemeriksaan)->translatedFormat('d F Y') : '-';
@@ -613,6 +614,7 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
             ->leftJoin('users', 'users.id', '=', 'perlengkapan.by_id')
             ->leftJoin('employee_new', 'employee_new.id', '=', 'users.pegawai_id')
             ->where('perlengkapan.no_induk', $noInduk)
+            ->orderBy('perlengkapan.tanggal', 'desc')
             ->get()
             ->map(function($item){
                 $item->tanggal = Carbon::parse($item->tanggal)->translatedFormat('d F Y');
@@ -1165,6 +1167,7 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
             ->leftJoin('users', 'users.id', '=', 'pelanggaran.by_id')
             ->leftJoin('employee_new', 'employee_new.id', '=', 'users.pegawai_id')
             ->where('pelanggaran.no_induk', $noInduk)
+            ->orderBy('pelanggaran.tanggal', 'desc')
             ->get()
             ->map(function($item){
                 $item->tanggal = Carbon::parse($item->tanggal)->translatedFormat('d F Y');
@@ -1223,6 +1226,7 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
             ->leftJoin('users', 'users.id', '=', 'izin.by_id')
             ->leftJoin('employee_new', 'employee_new.id', '=', 'users.pegawai_id')
             ->where('izin.no_induk', $noInduk)
+            ->orderBy('izin.tanggal', 'desc')
             ->get()
             ->map(function($item){
                 $item->tanggal = Carbon::parse($item->tanggal)->translatedFormat('d F Y');
@@ -1296,6 +1300,7 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
             ->leftJoin('users', 'users.id', '=', 'kerapian.by_id')
             ->leftJoin('employee_new', 'employee_new.id', '=', 'users.pegawai_id')
             ->where('kerapian.no_induk', $noInduk)
+            ->orderBy('kerapian.tanggal', 'desc')
             ->get()
             ->map(function($item){
                 $item->tanggal = Carbon::parse($item->tanggal)->translatedFormat('d F Y');
@@ -1371,6 +1376,7 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
             ->leftJoin('users', 'users.id', '=', 'pelanggaran_ketertiban.by_id')
             ->leftJoin('employee_new', 'employee_new.id', '=', 'users.pegawai_id')
             ->where('pelanggaran_ketertiban.no_induk', $noInduk)
+            ->orderBy('pelanggaran_ketertiban.tanggal', 'desc')
             ->get()
             ->map(function($item){
                 $item->tanggal = Carbon::parse($item->tanggal)->translatedFormat('d F Y');
