@@ -190,24 +190,24 @@ class WaliSantriController extends Controller
 
             $nowFormatted = Carbon::now()->translatedFormat('l d F Y, H:i');
 
-$kelas = strtoupper($hasil->kelas);
+// $kelas = strtoupper($hasil->kelas);
 
-$message = "🎉 Selamat datang
+// $message = "🎉 Selamat datang
 
-Walisantri {$hasil->nama}. dari {$hasil->asalKota}, Kelas {$kelas}, Murroby {$hasil->namaMurroby}.
+// Walisantri {$hasil->nama}. dari {$hasil->asalKota}, Kelas {$kelas}, Murroby {$hasil->namaMurroby}.
 
-{$nowFormatted}
+// {$nowFormatted}
 
-Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
-";
+// Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
+// ";
 
-            // kirim wa
-            $data = [
-                'no_wa' => $hasil->no_hp,
-                'pesan' => $message
-            ];
+//             // kirim wa
+//             $data = [
+//                 'no_wa' => $hasil->no_hp,
+//                 'pesan' => $message
+//             ];
 
-            $sendWa = Helpers_wa::send_wa($data);
+//             $sendWa = Helpers_wa::send_wa($data);
 
             return (new WaliSantriResource($hasil))->response()->setStatusCode(200);
         }else{
@@ -1443,7 +1443,7 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                     2 => 'Ditangani',
                     default => 'Status tidak diketahui',
                 };
-                $item->created_at = Carbon::parse($item->created_at)->translatedFormat('d F Y');
+                $item->diuploadPada = $item->created_at ? Carbon::parse($item->created_at)->translatedFormat('d F Y') : '-';
 
                 return $item;
             })
