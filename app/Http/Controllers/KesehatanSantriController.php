@@ -21,6 +21,7 @@ class KesehatanSantriController extends Controller
                 "santri_detail.nama AS nama_santri"
             )
             ->leftJoin("santri_detail", "santri_detail.no_induk", "=", "tb_pemeriksaan.no_induk")
+            ->where('santri_detail.status', 0)
             ->get();
 
             return response()->json([
@@ -51,6 +52,7 @@ class KesehatanSantriController extends Controller
                         "santri_detail.nama AS nama_santri"
                     )
                     ->leftJoin("santri_detail", "santri_detail.no_induk", "=", "tb_pemeriksaan.no_induk")
+                    ->where('santri_detail.status', 0)
                     ->where('tb_pemeriksaan.no_induk', $noInduk)
                     ->first();
                     

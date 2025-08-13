@@ -58,6 +58,7 @@ class KelengkapanController extends Controller
             })
             // ->where('santri_kamar.tahun_ajaran_id', $ta->id)
             ->where('santri_detail.kamar_id', $dataUser->idKamar)
+            ->where('santri_detail.status', 0)
             ->get();
 
             $labelKelengkapan = $this->labelKelengkapan;

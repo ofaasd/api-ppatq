@@ -48,6 +48,7 @@ class UangSakuController extends Controller
             ->leftJoin('tb_uang_saku', 'tb_uang_saku.no_induk', '=', 'santri_detail.no_induk')
             ->where('santri_detail.kamar_id', $dataUser->idKamar)
             ->whereNull('santri_detail.deleted_at')
+            ->where('santri_detail.status', 0)
             ->orderBy('namaSantri', 'asc')
             ->get();
 
@@ -79,6 +80,7 @@ class UangSakuController extends Controller
                 'santri_detail.nama AS namaSantri',
             ])
             ->where('santri_detail.no_induk', $noInduk)
+            ->where('santri_detail.status', 0)
             ->first();
 
         $dataUangMasuk = DB::table('tb_saku_masuk')
@@ -155,6 +157,7 @@ class UangSakuController extends Controller
                 'santri_detail.nama AS namaSantri',
             ])
             ->where('santri_detail.no_induk', $noInduk)
+            ->where('santri_detail.status', 0)
             ->first();
 
         $dataUangKeluar = DB::table('tb_saku_keluar')

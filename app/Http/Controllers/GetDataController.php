@@ -43,6 +43,7 @@ class GetDataController extends Controller
                         ->orWhere('santri_detail.no_induk', 'like', '%' . $search . '%');
                     });
                 })
+                ->where('santri_detail.status', 0)
                 ->get();
 
             return response()->json([

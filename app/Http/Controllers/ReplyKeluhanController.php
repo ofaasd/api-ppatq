@@ -39,6 +39,7 @@ class ReplyKeluhanController extends Controller
                 ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'tb_keluhan.id_santri')
                 ->where('tb_keluhan.is_hapus', 0)
                 ->orderBy('tb_keluhan.created_at', 'desc')
+                ->where('santri_detail.status', 0)
                 ->where('tb_keluhan.id_kategori', $row->id)
                 ->get()
                 ->map(function($item){

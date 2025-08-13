@@ -26,6 +26,7 @@ class IzinController extends Controller
             ->leftJoin('users', 'users.id', '=', 'izin.by_id')
             ->leftJoin('employee_new', 'employee_new.id', '=', 'users.pegawai_id')
             ->orderBy('izin.tanggal', 'desc')
+            ->where('santri_detail.status', 0)
             ->get()
             ->map(function($item){
                 $item->tanggal = Carbon::parse($item->tanggal)->translatedFormat('d F Y');

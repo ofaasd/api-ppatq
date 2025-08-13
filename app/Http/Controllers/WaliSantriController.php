@@ -139,6 +139,7 @@ class WaliSantriController extends Controller
         ->leftJoin('ref_tahfidz', 'ref_tahfidz.id', '=', 'santri_detail.tahfidz_id')
         ->leftJoin('tb_uang_saku', 'tb_uang_saku.no_induk', '=', 'santri_detail.no_induk')
         ->leftJoin('employee_new AS murroby', 'murroby.id', '=', 'ref_kamar.employee_id')
+        ->where('santri_detail.status', 0)
         ->leftJoin('employee_new AS tahfidz', 'tahfidz.id', '=', 'ref_tahfidz.employee_id');   
 
         if($siswa->count() > 0){
@@ -229,6 +230,7 @@ class WaliSantriController extends Controller
             'tb_uang_saku.jumlah AS saldo',
         ])
         ->leftJoin('tb_uang_saku', 'tb_uang_saku.no_induk', '=', 'santri_detail.no_induk')
+        ->where('santri_detail.status', 0)
         ->where('santri_detail.no_induk', $noInduk)
         ->first();
 
@@ -418,7 +420,7 @@ class WaliSantriController extends Controller
             $data['detailSantri'] = SantriDetail::select([
                 'santri_detail.nama',
                 'santri_detail.no_induk AS noInduk',
-            ])->where('no_induk', $noInduk)->get();
+            ])->where('no_induk', $noInduk)->where('santri_detail.status', 0)->get();
 
             $data['ketahfidzan'] = $groupedData;
 
@@ -614,6 +616,7 @@ class WaliSantriController extends Controller
             ->leftJoin('users', 'users.id', '=', 'perlengkapan.by_id')
             ->leftJoin('employee_new', 'employee_new.id', '=', 'users.pegawai_id')
             ->where('perlengkapan.no_induk', $noInduk)
+            ->where('santri_detail.status', 0)
             ->orderBy('perlengkapan.tanggal', 'desc')
             ->get()
             ->map(function($item){
@@ -1167,6 +1170,7 @@ class WaliSantriController extends Controller
             ->leftJoin('users', 'users.id', '=', 'pelanggaran.by_id')
             ->leftJoin('employee_new', 'employee_new.id', '=', 'users.pegawai_id')
             ->where('pelanggaran.no_induk', $noInduk)
+            ->where('santri_detail.status', 0)
             ->orderBy('pelanggaran.tanggal', 'desc')
             ->get()
             ->map(function($item){
@@ -1226,6 +1230,7 @@ class WaliSantriController extends Controller
             ->leftJoin('users', 'users.id', '=', 'izin.by_id')
             ->leftJoin('employee_new', 'employee_new.id', '=', 'users.pegawai_id')
             ->where('izin.no_induk', $noInduk)
+            ->where('santri_detail.status', 0)
             ->orderBy('izin.tanggal', 'desc')
             ->get()
             ->map(function($item){
@@ -1300,6 +1305,7 @@ class WaliSantriController extends Controller
             ->leftJoin('users', 'users.id', '=', 'kerapian.by_id')
             ->leftJoin('employee_new', 'employee_new.id', '=', 'users.pegawai_id')
             ->where('kerapian.no_induk', $noInduk)
+            ->where('santri_detail.status', 0)
             ->orderBy('kerapian.tanggal', 'desc')
             ->get()
             ->map(function($item){
@@ -1376,6 +1382,7 @@ class WaliSantriController extends Controller
             ->leftJoin('users', 'users.id', '=', 'pelanggaran_ketertiban.by_id')
             ->leftJoin('employee_new', 'employee_new.id', '=', 'users.pegawai_id')
             ->where('pelanggaran_ketertiban.no_induk', $noInduk)
+            ->where('santri_detail.status', 0)
             ->orderBy('pelanggaran_ketertiban.tanggal', 'desc')
             ->get()
             ->map(function($item){
@@ -1435,6 +1442,7 @@ class WaliSantriController extends Controller
             ->leftJoin('ref_kategori', 'ref_kategori.id', '=', 'tb_keluhan.id_kategori')
             ->where('tb_keluhan.is_hapus', 0)
             ->where('tb_keluhan.id_santri', $noInduk)
+            ->where('santri_detail.status', 0)
             ->orderBy('tb_keluhan.created_at', 'desc')
             ->get()
             ->map(function($item){

@@ -102,6 +102,7 @@ class AbahKeuanganController extends Controller
                 ->leftJoin('ref_kamar', 'ref_kamar.id', '=', 'santri_detail.kamar_id')
                 ->leftJoin('employee_new', 'employee_new.id', 'ref_kamar.employee_id')
                 ->where('santri_detail.kamar_id', $idKamar)
+                ->where('santri_detail.status', 0)
                 ->groupBy(
                     'santri_detail.photo',
                     'santri_detail.nama',
@@ -247,6 +248,7 @@ class AbahKeuanganController extends Controller
                     ->whereYear('tb_pembayaran.tanggal_bayar', $tahun);
             })
             ->where('santri_detail.kelas', $kode)
+            ->where('santri_detail.status', 0)
             ->get()
             ->map(function ($item) {
                 $item->status = is_null($item->tanggalBayar) ? 'Belum Bayar' : 'Sudah Bayar';

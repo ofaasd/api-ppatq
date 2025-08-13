@@ -102,6 +102,7 @@ class KelasKamarController extends Controller
             ->leftJoin('santri_tahfidz', 'santri_detail.id', '=', 'santri_tahfidz.santri_id')
             ->leftJoin('employee_new', 'ref_kamar.employee_id', '=', 'employee_new.id')
             ->where('ref_kelas.id', '=', $id)
+            ->where('santri_detail.status', 0)
             ->distinct();
 
             $jmlSantri = $querySantriDetail->count();
@@ -171,6 +172,7 @@ class KelasKamarController extends Controller
             ->leftJoin('employee_new', 'ref_kamar.employee_id', '=', 'employee_new.id')
             ->where('santri_kamar.kamar_id', $id)
             ->where('santri_kamar.status', 1)
+            ->where('santri_detail.status', 0)
             // ->where('santri_kamar.tahun_ajaran_id', $tahunAjaran->id)
             ->distinct()
             ;

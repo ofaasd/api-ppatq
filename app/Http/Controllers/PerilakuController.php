@@ -57,6 +57,7 @@ class PerilakuController extends Controller
                     ->whereNull('pr1.deleted_at');
             })
             // ->where('santri_kamar.tahun_ajaran_id', $ta->id)
+            ->where('santri_detail.status', 0)
             ->where('santri_detail.kamar_id', $dataUser->idKamar)
             ->get();
 

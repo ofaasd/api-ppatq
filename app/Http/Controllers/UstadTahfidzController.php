@@ -82,6 +82,7 @@ class UstadTahfidzController extends Controller
             ->leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
             ->where('id_tahfidz', $tahfidz->id)
             ->where('detail_santri_tahfidz.id_tahun_ajaran', $ta->id)
+            ->where('santri_detail.status', 0)
             ->orderBy('detail_santri_tahfidz.tanggal', 'desc')
             ->get();
 
@@ -188,6 +189,7 @@ class UstadTahfidzController extends Controller
                     'santri_detail.photo',
                 ])
                 ->where('tahfidz_id', $tahfidz->id)
+                ->where('santri_detail.status', 0)
                 ->get();
 
             $data = [

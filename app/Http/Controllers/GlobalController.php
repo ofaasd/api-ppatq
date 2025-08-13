@@ -68,6 +68,7 @@ class GlobalController extends Controller
             ])
             ->leftJoin('ref_tahfidz', 'ref_tahfidz.id', '=', 'santri_detail.tahfidz_id')
             ->leftJoin('employee_new', 'employee_new.id', '=', 'ref_tahfidz.employee_id')
+            ->where('santri_detail.status', 0)
             ->get()
             ->map(function ($item) {
                 $item->kelas = strtoupper($item->kelas);
@@ -107,6 +108,7 @@ class GlobalController extends Controller
                 ])
                 ->leftJoin('ref_tahfidz', 'ref_tahfidz.id', '=', 'santri_detail.tahfidz_id')
                 ->leftJoin('employee_new', 'employee_new.id', '=', 'ref_tahfidz.employee_id')
+                ->where('santri_detail.status', 0)
                 ->get()
                 ->map(function ($item) {
                     $item->kelas = strtoupper($item->kelas);
@@ -182,6 +184,7 @@ class GlobalController extends Controller
             ->leftJoin('employee_new AS murroby', 'murroby.id', '=', 'ref_kamar.employee_id')
             ->whereMonth('santri_detail.tanggal_lahir', $now->month)
             ->whereDay('santri_detail.tanggal_lahir', $now->day)
+            ->where('santri_detail.status', 0)
             ->get()
             ->map(function ($item) use ($now) {
                 $item->kelas = strtoupper($item->kelas);

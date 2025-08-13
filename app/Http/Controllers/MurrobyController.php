@@ -150,6 +150,7 @@ class MurrobyController extends Controller
         ])
         ->leftJoin('cities', 'cities.city_id', '=', 'santri_detail.kabkota')
         ->where('kamar_id', $dataUser->idKamar)
+        ->where('santri_detail.status', 0)
         ->get();
 
         if($listSantri->isEmpty())
@@ -210,6 +211,7 @@ class MurrobyController extends Controller
                     ->whereNull('tp.deleted_at');
             })
             ->where('santri_detail.kamar_id', $dataUser->idKamar)
+            ->where('santri_detail.status', 0)
             ->get()
             ->map(function ($item) {
                     $item->tanggalPemeriksaanFormatted = date('Y-m-d', $item->tanggalPemeriksaan);
@@ -243,6 +245,7 @@ class MurrobyController extends Controller
                 'santri_detail.no_induk AS noInduk',
             ])
             ->where('no_induk', $noInduk)
+            ->where('santri_detail.status', 0)
             ->first();
 
             $dataPemeriksaan = TbPemeriksaan::select([

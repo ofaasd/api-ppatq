@@ -26,6 +26,7 @@ class PelanggaranController extends Controller
             ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'pelanggaran.no_induk')
             ->leftJoin('users', 'users.id', '=', 'pelanggaran.by_id')
             ->leftJoin('employee_new', 'employee_new.id', '=', 'users.pegawai_id')
+            ->where('santri_detail.status', 0)
             ->orderBy('pelanggaran.tanggal', 'desc')
             ->get()
             ->map(function($item){

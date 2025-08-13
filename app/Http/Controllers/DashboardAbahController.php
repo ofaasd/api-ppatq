@@ -570,6 +570,7 @@ class DashboardAbahController extends Controller
                 'tahfidz.photo AS fotoTahfidz',
             ])
             ->where('santri_detail.no_induk', $noInduk)
+            ->where('santri_detail.status', 0)
             ->leftJoin('cities', 'cities.city_id', '=', 'santri_detail.kabkota')
             ->leftJoin('ref_kamar', 'ref_kamar.id', '=', 'santri_detail.kamar_id')
             ->leftJoin('ref_tahfidz', 'ref_tahfidz.id', '=', 'santri_detail.tahfidz_id')
@@ -968,6 +969,7 @@ class DashboardAbahController extends Controller
                     'santri_detail.jenis_kelamin AS jenisKelamin',
                 ])
                 ->where('kamar_id', $refKamar->id)
+                ->where('santri_detail.status', 0)
                 ->get();
             }
 
@@ -981,6 +983,7 @@ class DashboardAbahController extends Controller
                     'santri_detail.kelas',
                     'santri_detail.jenis_kelamin AS jenisKelamin',
                 ])
+                ->where('santri_detail.status', 0)
                 ->where('tahfidz_id', $refTahfidz->id)
                 ->get();
             }
@@ -995,6 +998,7 @@ class DashboardAbahController extends Controller
                     'santri_detail.kelas',
                     'santri_detail.jenis_kelamin AS jenisKelamin',
                 ])
+                ->where('santri_detail.status', 0)
                 ->where('kelas', $refKelas->code)
                 ->get();
             }
@@ -1056,6 +1060,7 @@ class DashboardAbahController extends Controller
                 'pelanggaran.hukuman',
                 'pelanggaran.bukti',
             ])
+            ->where('santri_detail.status', 0)
             ->where('pelanggaran.kategori', $kodeKategori)
             ->orderBy('santri_detail.nama')
             ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'pelanggaran.no_induk')
@@ -1228,6 +1233,7 @@ class DashboardAbahController extends Controller
                         LIMIT 1
                     )');
             })
+            ->where('santri_detail.status', 0)
             ->whereMonth('perlengkapan.tanggal', $now->month)
             ->whereYear('perlengkapan.tanggal', $now->year)
             ->distinct('noInduk')
@@ -1705,6 +1711,7 @@ class DashboardAbahController extends Controller
                 ])
                 ->whereBetween('tanggal_sakit', [$startDate, $endDate])
                 ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'tb_kesehatan.santri_id')
+                ->where('santri_detail.status', 0)
                 ->orderBy('santri_detail.nama')
                 ->get();
 
@@ -1715,6 +1722,7 @@ class DashboardAbahController extends Controller
             ])
             ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'rawat_inap.santri_no_induk')
             ->whereBetween('tanggal_masuk', [$startDate, $endDate])
+            ->where('santri_detail.status', 0)
             ->get();
 
             // Gabungkan dua koleksi
@@ -1775,6 +1783,7 @@ class DashboardAbahController extends Controller
             ->leftJoin('tb_kesehatan', 'tb_kesehatan.santri_id', '=', 'santri_detail.no_induk')
             ->leftJoin('ref_kamar', 'ref_kamar.id', '=', 'santri_detail.kamar_id')
             ->leftJoin('employee_new', 'employee_new.id', '=', 'ref_kamar.employee_id')
+            ->where('santri_detail.status', 0)
             ->whereNotNull('tb_kesehatan.id')
             ->whereBetween('tb_kesehatan.tanggal_sakit', [$startDate, $endDate]);
 
@@ -1795,6 +1804,7 @@ class DashboardAbahController extends Controller
             ->leftJoin('ref_kamar', 'ref_kamar.id', '=', 'santri_detail.kamar_id')
             ->leftJoin('employee_new', 'employee_new.id', '=', 'ref_kamar.employee_id')
             ->leftJoin('rawat_inap', 'rawat_inap.santri_no_induk', '=', 'santri_detail.no_induk')
+            ->where('santri_detail.status', 0)
             ->whereNotNull('rawat_inap.id')
             ->whereBetween('rawat_inap.tanggal_masuk', [$startDate, $endDate]);
 
@@ -1907,6 +1917,7 @@ class DashboardAbahController extends Controller
                 'tb_pembayaran.atas_nama AS atasNama',
             ])
             ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'tb_pembayaran.nama_santri')
+            ->where('santri_detail.status', 0)
             ->whereMonth('tanggal_validasi', $bulan)
             ->whereYear('tanggal_validasi', $tahun)
             ->get();
@@ -1946,6 +1957,7 @@ class DashboardAbahController extends Controller
                 'tb_pembayaran.atas_nama AS atasNama',
             ])
             ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'tb_pembayaran.nama_santri')
+            ->where('santri_detail.status', 0)
             ->whereMonth('tanggal_validasi', $bulanLalu)
             ->whereYear('tanggal_validasi', $tahun)
             ->get();
@@ -2021,6 +2033,7 @@ class DashboardAbahController extends Controller
                 })
                 ->leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
                 ->leftJoin('cities', 'cities.city_id', '=', 'santri_detail.kabkota')
+                ->where('santri_detail.status', 0)
                 ->where('kamar_id', $id)
                 // Ambil capaian terakhir jika ada, jika tidak ada tetap tampilkan santri
                 ->where(function($q) {
@@ -2287,6 +2300,7 @@ class DashboardAbahController extends Controller
                 })
                 ->leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
                 ->where('tahfidz_id', $id)
+                ->where('santri_detail.status', 0)
                 ->where(function($q) {
                     $q->whereNull('detail_santri_tahfidz.kode_juz_surah')
                     ->orWhereRaw('detail_santri_tahfidz.kode_juz_surah = (
@@ -2313,6 +2327,7 @@ class DashboardAbahController extends Controller
                     'kode_juz.nama AS capaian',
                     'santri_detail.nama AS namaSantri'
                 ])
+                ->where('santri_detail.status', 0)
                 ->leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
                 ->first();
 
@@ -2324,6 +2339,7 @@ class DashboardAbahController extends Controller
                     'santri_detail.nama AS namaSantri',
                     'santri_detail.photo',
                 ])
+                ->where('santri_detail.status', 0)
                 ->distinct('santri_detail.no_induk')
                 ->get();
 
@@ -2572,6 +2588,7 @@ class DashboardAbahController extends Controller
                 ])
             ->leftJoin('santri_detail', 'santri_detail.id', '=', 'kurban.id_santri')
             ->where('jenis', $kodeJenis)
+            ->where('santri_detail.status', 0)
             ->where('tahun_hijriah', $maxTahun)
             ->orderBy('santri_detail.nama')
             ->get();
@@ -2616,6 +2633,7 @@ class DashboardAbahController extends Controller
                 'kurban.tahun_hijriah AS tahunHijriah'
                 ])
             ->leftJoin('santri_detail', 'santri_detail.id', '=', 'kurban.id_santri')
+            ->where('santri_detail.status', 0)
             ->orderBy('kurban.tanggal', 'desc')
             ->get()
             ->map(function($item){
