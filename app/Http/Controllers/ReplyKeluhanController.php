@@ -81,6 +81,7 @@ class ReplyKeluhanController extends Controller
             $data = [
                 'id_keluhan' => $request->idKeluhan,
                 'pesan' => $request->pesan,
+                'by_id' => $request->user()->id
             ];
             
             $data = ReplyKeluhan::create($data);
@@ -140,7 +141,8 @@ class ReplyKeluhanController extends Controller
             ]);
 
             $reply->update([
-                'pesan' => $request->pesan
+                'pesan' => $request->pesan,
+                'by_id' => $request->user()->id
             ]);
 
             return response()->json([
@@ -160,6 +162,10 @@ class ReplyKeluhanController extends Controller
     {
         try {
             $cek = ReplyKeluhan::where('id', $idBalasan)->first();
+            $keluhan = Keluhan::where('id', $cek->id_keluhan)->first();
+            $keluhan->update([
+                'status' => 1, // Set status ke 'Belum Ditangani'
+            ]);
             $cek->delete();
 
             return response()->json([
