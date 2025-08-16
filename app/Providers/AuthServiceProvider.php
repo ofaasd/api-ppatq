@@ -32,26 +32,15 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        // Konfigurasi masa berlaku token
-        Passport::tokensExpireIn(now()->addDays(15));
-        Passport::refreshTokensExpireIn(now()->addDays(30));
-
         $server = $this->app->get(AuthorizationServer::class);
 
         $userGrant = new PasswordGrant(
             app(UserRepository::class),
             app(RefreshTokenRepository::class),
-            new \DateInterval('P15D')
+            new \DateInterval('P999Y') // access token lifetime: 999 years
         );
-        $server->enableGrantType($userGrant, new \DateInterval('PT8H'));
+        $server->enableGrantType($userGrant, new \DateInterval('P999Y')); // refresh token lifetime: 999 years
 
-        // Password grant untuk siswa
-        // $siswaGrant = new PasswordGrant(
-        //     app(SiswaUserRepository::class),
-        //     app(RefreshTokenRepository::class),
-        //     new \DateInterval('P15D')
-        // );
-        // $server->enableGrantType($siswaGrant, new \DateInterval('PT2H'));
     }
 
 }
