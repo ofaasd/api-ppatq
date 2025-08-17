@@ -2,24 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
+use App\Models\User;
+
+use App\Models\RefKamar;
+use App\Models\EmployeeNew;
+use App\Models\SantriKamar;
+use App\Models\SantriDetail;
 use Illuminate\Http\Request;
+use App\Models\TbPemeriksaan;
+use App\Models\RefTahunAjaran;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
+
+use App\Http\Resources\MurrobyResource;
+
+use App\Http\Helpers\Helpers_wa;
 
 use App\Http\Requests\LoginMurrobyRequest;
-use App\Http\Resources\MurrobyResource;
-use App\Models\EmployeeNew;
-use App\Models\RefKamar;
-use App\Models\RefTahunAjaran;
-use App\Models\SantriDetail;
-use App\Models\SantriKamar;
-use App\Models\TbPemeriksaan;
-use App\Models\User;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Exceptions\HttpResponseException;
-
-use Illuminate\Support\Facades\Hash;
-
-use Illuminate\Support\Facades\Http;
 
 class MurrobyController extends Controller
 {
@@ -68,6 +71,8 @@ class MurrobyController extends Controller
                 'users.id AS idUser',
                 'employee_new.nama',
                 'employee_new.photo',
+                'employee_new.jenis_kelamin',
+                'employee_new.no_hp',
             ])
             ->leftJoin('users', 'users.pegawai_id', '=', 'employee_new.id')
             ->first();
@@ -75,6 +80,27 @@ class MurrobyController extends Controller
         // Tambahkan token ke resource
         $pegawai->access_token = $tokenData['access_token'];
         $pegawai->expires_in = $tokenData['expires_in'];
+
+        $nowFormatted = Carbon::now()->translatedFormat('l d F Y, H:i');
+
+$teksJenisKelamin = $pegawai->jenis_kelamin == 'Laki-laki' ? 'Ustad' : 'Ustadzah';
+
+$message = "🎉 Selamat datang
+
+{$teksJenisKelamin} {$pegawai->nama}. Anda telah melakukan log in pada Aplikasi Mobile
+
+{$nowFormatted}
+
+Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
+";
+
+            // kirim wa
+            $data = [
+                'no_wa' => $pegawai->no_hp,
+                'pesan' => $message
+            ];
+
+            $sendWa = Helpers_wa::send_wa($data);
 
         activity()
         ->useLog('autentikasi')
