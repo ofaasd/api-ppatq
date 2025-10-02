@@ -162,15 +162,28 @@ class UangSakuController extends Controller
 
         $dataUangKeluar = DB::table('tb_saku_keluar')
             ->select([
-                'tb_saku_keluar.jumlah AS jumlahKeluar',
-                'tb_saku_keluar.note AS catatan',
-                'tb_saku_keluar.tanggal AS tanggalTransaksi',
-                'employee_new.nama AS namaMurroby',
+            DB::raw("YEAR(tb_saku_keluar.tanggal) AS tahun"),
+            DB::raw("MONTH(tb_saku_keluar.tanggal) AS bulan"),
+            'tb_saku_keluar.jumlah AS jumlahKeluar',
+            'tb_saku_keluar.note AS catatan',
+            'tb_saku_keluar.tanggal AS tanggalTransaksi',
+            'employee_new.nama AS namaMurroby',
             ])
             ->leftJoin('employee_new', 'employee_new.id', 'tb_saku_keluar.pegawai_id')
-            ->orderBy('tanggalTransaksi', 'desc')
             ->where('no_induk', $noInduk)
-            ->get();
+            ->orderBy('tahun', 'desc')
+            ->orderBy('bulan', 'desc')
+            ->orderBy('tanggalTransaksi', 'desc')
+            ->get()
+            ->map(function($item) {
+                $item->tanggalTransaksi = date('d/m/Y', strtotime($item->tanggalTransaksi));
+                // Menggunakan Carbon untuk nama bulan Indonesia
+                $item->teksBulan = Carbon::create()->month((int)date('n', mktime(0, 0, 0, $item->bulan, 10)))->locale('id')->monthName;
+                return $item;
+            })
+            ->groupBy(function($item) {
+                return $item->tahun;
+            });
         
         $data = [
             'dataSantri'    =>  $dataSantri,
