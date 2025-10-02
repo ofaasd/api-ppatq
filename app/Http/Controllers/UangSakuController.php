@@ -83,22 +83,40 @@ class UangSakuController extends Controller
             ->where('santri_detail.status', 0)
             ->first();
 
-        $dataUangMasuk = DB::table('tb_saku_masuk')
+        $dataUangMasukRaw = DB::table('tb_saku_masuk')
             ->select([
-                DB::raw("
-                    CASE tb_saku_masuk.dari
-                        WHEN 1 THEN 'Uang Saku'
-                        WHEN 2 THEN 'Kunjungan Walsan'
-                        WHEN 3 THEN 'Sisa Bulan Kemarin'
-                        ELSE 'Tidak Diketahui'
-                    END AS uangAsal
-                "),
-                'tb_saku_masuk.jumlah AS jumlahMasuk',
-                'tb_saku_masuk.tanggal AS tanggalTransaksi',
+            DB::raw("
+                CASE tb_saku_masuk.dari
+                WHEN 1 THEN 'Uang Saku'
+                WHEN 2 THEN 'Kunjungan Walsan'
+                WHEN 3 THEN 'Sisa Bulan Kemarin'
+                ELSE 'Tidak Diketahui'
+                END AS uangAsal
+            "),
+            'tb_saku_masuk.jumlah AS jumlahMasuk',
+            'tb_saku_masuk.tanggal AS tanggalTransaksi',
             ])
             ->orderBy('tanggalTransaksi', 'desc')
             ->where('no_induk', $noInduk)
             ->get();
+
+        $bulanNama = [
+            '01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April',
+            '05' => 'Mei', '06' => 'Juni', '07' => 'Juli', '08' => 'Agustus',
+            '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember'
+        ];
+
+        $groupedData = [];
+        foreach ($dataUangMasukRaw as $row) {
+            $tahun = date('Y', strtotime($row->tanggalTransaksi));
+            $bulan = date('m', strtotime($row->tanggalTransaksi));
+            $namaBulan = $bulanNama[$bulan] ?? $bulan;
+            $row->tanggalTransaksi = date('d/m/Y', strtotime($row->tanggalTransaksi));
+            $row->teksBulan = $namaBulan;
+            $groupedData[$tahun][$namaBulan][] = $row;
+        }
+
+        $dataUangMasuk = $groupedData;
         
         $data = [
             'dataSantri'    =>  $dataSantri,
