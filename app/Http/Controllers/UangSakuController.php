@@ -160,10 +160,8 @@ class UangSakuController extends Controller
             ->where('santri_detail.status', 0)
             ->first();
 
-        $dataUangKeluar = DB::table('tb_saku_keluar')
+        $dataUangKeluarRaw = DB::table('tb_saku_keluar')
             ->select([
-            DB::raw("YEAR(tb_saku_keluar.tanggal) AS tahun"),
-            DB::raw("MONTH(tb_saku_keluar.tanggal) AS bulan"),
             'tb_saku_keluar.jumlah AS jumlahKeluar',
             'tb_saku_keluar.note AS catatan',
             'tb_saku_keluar.tanggal AS tanggalTransaksi',
@@ -171,19 +169,26 @@ class UangSakuController extends Controller
             ])
             ->leftJoin('employee_new', 'employee_new.id', 'tb_saku_keluar.pegawai_id')
             ->where('no_induk', $noInduk)
-            ->orderBy('tahun', 'desc')
-            ->orderBy('bulan', 'desc')
             ->orderBy('tanggalTransaksi', 'desc')
-            ->get()
-            ->map(function($item) {
-                $item->tanggalTransaksi = date('d/m/Y', strtotime($item->tanggalTransaksi));
-                // Menggunakan Carbon untuk nama bulan Indonesia
-                $item->teksBulan = Carbon::create()->month((int)date('n', mktime(0, 0, 0, $item->bulan, 10)))->locale('id')->monthName;
-                return $item;
-            })
-            ->groupBy(function($item) {
-                return $item->tahun;
-            });
+            ->get();
+
+        $bulanNama = [
+            '01' => 'Januari', '02' => 'Februari', '03' => 'Maret', '04' => 'April',
+            '05' => 'Mei', '06' => 'Juni', '07' => 'Juli', '08' => 'Agustus',
+            '09' => 'September', '10' => 'Oktober', '11' => 'November', '12' => 'Desember'
+        ];
+
+        $groupedData = [];
+        foreach ($dataUangKeluarRaw as $row) {
+            $tahun = date('Y', strtotime($row->tanggalTransaksi));
+            $bulan = date('m', strtotime($row->tanggalTransaksi));
+            $namaBulan = $bulanNama[$bulan] ?? $bulan;
+            $row->tanggalTransaksi = date('d/m/Y', strtotime($row->tanggalTransaksi));
+            $row->teksBulan = $namaBulan;
+            $groupedData[$tahun][$namaBulan][] = $row;
+        }
+
+        $dataUangKeluar = $groupedData;
         
         $data = [
             'dataSantri'    =>  $dataSantri,
