@@ -127,22 +127,6 @@ class KeuanganController extends Controller
         //     }
         // }else if($tipePembayaran == "Cash")
         // {
-
-        $data = [
-            'nama_santri' => $request->noInduk,
-            'jumlah' => $request->jumlah,
-            'tanggal_bayar' => $request->tanggalBayar,
-            'periode' => $request->periode,
-            'tahun' => $request->tahun,
-            'bank_pengirim' => $request->bankPengirim,
-            'atas_nama' => $request->atasNama,
-            'no_wa' => $request->noWa,
-            'note_validasi' => $request->catatanValidasi,
-            'catatan' => $request->catatan,
-            'tipe' => $request->tipePembayaran,
-        ];
-
-
         
             $data = [
                 'nama_santri' => $request->noInduk,

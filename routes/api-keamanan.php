@@ -1,14 +1,21 @@
 <?php
 
+use App\Models\PelanggaranKetertiban;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\IzinController;
 use App\Http\Controllers\KerapianController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PelanggaranController;
-use App\Http\Controllers\PelanggaranKetertibanController;
 use App\Http\Controllers\PerlengkapanController;
-use App\Models\PelanggaranKetertiban;
+use App\Http\Controllers\DashboardAbahController;
+use App\Http\Controllers\PelanggaranKetertibanController;
 
 Route::prefix('keamanan')->group(function () {
+
+    Route::prefix('santri')->group(function () {
+        Route::get('/{search?}', [DashboardAbahController::class, 'santri']);
+        Route::get('/detail/{noInduk}', [DashboardAbahController::class, 'detailSantri']);
+    });
+    
     Route::prefix('pelanggaran')->group(function () {
         Route::get('/', [PelanggaranController::class, 'index']);
         Route::post('/store', [PelanggaranController::class, 'store']);

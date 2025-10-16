@@ -6,21 +6,21 @@ use App\Http\Controllers\AgendaController;
 use App\Http\Controllers\BeritaController;
 use App\Http\Controllers\DakwahController;
 use App\Http\Controllers\GaleriController;
-use App\Http\Controllers\GetDataController;
+use App\Http\Controllers\GlobalController;
 
+use App\Http\Controllers\GetDataController;
 use App\Http\Controllers\KeluhanController;
 use App\Http\Controllers\MurrobyController;
 use App\Http\Controllers\RekeningController;
 use App\Http\Controllers\TutorialController;
 use App\Http\Controllers\KelasKamarController;
 use App\Http\Controllers\KesantrianController;
+use App\Http\Controllers\WaliSantriController;
 use App\Http\Controllers\PelanggaranController;
 use App\Http\Controllers\ReplyKeluhanController;
 use App\Http\Controllers\DashboardAbahController;
-use App\Http\Controllers\GlobalController;
 use App\Http\Controllers\StaffPengasuhController;
 use App\Http\Controllers\KesehatanSantriController;
-use App\Http\Controllers\WaliSantriController;
 
 /*
 |--------------------------------------------------------------------------
