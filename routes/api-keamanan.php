@@ -6,10 +6,12 @@ use App\Http\Controllers\IzinController;
 use App\Http\Controllers\KerapianController;
 use App\Http\Controllers\PelanggaranController;
 use App\Http\Controllers\PerlengkapanController;
+use App\Http\Controllers\ReplyKeluhanController;
 use App\Http\Controllers\DashboardAbahController;
 use App\Http\Controllers\PelanggaranKetertibanController;
 
 Route::prefix('keamanan')->group(function () {
+    Route::get('/keluhan', [ReplyKeluhanController::class, 'index']);
 
     Route::prefix('santri')->group(function () {
         Route::get('/{search?}', [DashboardAbahController::class, 'santri']);
