@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\PelanggaranKetertiban;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\IzinController;
 use App\Http\Controllers\KerapianController;

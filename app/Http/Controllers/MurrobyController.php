@@ -5,16 +5,13 @@ namespace App\Http\Controllers;
 use Carbon\Carbon;
 use App\Models\User;
 
-use App\Models\RefKamar;
 use App\Models\EmployeeNew;
-use App\Models\SantriKamar;
 use App\Models\SantriDetail;
 use Illuminate\Http\Request;
 use App\Models\TbPemeriksaan;
 use App\Models\RefTahunAjaran;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
 
 use App\Http\Resources\MurrobyResource;

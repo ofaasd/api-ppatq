@@ -14,31 +14,32 @@ use App\Models\RawatInap;
 use App\Models\SakuMasuk;
 use App\Models\pembayaran;
 use App\Models\SakuKeluar;
+use App\Models\EmployeeNew;
 use App\Models\Kelengkapan;
 use App\Models\Pelanggaran;
-use App\Models\DetailSantri;
 
+use App\Models\DetailSantri;
 use App\Models\Perlengkapan;
 use App\Models\SantriDetail;
 use Illuminate\Http\Request;
+
 use App\Models\TbPemeriksaan;
+use App\Models\JenisPembayaran;
 
 use App\Http\Helpers\Helpers_wa;
+
 use App\Models\detailPembayaran;
-
 use Illuminate\Http\JsonResponse;
-
 use App\Models\RefJenisPembayaran;
+
 use Illuminate\Support\Facades\DB;
 use App\Models\DetailSantriTahfidz;
-
 use Illuminate\Support\Facades\Http;
 use App\Models\PelanggaranKetertiban;
 use Illuminate\Validation\Rules\File;
 use Intervention\Image\Facades\Image;
 use App\Http\Resources\WaliSantriResource;
 use App\Http\Requests\LoginWaliSantriRequest;
-use App\Models\JenisPembayaran;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 class WaliSantriController extends Controller
@@ -1614,6 +1615,8 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                             'message'   => 'Total pembayaran dan rincian pembayaran tidak sama.',
                         ], 422);
                     }
+                    
+                    $noBendahara = EmployeeNew::where('jabatan_new_2', 16)->first()->no_hp ?? '0000000000';
 
                     $dataSantri = DetailSantri::where('no_induk', $noInduk)->first();
 $message = '[     dari mobile PPATQ-RF ku   ]
@@ -1657,7 +1660,27 @@ Kami ucapkan banyak terima kasih kepada (Bp/Ibu) ' . $atasNama . ', salam kami k
 Semoga pekerjaan dan usahanya diberikan kelancaran dan menghasilkan Rizqi yang banyak dan berkah, aamiin.
 ';
 
-                
+$messageBendahara = '[Notifikasi Aplikasi Wali Santri - PPATQ-RF]
+
+Yth. Bendahara,
+
+Wali santri *' . $dataSantri->nama . '* (Kelas *' . strtoupper($dataSantri->kelas) . '*) atas nama *' . $atasNama . '* telah melaporkan pembayaran untuk bulan *' . $this->getNamaBulan($periode) . '*.
+Jumlah: Rp. ' . number_format($jumlah, 0, ',', '.') . '
+
+Rincian pembayaran:
+';
+$jenis = RefJenisPembayaran::orderBy('urutan', 'asc')->get();
+$listJenis = [];
+foreach($jenis as $row){
+    $listJenis[$row->id] = $row->jenis;
+}
+
+$detail = detailPembayaran::where('id_pembayaran', $id)->get();
+foreach($detail as $row){
+    $messageBendahara .= '• ' . ($listJenis[$row->id_jenis_pembayaran] ?? 'Jenis tidak diketahui') . ' : Rp. ' . number_format($row->nominal,0,',','.') . '
+';
+}
+
                     if($insertPembayaran){
 
                         try {
@@ -1671,6 +1694,13 @@ Semoga pekerjaan dan usahanya diberikan kelancaran dan menghasilkan Rizqi yang b
 
                             $hasil = SendWA::create($data);
                             $sendWa = Helpers_wa::send_wa($data);
+
+                            $dataBendahara = [
+                                'no_wa' => $noBendahara,
+                                'pesan' => $messageBendahara,
+                            ];
+
+                            $sendWa = Helpers_wa::send_wa($dataBendahara);
 
                             $responseDecoded = json_decode($sendWa, true);
 
