@@ -1660,7 +1660,7 @@ Kami ucapkan banyak terima kasih kepada (Bp/Ibu) ' . $atasNama . ', salam kami k
 Semoga pekerjaan dan usahanya diberikan kelancaran dan menghasilkan Rizqi yang banyak dan berkah, aamiin.
 ';
 
-$messageBendahara = '[Notifikasi Aplikasi Wali Santri - PPATQ-RF]
+$messageBendahara = '[     dari mobile PPATQ-RF ku   ]
 
 Yth. Bendahara,
 
