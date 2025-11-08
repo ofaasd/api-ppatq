@@ -1616,7 +1616,10 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                         ], 422);
                     }
                     
-                    $noBendahara = EmployeeNew::where('jabatan_new_2', 16)->first()->no_hp ?? '0000000000';
+                    $bendahara = EmployeeNew::where(function($q){
+                        $q->where('jabatan_new_2', 16)
+                        ->orWhere('jabatan_new', 16);
+                    })->get();
 
                     $dataSantri = DetailSantri::where('no_induk', $noInduk)->first();
 $message = '[     dari mobile PPATQ-RF ku   ]
@@ -1662,7 +1665,7 @@ Semoga pekerjaan dan usahanya diberikan kelancaran dan menghasilkan Rizqi yang b
 
 $messageBendahara = '[     dari mobile PPATQ-RF ku   ]
 
-Yth. Bendahara,
+Yth. Bendahara PPATQ-RF,
 
 Wali santri *' . $dataSantri->nama . '* (Kelas *' . strtoupper($dataSantri->kelas) . '*) atas nama *' . $atasNama . '* telah melaporkan pembayaran untuk bulan *' . $this->getNamaBulan($periode) . '*.
 Jumlah: Rp. ' . number_format($jumlah, 0, ',', '.') . '
@@ -1695,12 +1698,15 @@ foreach($detail as $row){
                             $hasil = SendWA::create($data);
                             $sendWa = Helpers_wa::send_wa($data);
 
-                            $dataBendahara = [
-                                'no_wa' => $noBendahara,
-                                'pesan' => $messageBendahara,
-                            ];
-
-                            $sendWa = Helpers_wa::send_wa($dataBendahara);
+                            foreach($bendahara as $row){
+                                $noBendahara = $row->no_hp;
+                                $dataBendahara = [
+                                    'no_wa' => $noBendahara,
+                                    'pesan' => $messageBendahara,
+                                ];
+                                
+                                $sendWa = Helpers_wa::send_wa($dataBendahara);
+                            }
 
                             $responseDecoded = json_decode($sendWa, true);
 
