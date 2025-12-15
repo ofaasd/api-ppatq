@@ -1570,25 +1570,25 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                         $nominal = $refJenisPembayaran->get($idJenisPembayaran[$key])->harga ?? 0;
                         $teksJenisPembayaran = $refJenisPembayaran->get($idJenisPembayaran[$key])->jenis ?? "Jenis Pembayaran Tidak Ditemukan";
                         
-                        if($idJenisPembayaran[$key] == 3){
-                            if($value >= $nominal)
-                            {
-                                $dataSaku = [
-                                    'dari' => 1,
-                                    'jumlah' => $value,
-                                    'tanggal' => $tanggalBayar,
-                                    'no_induk' => $noInduk,
-                                    'id_pembayaran' => $id,
-                                    'status_pembayaran' => 0
-                                ];
-                                $query2 = SakuMasuk::insert($dataSaku);
-                            }else{
-                                return response()->json([
-                                    'status'    => 422,
-                                    'message'   => 'Nominal rincian pembayaran ' . $teksJenisPembayaran . ' tidak boleh kurang dari Rp' . number_format($nominal, 0, ',', '.') . ',00.',
-                                ], 422);
-                            }
-                        }
+                        // if($idJenisPembayaran[$key] == 3){
+                        //     if($value >= $nominal)
+                        //     {
+                        //         $dataSaku = [
+                        //             'dari' => 1,
+                        //             'jumlah' => $value,
+                        //             'tanggal' => $tanggalBayar,
+                        //             'no_induk' => $noInduk,
+                        //             'id_pembayaran' => $id,
+                        //             'status_pembayaran' => 0
+                        //         ];
+                        //         $query2 = SakuMasuk::insert($dataSaku);
+                        //     }else{
+                        //         return response()->json([
+                        //             'status'    => 422,
+                        //             'message'   => 'Nominal rincian pembayaran ' . $teksJenisPembayaran . ' tidak boleh kurang dari Rp' . number_format($nominal, 0, ',', '.') . ',00.',
+                        //         ], 422);
+                        //     }
+                        // }
 
                         if($value != 0 && !empty($value)){
                             if($value >= $nominal){
