@@ -163,17 +163,17 @@ class KeuanganController extends Controller
                     $totalRincian += $value;
                 }
 
-                if($idJenisPembayaran == 3){
-                    $data_saku = [
-                        'dari' => 1,
-                        'jumlah' => $value,
-                        'tanggal' => $request->tanggalBayar,
-                        'no_induk' => $request->noInduk,
-                        'id_pembayaran' => $id,
-                        'status_pembayaran' => 0
-                    ];
-                    $query2 = SakuMasuk::insert($data_saku);
-                }
+                // if($idJenisPembayaran == 3){
+                //     $data_saku = [
+                //         'dari' => 1,
+                //         'jumlah' => $value,
+                //         'tanggal' => $request->tanggalBayar,
+                //         'no_induk' => $request->noInduk,
+                //         'id_pembayaran' => $id,
+                //         'status_pembayaran' => 0
+                //     ];
+                //     $query2 = SakuMasuk::insert($data_saku);
+                // }
             }
         // }else
         // {

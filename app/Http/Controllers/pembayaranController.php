@@ -143,7 +143,7 @@ class pembayaranController extends Controller
                         'input_by' => 3, //input lewat api / aplikasi
                     );
                     $pembayaran = pembayaran::insert($data);
-                    $id = DB::getPdo()->lastInsertId();
+                    $id = \DB::getPdo()->lastInsertId();
                     $jenis_pembayaran = $request->input('jenis_pembayaran');
 				    $id_jenis_pembayaran = $request->input('id_jenis_pembayaran');
                     foreach($jenis_pembayaran as $key=>$value){
@@ -157,17 +157,17 @@ class pembayaranController extends Controller
                             $query = detailPembayaran::insert($data_detail);
                         }
 
-                        if($id_jenis_pembayaran == 3){
-                            $data_saku = array(
-                                'dari' => 1,
-                                'jumlah' => $value,
-                                'tanggal' => $request->input('tanggal_bayar'),
-                                'no_induk' => $request->input('nama_santri'),
-                                'id_pembayaran' => $id,
-                                'status_pembayaran' => 0
-                            );
-                            $query2 = SakuMasuk::insert($data_saku);
-                        }
+                        // if($id_jenis_pembayaran == 3){
+                        //     $data_saku = array(
+                        //         'dari' => 1,
+                        //         'jumlah' => $value,
+                        //         'tanggal' => $request->input('tanggal_bayar'),
+                        //         'no_induk' => $request->input('nama_santri'),
+                        //         'id_pembayaran' => $id,
+                        //         'status_pembayaran' => 0
+                        //     );
+                        //     $query2 = SakuMasuk::insert($data_saku);
+                        // }
                     }
                     $berhasil = 1;
                 }else{
