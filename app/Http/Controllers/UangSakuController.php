@@ -301,6 +301,43 @@ class UangSakuController extends Controller
                     
                     DB::commit();
                     return response()->json("Semua uang saku santri telah dikurangi sebesar " . number_format($jumlah, 0, ',', '.'));
+                }elseif($request->selectSantri)
+                {
+                    foreach($request->selectedSantri as $noIndukSantri)
+                    {
+                        UangSaku::firstOrCreate(['no_induk' => $noIndukSantri]);
+
+                        $saku = UangSaku::where('no_induk', $noIndukSantri)->first();
+                        if (!$saku) {
+                            return response()->json([
+                                "status"  => 404,
+                                "message" => "Data uang saku santri tidak ditemukan.",
+                            ], 404);
+                        }
+
+                        // if($saku->jumlah <= $jumlah){
+                        //     return response()->json([
+                        //         "status"    => 400,
+                        //         "message"   => "Uang tidak cukup.",
+                        //     ], 400);
+                        // }
+
+                        $updateSaku = UangSaku::find($saku->id);
+                        $updateSaku->jumlah = $saku->jumlah - $jumlah;
+                        $updateSaku->save();
+
+                        $sakuKeluar = SakuKeluar::create([
+                            'pegawai_id' => $user->pegawai_id,
+                            'jumlah' => $jumlah,
+                            'no_induk' => $noIndukSantri,
+                            'note' => $request->note,
+                            'tanggal' => Carbon::parse($request->tanggal)->format('Y-m-d'),
+                        ]);
+                    }
+
+                    DB::commit();
+                    return response()->json("Uang saku santri terpilih telah dikurangi sebesar " . number_format($jumlah, 0, ',', '.'));
+
                 }else
                 {
                     UangSaku::firstOrCreate(['no_induk' => $request->noInduk]);
