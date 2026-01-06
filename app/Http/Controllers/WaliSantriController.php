@@ -252,6 +252,60 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
         ], 404);
     }
 
+    public function transaksiSaldoBulanIni($noInduk)
+    {
+        try {
+            $currentMonth = Carbon::now()->month;
+            $currentYear = Carbon::now()->year;
+            
+            $sakuMasuk = SakuMasuk::select([
+                DB::raw("
+                    CASE tb_saku_masuk.dari
+                        WHEN 1 THEN 'Uang Saku'
+                        WHEN 2 THEN 'Kunjungan Walsan'
+                        WHEN 3 THEN 'Sisa Bulan Kemarin'
+                        ELSE 'Tidak Diketahui'
+                    END AS uangAsal
+                "),
+                'tb_saku_masuk.jumlah',
+                'tb_saku_masuk.tanggal'
+            ])
+            ->where('no_induk', $noInduk)
+            ->whereMonth('tb_saku_masuk.tanggal', $currentMonth)
+            ->whereYear('tb_saku_masuk.tanggal', $currentYear)
+            ->orderBy('tb_saku_masuk.tanggal', 'desc')
+            ->get();
+            
+            $sakuKeluar = SakuKeluar::select([
+                'employee_new.nama',
+                'tb_saku_keluar.jumlah',
+                'tb_saku_keluar.note',
+                'tb_saku_keluar.tanggal',
+            ])
+            ->leftJoin('employee_new', 'employee_new.id', '=', 'tb_saku_keluar.pegawai_id')
+            ->whereMonth('tb_saku_keluar.tanggal', $currentMonth)
+            ->whereYear('tb_saku_keluar.tanggal', $currentYear)
+            ->where('no_induk', $noInduk)
+            ->orderBy('tb_saku_keluar.tanggal', 'desc')
+            ->get();
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Berhasil mengambil data transaksi bulan ini.',
+                'data' => [
+                    'totalMasuk' => $sakuMasuk->sum('jumlah'),
+                    'totalKeluar' => $sakuKeluar->sum('jumlah')
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Terjadi kesalahan. Silakan coba lagi nanti.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function logout(Request $request)
     {
         $user = $request->user();

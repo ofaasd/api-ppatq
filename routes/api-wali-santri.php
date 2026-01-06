@@ -11,6 +11,7 @@ Route::prefix('wali-santri')->group(function () {
         Route::post('/logout', [WaliSantriController::class, 'logout']);
 
         Route::get('/saldo/{noInduk}', [WaliSantriController::class, 'saldo']);
+        Route::get('/saldo-transaksi/{noInduk}', [WaliSantriController::class, 'transaksiSaldoBulanIni']);
 
         Route::get('/kesehatan/{noInduk}', [WaliSantriController::class, 'kesehatan']);
         Route::get('/ketahfidzan/{noInduk}', [WaliSantriController::class, 'ketahfidzan']);
