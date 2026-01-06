@@ -293,8 +293,8 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                 'status' => 200,
                 'message' => 'Berhasil mengambil data transaksi bulan ini.',
                 'data' => [
-                    'totalMasuk' => $sakuMasuk->sum('jumlah'),
-                    'totalKeluar' => $sakuKeluar->sum('jumlah')
+                    'totalMasuk' => number_format($sakuMasuk->sum('jumlah'), 0, ',', '.'),
+                    'totalKeluar' => number_format($sakuKeluar->sum('jumlah'), 0, ',', '.')
                 ]
             ], 200);
         } catch (\Exception $e) {
