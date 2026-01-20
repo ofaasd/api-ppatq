@@ -13,6 +13,7 @@ use App\Http\Controllers\KeluhanController;
 use App\Http\Controllers\MurrobyController;
 use App\Http\Controllers\RekeningController;
 use App\Http\Controllers\TutorialController;
+use App\Http\Controllers\UangSakuController;
 use App\Http\Controllers\KelasKamarController;
 use App\Http\Controllers\KesantrianController;
 use App\Http\Controllers\WaliSantriController;
@@ -58,6 +59,8 @@ Route::get('/kesehatan-santri', [KesehatanSantriController::class, 'index']);
 
 // Berita
 Route::get('/berita', [BeritaController::class, 'index']);
+
+Route::get('/saldo-transaksi/{noInduk}', [WaliSantriController::class, 'transaksiSaldoBulanIni']);
 
 // Dakwah
 Route::get('/dakwah', [DakwahController::class, 'index']);
@@ -134,6 +137,9 @@ Route::middleware(['auth:api', 'update.lastseen'])->group(function () {
 
     // Keamanan
     require __DIR__ . '/api-keamanan.php';
+
+    // Kemadrasahan
+    require __DIR__ . '/api-kemadrasahan.php';
 });
 
 // API Wali Santri
