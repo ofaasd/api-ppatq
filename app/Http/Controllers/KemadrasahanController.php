@@ -97,7 +97,7 @@ class KemadrasahanController extends Controller
                     });
                 });
 
-            if (!$laporan) {
+            if (empty($laporan)) {
                 $laporan = [
                     '1' => [
                         // semester 1
