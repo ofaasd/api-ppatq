@@ -47,6 +47,58 @@ class KemadrasahanController extends Controller
             ], 500);
         }
     }
+
+    public function getDataSantri($noInduk)
+    {
+        try {
+            $santri = SantriDetail::select([
+                        'santri_detail.no_induk AS noInduk',
+                        'santri_detail.nama AS namaSantri',
+                        'santri_detail.photo AS fotoSantri',
+                        'santri_detail.kelas AS kodeKelas'
+                    ])
+                    ->where('santri_detail.no_induk', $noInduk)
+                    ->first();
+
+            $laporan = LaporanBulananKemadrasahan::select([
+                    'laporan_bulanan_kemadrasahan.id',
+                    'laporan_bulanan_kemadrasahan.bulan',
+                    'laporan_bulanan_kemadrasahan.semester',
+                ])
+                ->where('no_induk', $noInduk)
+                ->get()
+                ->map(function ($item) {
+                    $item->bulan = getMonthName($item->bulan);
+                    $item->detail = DetailPenilaianKemadrasahan::select([
+                        'detail_penilaian_kemadrasahan.id',
+                        'detail_penilaian_kemadrasahan.materi',
+                        'detail_penilaian_kemadrasahan.id_laporan AS idLaporan',
+                        'detail_penilaian_kemadrasahan.deskripsi_penilaian AS deskripsiPenilaian',
+                        'detail_penilaian_kemadrasahan.minggu_ke AS mingguKe',
+                        'employee_new.nama AS pengampu',
+                    ])
+                    ->leftJoin('ref_mapel', 'ref_mapel.id', '=', 'detail_penilaian_kemadrasahan.id_mapel')
+                    ->leftJoin('employee_new', 'employee_new.id', '=', 'detail_penilaian_kemadrasahan.id_pengampu')
+                    ->where('id_laporan', $item->id)
+                    ->get();
+                    return $item;
+                });
+
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'santri' => $santri,
+                    'laporan' => $laporan
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    
     public function getDataMapel()
     {
         try {
