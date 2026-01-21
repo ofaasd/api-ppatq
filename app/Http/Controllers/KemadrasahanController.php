@@ -109,8 +109,6 @@ class KemadrasahanController extends Controller
                         (object)[
                             'id' => null,
                             'bulan' => null,
-                            'semester' => 1,
-                            'kelas' => $santri->kodeKelas,
                             'semester' => null,
                             'kelas' => null,
                             'detail' => collect([
@@ -130,8 +128,8 @@ class KemadrasahanController extends Controller
                         (object)[
                             'id' => null,
                             'bulan' => null,
-                            'semester' => 2,
-                            'kelas' => $santri->kodeKelas,
+                            'semester' => null,
+                            'kelas' => null,
                             'detail' => collect([
                                 (object)[
                                     'id' => null,
@@ -195,6 +193,7 @@ class KemadrasahanController extends Controller
             $laporan = LaporanBulananKemadrasahan::select([
                 'laporan_bulanan_kemadrasahan.id',
                 'laporan_bulanan_kemadrasahan.bulan',
+                'laporan_bulanan_kemadrasahan.kelas',
                 'laporan_bulanan_kemadrasahan.semester',
             ])
             ->where('no_induk', $noInduk)
@@ -245,15 +244,17 @@ class KemadrasahanController extends Controller
         DB::beginTransaction();
 
         try {
-            $kodeKelas = $request->kodeKelas;
+            $user = User::where('id', $request->idUser)->first();
+            $refKelas = RefKelas::where('employee_id', $user->pegawai_id)->first();
             $santri = SantriDetail::select('no_induk')
-                ->where('kelas', $kodeKelas)
+                ->where('kelas', $refKelas->kode)
                 ->get();
 
             $bulan = $request->bulan;
             $semester = $request->semester;
             $idMapel = $request->idMapel;
             $tipeInput = $request->tipeInput; // 'single' atau 'bulk'
+            $kelas = preg_replace('/[^0-9]/', '', $refKelas->kode);
             
             if ($tipeInput == 'single') {
                 $santri = SantriDetail::select('no_induk')
@@ -264,6 +265,7 @@ class KemadrasahanController extends Controller
                         'no_induk' => $santri->no_induk,
                         'bulan'    => $bulan,
                         'semester' => $semester,
+                        'kelas'    => $kelas,
                     ],
                     [
                         // Anda bisa menambahkan kolom lain yang perlu diupdate di sini
@@ -292,6 +294,7 @@ class KemadrasahanController extends Controller
                             'no_induk' => $row->no_induk,
                             'bulan'    => $bulan,
                             'semester' => $semester,
+                            'kelas'    => $kelas,
                         ],
                         [
                             // Anda bisa menambahkan kolom lain yang perlu diupdate di sini
