@@ -82,7 +82,7 @@ class KemadrasahanController extends Controller
                 ->sortKeys() // Sort by semester key (1 = ganjil, 2 = genap)
                 ->map(function ($items) {
                     return $items->map(function ($item) {
-                        $item->bulan = getMonthName($item->bulan);  
+                        $item->bulan = getMonthName($item->bulan);
                         $item->detail = DetailPenilaianKemadrasahan::select([
                             'detail_penilaian_kemadrasahan.id',
                             'ref_mapel.nama AS namaMapel',
@@ -111,6 +111,8 @@ class KemadrasahanController extends Controller
                             'bulan' => null,
                             'semester' => 1,
                             'kelas' => $santri->kodeKelas,
+                            'semester' => null,
+                            'kelas' => null,
                             'detail' => collect([
                                 (object)[
                                     'id' => null,
