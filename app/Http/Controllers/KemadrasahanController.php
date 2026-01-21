@@ -17,9 +17,9 @@ class KemadrasahanController extends Controller
         try {
             $dataUser = User::select([
                     'employee_new.id AS idPegawai',
-                    'employee_new.nama AS namaMurroby',
-                    'employee_new.photo AS fotoMurroby',
-                    'employee_new.alamat AS alamatMurroby',
+                    'employee_new.nama AS namaWaliKelas',
+                    'employee_new.photo AS fotoWaliKelas',
+                    'employee_new.alamat AS alamatWaliKelas',
                     'ref_kelas.code AS kodeKelas'
                 ])
                 ->leftJoin('employee_new', 'employee_new.id', '=', 'users.pegawai_id')
