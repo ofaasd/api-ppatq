@@ -79,9 +79,10 @@ class KemadrasahanController extends Controller
                 ->where('no_induk', $noInduk)
                 ->get()
                 ->groupBy('semester') // Grouping by semester
+                ->sortKeys() // Sort by semester key (1 = ganjil, 2 = genap)
                 ->map(function ($items) {
                     return $items->map(function ($item) {
-                        $item->bulan = getMonthName($item->bulan);
+                        $item->bulan = getMonthName($item->bulan);  
                         $item->detail = DetailPenilaianKemadrasahan::select([
                             'detail_penilaian_kemadrasahan.id',
                             'ref_mapel.nama AS namaMapel',
@@ -97,6 +98,9 @@ class KemadrasahanController extends Controller
                         ->get();
                         return $item;
                     });
+                })
+                ->mapWithKeys(function ($items, $semester) {
+                    return [$semester === 1 ? 'ganjil' : 'genap' => $items];
                 });
 
             if (!$laporan || $laporan->isEmpty()) {
