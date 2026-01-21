@@ -60,6 +60,15 @@ class KemadrasahanController extends Controller
                     ->where('santri_detail.no_induk', $noInduk)
                     ->first();
 
+            if (!$santri) {
+                $santri = [
+                    'noInduk' => $noInduk,
+                    'namaSantri' => null,
+                    'fotoSantri' => null,
+                    'kodeKelas' => null,
+                ];
+            }
+
             $laporan = LaporanBulananKemadrasahan::select([
                     'laporan_bulanan_kemadrasahan.id',
                     'laporan_bulanan_kemadrasahan.bulan',
@@ -87,6 +96,25 @@ class KemadrasahanController extends Controller
                         return $item;
                     });
                 });
+
+            if (!$laporan) {
+                $laporan = [
+                    '1' => [
+                        // semester 1
+                        'id' => null,
+                        'bulan' => null,
+                        'semester' => 1,
+                        'detail' => [
+                            'id' => null,
+                            'materi' => null,
+                            'idLaporan' => null,
+                            'deskripsiPenilaian' => null,
+                            'mingguKe' => null,
+                            'pengampu' => null,
+                        ],
+                    ],
+                ];
+            }
 
             return response()->json([
                 'status' => 'success',
