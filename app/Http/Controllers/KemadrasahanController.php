@@ -8,9 +8,48 @@ use App\Models\RefMapel;
 use App\Models\SantriDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use App\Models\User;
 
 class KemadrasahanController extends Controller
 {
+    public function getSantri($idUser)
+    {
+        try {
+            $dataUser = User::select([
+                    'employee_new.id AS idPegawai',
+                    'employee_new.nama AS namaMurroby',
+                    'employee_new.photo AS fotoMurroby',
+                    'employee_new.alamat AS alamatMurroby',
+                    'ref_kelas.code AS kodeKelas'
+                ])
+                ->leftJoin('employee_new', 'employee_new.id', '=', 'users.pegawai_id')
+                ->leftJoin('ref_kelas', 'ref_kelas.employee_id', '=', 'employee_new.id')
+                ->where('users.id', $idUser)
+                ->first();
+
+            $santri = SantriDetail::select([
+                    'santri_detail.no_induk AS noInduk',
+                    'santri_detail.nama AS namaSantri',
+                    'santri_detail.photo AS fotoSantri',
+                    'santri_detail.kelas AS kodeKelas'
+                ])
+                ->where('santri_detail.kelas', $dataUser->kodeKelas)
+                ->get();
+
+            return response()->json([
+                'status' => 'success',
+                'data' => [
+                    'user' => $dataUser,
+                    'santri' => $santri
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
     public function getDataMapel()
     {
         try {
@@ -168,7 +207,7 @@ class KemadrasahanController extends Controller
             return response()->json([
                 'status' => 'success',
                 'message' => 'Data penilaian berhasil disimpan atau diperbarui'
-            ]);
+            ], 200);
 
         } catch (\Exception $e) {
             // Jika ada satu saja yang error, batalkan semua perubahan
