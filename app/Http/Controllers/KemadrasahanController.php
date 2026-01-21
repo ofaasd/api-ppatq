@@ -67,21 +67,25 @@ class KemadrasahanController extends Controller
                 ])
                 ->where('no_induk', $noInduk)
                 ->get()
-                ->map(function ($item) {
-                    $item->bulan = getMonthName($item->bulan);
-                    $item->detail = DetailPenilaianKemadrasahan::select([
-                        'detail_penilaian_kemadrasahan.id',
-                        'detail_penilaian_kemadrasahan.materi',
-                        'detail_penilaian_kemadrasahan.id_laporan AS idLaporan',
-                        'detail_penilaian_kemadrasahan.deskripsi_penilaian AS deskripsiPenilaian',
-                        'detail_penilaian_kemadrasahan.minggu_ke AS mingguKe',
-                        'employee_new.nama AS pengampu',
-                    ])
-                    ->leftJoin('ref_mapel', 'ref_mapel.id', '=', 'detail_penilaian_kemadrasahan.id_mapel')
-                    ->leftJoin('employee_new', 'employee_new.id', '=', 'detail_penilaian_kemadrasahan.id_pengampu')
-                    ->where('id_laporan', $item->id)
-                    ->get();
-                    return $item;
+                ->groupBy('semester') // Grouping by semester
+                ->map(function ($items) {
+                    return $items->map(function ($item) {
+                        $item->bulan = getMonthName($item->bulan);
+                        $item->detail = DetailPenilaianKemadrasahan::select([
+                            'detail_penilaian_kemadrasahan.id',
+                            'ref_mapel.nama AS namaMapel',
+                            'detail_penilaian_kemadrasahan.materi',
+                            'detail_penilaian_kemadrasahan.id_laporan AS idLaporan',
+                            'detail_penilaian_kemadrasahan.deskripsi_penilaian AS deskripsiPenilaian',
+                            'detail_penilaian_kemadrasahan.minggu_ke AS mingguKe',
+                            'employee_new.nama AS pengampu',
+                        ])
+                        ->leftJoin('ref_mapel', 'ref_mapel.id', '=', 'detail_penilaian_kemadrasahan.id_mapel')
+                        ->leftJoin('employee_new', 'employee_new.id', '=', 'detail_penilaian_kemadrasahan.id_pengampu')
+                        ->where('id_laporan', $item->id)
+                        ->get();
+                        return $item;
+                    });
                 });
 
             return response()->json([
