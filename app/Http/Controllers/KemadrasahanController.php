@@ -38,10 +38,7 @@ class KemadrasahanController extends Controller
 
             return response()->json([
                 'status' => 'success',
-                'data' => [
-                    'user' => $dataUser,
-                    'santri' => $santri
-                ]
+                'data' => $santri
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
