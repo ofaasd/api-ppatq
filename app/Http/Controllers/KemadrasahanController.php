@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DetailPenilaianKemadrasahan;
 use App\Models\LaporanBulananKemadrasahan;
+use App\Models\RefKelas;
 use App\Models\RefMapel;
 use App\Models\SantriDetail;
 use Illuminate\Http\Request;
@@ -72,6 +73,7 @@ class KemadrasahanController extends Controller
             $laporan = LaporanBulananKemadrasahan::select([
                     'laporan_bulanan_kemadrasahan.id',
                     'laporan_bulanan_kemadrasahan.bulan',
+                    'laporan_bulanan_kemadrasahan.kelas',
                     'laporan_bulanan_kemadrasahan.semester',
                 ])
                 ->where('no_induk', $noInduk)
@@ -98,22 +100,46 @@ class KemadrasahanController extends Controller
                 });
 
             if (!$laporan || $laporan->isEmpty()) {
-                $laporan = [
-                    '1' => [
-                        // semester 1
-                        'id' => null,
-                        'bulan' => null,
-                        'semester' => 1,
-                        'detail' => [
+                $laporan = collect([
+                    'ganjil' => collect([
+                        (object)[
                             'id' => null,
-                            'materi' => null,
-                            'idLaporan' => null,
-                            'deskripsiPenilaian' => null,
-                            'mingguKe' => null,
-                            'pengampu' => null,
-                        ],
-                    ],
-                ];
+                            'bulan' => null,
+                            'semester' => 1,
+                            'kelas' => $santri->kodeKelas,
+                            'detail' => collect([
+                                (object)[
+                                    'id' => null,
+                                    'namaMapel' => null,
+                                    'materi' => null,
+                                    'idLaporan' => null,
+                                    'deskripsiPenilaian' => null,
+                                    'mingguKe' => null,
+                                    'pengampu' => null,
+                                ]
+                            ]),
+                        ]
+                    ]),
+                    'genap' => collect([
+                        (object)[
+                            'id' => null,
+                            'bulan' => null,
+                            'semester' => 2,
+                            'kelas' => $santri->kodeKelas,
+                            'detail' => collect([
+                                (object)[
+                                    'id' => null,
+                                    'namaMapel' => null,
+                                    'materi' => null,
+                                    'idLaporan' => null,
+                                    'deskripsiPenilaian' => null,
+                                    'mingguKe' => null,
+                                    'pengampu' => null,
+                                ]
+                            ]),
+                        ]
+                    ]),
+                ]);
             }
 
             return response()->json([
