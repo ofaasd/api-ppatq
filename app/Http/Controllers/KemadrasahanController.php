@@ -247,14 +247,14 @@ class KemadrasahanController extends Controller
             $user = User::where('id', $request->idUser)->first();
             $refKelas = RefKelas::where('employee_id', $user->pegawai_id)->first();
             $santris = SantriDetail::select('no_induk')
-                ->where('kelas', $refKelas->kode)
+                ->where('kelas', $refKelas->code)
                 ->get();
 
             $bulan = $request->bulan;
             $semester = $request->semester;
             $idMapel = $request->idMapel;
             $tipeInput = $request->tipeInput; // 'single' atau 'bulk'
-            $kelas = substr($refKelas->kode, 0, 1);
+            $kelas = substr($refKelas->code, 0, 1);
             
             if ($tipeInput == 'single') {
                 $santri = SantriDetail::where('no_induk', $request->noInduk)->first();
