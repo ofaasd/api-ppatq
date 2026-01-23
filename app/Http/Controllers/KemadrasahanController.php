@@ -259,6 +259,7 @@ class KemadrasahanController extends Controller
             if ($tipeInput == 'single') {
                 $santri = SantriDetail::select('no_induk')
                     ->where('no_induk', $request->noInduk)->first();
+                $kelas = preg_replace('/[^0-9]/', '', $santri->kelas);
 
                 $laporan = LaporanBulananKemadrasahan::updateOrCreate(
                     [
