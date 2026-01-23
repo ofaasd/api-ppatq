@@ -234,7 +234,7 @@ class KemadrasahanController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => $e->getMessage()
-            ], 500);
+            ], 500); 
         }
     }
 
@@ -301,6 +301,16 @@ class KemadrasahanController extends Controller
                             'updated_at' => now(),
                         ]
                     );
+
+                    if (!$laporan) {
+                        response()->json([
+                            'status' => 'error',
+                            'message' => 'Gagal membuat atau memperbarui laporan untuk santri dengan No. Induk: ' . $row->no_induk
+                        ], 500);
+
+                        DB::rollBack();
+                        return;
+                    }
 
                     // 2. Update atau Buat Detail Penilaian (Mencegah Duplikasi Minggu yang Sama)
                     DetailPenilaianKemadrasahan::updateOrCreate(
