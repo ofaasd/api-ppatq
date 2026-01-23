@@ -246,7 +246,7 @@ class KemadrasahanController extends Controller
         try {
             $user = User::where('id', $request->idUser)->first();
             $refKelas = RefKelas::where('employee_id', $user->pegawai_id)->first();
-            $santri = SantriDetail::select('no_induk')
+            $santris = SantriDetail::select('no_induk')
                 ->where('kelas', $refKelas->kode)
                 ->get();
 
@@ -286,14 +286,14 @@ class KemadrasahanController extends Controller
                 );
                 
             } else if ($tipeInput == 'bulk') {
-                if(!$santri || $santri->isEmpty()) {
+                if(!$santris || $santris->isEmpty()) {
                     DB::rollBack();
                     return response()->json([
                         'status' => 'error',
                         'message' => 'Anda tidak ditugaskan sebagai Wali Kelas.'
                     ], 404);
                 }
-                foreach ($santri as $row) {
+                foreach ($santris as $row) {
                     $laporan = LaporanBulananKemadrasahan::updateOrCreate(
                         [
                             'no_induk' => $row->no_induk,
