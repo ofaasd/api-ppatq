@@ -93,6 +93,7 @@ Route::get('/get-staff', [StaffPengasuhController::class, 'getStaff']);
 Route::get('/kesantrian', [KesantrianController::class, 'index']);
 
 Route::get('/kelas-kamar', [KelasKamarController::class, 'index']);
+Route::get('/get-kelas', [KelasKamarController::class, 'getKelas']);
 Route::get('/kelas/{id}', [KelasKamarController::class, 'showKelas']);
 Route::get('/kamar/{id}', [KelasKamarController::class, 'showKamar']);
 

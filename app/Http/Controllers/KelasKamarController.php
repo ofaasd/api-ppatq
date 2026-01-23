@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\RefKelas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Crypt;
@@ -198,5 +199,31 @@ class KelasKamarController extends Controller
             // return response()->json(['error' => $e->getMessage()], 500);
         }
 
+    }
+
+    public function getKelas()
+    {
+        try{
+            $queryKelas = RefKelas::select([
+                'ref_kelas.id',
+                'ref_kelas.code',
+                'ref_kelas.name',
+                'employee_new.nama AS waliKelas'
+            ])
+            ->leftJoin('employee_new', 'ref_kelas.employee_id','=','employee_new.id')
+            ->get();
+
+            return response()->json([
+                "status"  => 200,
+                "message" => "Berhasil mengambil data",
+                "data"    => $queryKelas
+            ], 200);
+        }catch (\Exception $e) {
+            return response()->json([
+                "status"  => 500,
+                "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
+                "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
+            ], 500);
+        }
     }
 }

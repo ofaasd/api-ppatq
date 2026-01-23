@@ -19,6 +19,7 @@ use App\Http\Resources\MurrobyResource;
 use App\Http\Helpers\Helpers_wa;
 
 use App\Http\Requests\LoginMurrobyRequest;
+use App\Models\RefKelas;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
 class MurrobyController extends Controller
@@ -73,10 +74,10 @@ class MurrobyController extends Controller
             ])
             ->leftJoin('users', 'users.pegawai_id', '=', 'employee_new.id')
             ->first();
-
         // Tambahkan token ke resource
         $pegawai->access_token = $tokenData['access_token'];
         $pegawai->expires_in = $tokenData['expires_in'];
+        $pegawai->isWaliKelas = RefKelas::where('employee_id', $user->pegawai_id)->exists();
 
         $nowFormatted = Carbon::now()->translatedFormat('l d F Y, H:i');
 
