@@ -268,7 +268,6 @@ class KemadrasahanController extends Controller
                         'kelas'    => $kelas,
                     ],
                     [
-                        // Anda bisa menambahkan kolom lain yang perlu diupdate di sini
                         'updated_at' => now(),
                     ]
                 );
@@ -287,8 +286,14 @@ class KemadrasahanController extends Controller
                 );
                 
             } else if ($tipeInput == 'bulk') {
+                if(!$santri || $santri->isEmpty()) {
+                    DB::rollBack();
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Anda tidak ditugaskan sebagai Wali Kelas.'
+                    ], 404);
+                }
                 foreach ($santri as $row) {
-                    // 1. Update atau Buat Header Laporan
                     $laporan = LaporanBulananKemadrasahan::updateOrCreate(
                         [
                             'no_induk' => $row->no_induk,
@@ -297,22 +302,18 @@ class KemadrasahanController extends Controller
                             'kelas'    => $kelas,
                         ],
                         [
-                            // Anda bisa menambahkan kolom lain yang perlu diupdate di sini
                             'updated_at' => now(),
                         ]
                     );
 
                     if (!$laporan) {
-                        response()->json([
+                        DB::rollBack();
+                        return response()->json([
                             'status' => 'error',
                             'message' => 'Gagal membuat atau memperbarui laporan untuk santri dengan No. Induk: ' . $row->no_induk
                         ], 500);
-
-                        DB::rollBack();
-                        return;
                     }
 
-                    // 2. Update atau Buat Detail Penilaian (Mencegah Duplikasi Minggu yang Sama)
                     DetailPenilaianKemadrasahan::updateOrCreate(
                         [
                             'id_laporan' => $laporan->id,
@@ -336,7 +337,6 @@ class KemadrasahanController extends Controller
             ], 200);
 
         } catch (\Exception $e) {
-            // Jika ada satu saja yang error, batalkan semua perubahan
             DB::rollBack();
 
             return response()->json([
