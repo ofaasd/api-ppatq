@@ -254,12 +254,12 @@ class KemadrasahanController extends Controller
             $semester = $request->semester;
             $idMapel = $request->idMapel;
             $tipeInput = $request->tipeInput; // 'single' atau 'bulk'
-            $kelas = preg_replace('/[^0-9]/', '', $refKelas->kode);
+            $kelas = substr($refKelas->kode, 0, 1);
             
             if ($tipeInput == 'single') {
                 $santri = SantriDetail::select('no_induk')
                     ->where('no_induk', $request->noInduk)->first();
-                $kelas = preg_replace('/[^0-9]/', '', $santri->kelas);
+                $kelas = substr($santri->kelas, 0, 1);
 
                 $laporan = LaporanBulananKemadrasahan::updateOrCreate(
                     [
