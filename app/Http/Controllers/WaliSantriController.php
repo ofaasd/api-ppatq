@@ -79,17 +79,6 @@ class WaliSantriController extends Controller
             'scope'         => '',
         ]);
 
-        // Menampilkan response error
-        if ($response->failed()) {
-            return response()->json([
-                'status' => $response->status(),
-                'message' => 'Login gagal',
-                'error' => $response->json()
-            ], $response->status());
-        }
-
-        return response()->json($response->failed());
-
         // if ($response->failed()) {
         //     throw new HttpResponseException(response([
         //         "errors" => [
