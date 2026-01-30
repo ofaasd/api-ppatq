@@ -79,6 +79,8 @@ class WaliSantriController extends Controller
             'scope'         => '',
         ]);
 
+        return response()->json($response->failed());
+
         // if ($response->failed()) {
         //     throw new HttpResponseException(response([
         //         "errors" => [
