@@ -388,4 +388,22 @@ class UangSakuController extends Controller
             ], 422);
         }
     }
+
+    public function resetSaldo(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            UangSaku::where('no_induk', $request->noInduk)->update(['jumlah' => 0]);
+
+            DB::commit();
+            return response()->json(['message' => 'Saldo uang saku telah direset menjadi Rp 0'], 200);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                "status"  => 500,
+                "message" => "Terjadi kesalahan saat mereset saldo uang saku. Hubungi Faiz ganteng",
+                "error"   => $e->getMessage() // Opsional: Hapus ini pada production untuk alasan keamanan
+            ], 500);
+        }
+    }
 }

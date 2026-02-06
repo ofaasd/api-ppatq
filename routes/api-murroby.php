@@ -22,6 +22,7 @@ Route::prefix('murroby')->group(function () {
     // Transaksi Saku
     Route::get('/saku-masuk/{noInduk}', [UangSakuController::class, 'uangMasuk']);
     Route::post('/saku-masuk', [UangSakuController::class, 'storeUangMasuk']);
+    Route::post('/reset-saku', [UangSakuController::class, 'resetSaldo']);
     Route::get('/saku-keluar/{noInduk}', [UangSakuController::class, 'uangKeluar']);
     Route::post('/saku-keluar', [UangSakuController::class, 'storeUangKeluar']);
 
