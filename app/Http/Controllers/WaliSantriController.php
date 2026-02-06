@@ -154,6 +154,8 @@ class WaliSantriController extends Controller
                         WHEN 1 THEN 'Uang Saku'
                         WHEN 2 THEN 'Kunjungan Walsan'
                         WHEN 3 THEN 'Sisa Bulan Kemarin'
+                        WHEN 4 THEN 'Saldo Minus'
+                        WHEN 5 THEN 'Bendahara'
                         ELSE 'Tidak Diketahui'
                     END AS uangAsal
                 "),
@@ -270,6 +272,8 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                         WHEN 1 THEN 'Uang Saku'
                         WHEN 2 THEN 'Kunjungan Walsan'
                         WHEN 3 THEN 'Sisa Bulan Kemarin'
+                        WHEN 4 THEN 'Saldo Minus'
+                        WHEN 5 THEN 'Bendahara'
                         ELSE 'Tidak Diketahui'
                     END AS uangAsal
                 "),

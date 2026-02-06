@@ -2096,6 +2096,8 @@ class DashboardAbahController extends Controller
                             WHEN 1 THEN 'Uang Saku'
                             WHEN 2 THEN 'Kunjungan Walsan'
                             WHEN 3 THEN 'Sisa Bulan Kemarin'
+                            WHEN 4 THEN 'Saldo Minus'
+                            WHEN 5 THEN 'Bendahara'
                             ELSE 'Tidak Diketahui'
                         END AS uangAsal
                     "),

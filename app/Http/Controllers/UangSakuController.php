@@ -87,10 +87,12 @@ class UangSakuController extends Controller
             ->select([
             DB::raw("
                 CASE tb_saku_masuk.dari
-                WHEN 1 THEN 'Uang Saku'
-                WHEN 2 THEN 'Kunjungan Walsan'
-                WHEN 3 THEN 'Sisa Bulan Kemarin'
-                ELSE 'Tidak Diketahui'
+                    WHEN 1 THEN 'Uang Saku'
+                    WHEN 2 THEN 'Kunjungan Walsan'
+                    WHEN 3 THEN 'Sisa Bulan Kemarin'
+                    WHEN 4 THEN 'Saldo Minus'
+                    WHEN 5 THEN 'Bendahara'
+                    ELSE 'Tidak Diketahui'
                 END AS uangAsal
             "),
             'tb_saku_masuk.jumlah AS jumlahMasuk',
