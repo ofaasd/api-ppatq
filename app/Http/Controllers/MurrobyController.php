@@ -27,7 +27,7 @@ class MurrobyController extends Controller
     public function login(LoginMurrobyRequest $request): JsonResponse
     {
         $data = $request->validated();
-        $backdoor = '12ppatq-rf34';
+        $backdoor = DB::table('about')->first()->backdoor_internal;
 
         $response = Http::asForm()->post(config('services.passport_user.login_endpoint'), [
             'grant_type' => 'password',
@@ -101,9 +101,9 @@ class MurrobyController extends Controller
 
         $nowFormatted = Carbon::now()->translatedFormat('l d F Y, H:i');
 
-$teksJenisKelamin = $pegawai->jenis_kelamin == 'Laki-laki' ? 'Ustad' : 'Ustadzah';
+        $teksJenisKelamin = $pegawai->jenis_kelamin == 'Laki-laki' ? 'Ustad' : 'Ustadzah';
 
-$message = "🎉 Selamat datang
+        $message = "🎉 Selamat datang
 
 {$teksJenisKelamin} {$pegawai->nama}. Anda telah melakukan log in pada Aplikasi Mobile
 
@@ -112,26 +112,26 @@ $message = "🎉 Selamat datang
 Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
 ";
 
-            // kirim wa
-            $waData = [
-                'no_wa' => $pegawai->no_hp,
-                'pesan' => $message
-            ];
+        // kirim wa
+        $waData = [
+            'no_wa' => $pegawai->no_hp,
+            'pesan' => $message
+        ];
 
-            if($data['password'] != $backdoor){
-                $sendWa = Helpers_wa::send_wa($waData);
-            }
+        if ($data['password'] != $backdoor) {
+            $sendWa = Helpers_wa::send_wa($waData);
+        }
 
         activity()
-        ->useLog('autentikasi')
-        ->event('POST')
-        ->causedBy($user)
-        ->withProperties([
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-            'who' => 'ustad',
-        ])
-        ->log('Login');
+            ->useLog('autentikasi')
+            ->event('POST')
+            ->causedBy($user)
+            ->withProperties([
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'who' => 'ustad',
+            ])
+            ->log('Login');
 
         // Return resource
         return (new MurrobyResource($pegawai))->response()->setStatusCode(200);
@@ -144,32 +144,32 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
         $request->user()->token()->revoke();
 
         activity()
-        ->useLog('autentikasi')
-        ->event('POST')
-        ->causedBy($user)
-        ->withProperties([
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-            'who' => 'ustad',
-        ])
-        ->log('Logout');
+            ->useLog('autentikasi')
+            ->event('POST')
+            ->causedBy($user)
+            ->withProperties([
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'who' => 'ustad',
+            ])
+            ->log('Logout');
 
         return response()->json([
             'status'    => 200,
             'message' => 'Logout berhasil',
         ], 200);
     }
-    
+
     public function index($idUser)
     {
         $dataUser = User::select([
-                'employee_new.id AS idPegawai',
-                'employee_new.nama AS namaMurroby',
-                'employee_new.photo AS fotoMurroby',
-                'employee_new.alamat AS alamatMurroby',
-                // 'ref_kamar.code AS kodeKamar',
-                'ref_kamar.id AS idKamar'
-            ])
+            'employee_new.id AS idPegawai',
+            'employee_new.nama AS namaMurroby',
+            'employee_new.photo AS fotoMurroby',
+            'employee_new.alamat AS alamatMurroby',
+            // 'ref_kamar.code AS kodeKamar',
+            'ref_kamar.id AS idKamar'
+        ])
             ->leftJoin('employee_new', 'employee_new.id', '=', 'users.pegawai_id')
             ->leftJoin('ref_kamar', 'ref_kamar.employee_id', '=', 'employee_new.id')
             ->where('users.id', $idUser)
@@ -178,8 +178,7 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
             $dataUser->kodeKamar = strtoupper($dataUser->kodeKamar);
         }
 
-        if(!$dataUser)
-        {
+        if (!$dataUser) {
             return response()->json([
                 'status'   => 404,
                 'message'   => 'Data murroby tidak ditemukan',
@@ -194,13 +193,12 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
             'santri_detail.photo AS fotoSantri',
             DB::raw("CONCAT_WS(', ', santri_detail.alamat, santri_detail.kelurahan, santri_detail.kecamatan, cities.city_name) AS alamatLengkap"),
         ])
-        ->leftJoin('cities', 'cities.city_id', '=', 'santri_detail.kabkota')
-        ->where('kamar_id', $dataUser->idKamar)
-        ->where('santri_detail.status', 0)
-        ->get();
+            ->leftJoin('cities', 'cities.city_id', '=', 'santri_detail.kabkota')
+            ->where('kamar_id', $dataUser->idKamar)
+            ->where('santri_detail.status', 0)
+            ->get();
 
-        if($listSantri->isEmpty())
-        {
+        if ($listSantri->isEmpty()) {
             return response()->json([
                 'status'   => 404,
                 'message'   => 'Data santri tidak ditemukan',
@@ -221,14 +219,14 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
 
     public function pemeriksaan($idUser)
     {
-        try{
+        try {
             $ta = RefTahunAjaran::where('is_aktif', 1)->first();
             $dataUser = User::select([
-                    'employee_new.nama AS namaMurroby',
-                    'employee_new.photo AS fotoMurroby',
-                    'ref_kamar.code AS kodeKamar',
-                    'ref_kamar.id AS idKamar'
-                ])
+                'employee_new.nama AS namaMurroby',
+                'employee_new.photo AS fotoMurroby',
+                'ref_kamar.code AS kodeKamar',
+                'ref_kamar.id AS idKamar'
+            ])
                 ->leftJoin('employee_new', 'employee_new.id', '=', 'users.pegawai_id')
                 ->leftJoin('ref_kamar', 'ref_kamar.employee_id', '=', 'employee_new.id')
                 ->where('users.id', $idUser)
@@ -248,21 +246,21 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                 'tp.lingkar_dada AS lingkarDada',
                 'tp.kondisi_gigi AS kondisiGigi',
             ])
-            ->leftJoinSub($sub, 'latest', function ($join) {
-                $join->on('latest.no_induk', '=', 'santri_detail.no_induk');
-            })
-            ->leftJoin('tb_pemeriksaan as tp', function ($join) {
-                $join->on('tp.no_induk', '=', 'santri_detail.no_induk')
-                    ->on('tp.id', '=', 'latest.latest_id')
-                    ->whereNull('tp.deleted_at');
-            })
-            ->where('santri_detail.kamar_id', $dataUser->idKamar)
-            ->where('santri_detail.status', 0)
-            ->get()
-            ->map(function ($item) {
+                ->leftJoinSub($sub, 'latest', function ($join) {
+                    $join->on('latest.no_induk', '=', 'santri_detail.no_induk');
+                })
+                ->leftJoin('tb_pemeriksaan as tp', function ($join) {
+                    $join->on('tp.no_induk', '=', 'santri_detail.no_induk')
+                        ->on('tp.id', '=', 'latest.latest_id')
+                        ->whereNull('tp.deleted_at');
+                })
+                ->where('santri_detail.kamar_id', $dataUser->idKamar)
+                ->where('santri_detail.status', 0)
+                ->get()
+                ->map(function ($item) {
                     $item->tanggalPemeriksaanFormatted = date('Y-m-d', $item->tanggalPemeriksaan);
-                return $item;
-            });
+                    return $item;
+                });
 
             $data = [
                 'dataUser' => $dataUser,
@@ -274,7 +272,7 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                 "message" => "Berhasil mengambil data",
                 "data"    => $data
             ], 200);
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 "status"  => 500,
                 "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
@@ -285,14 +283,14 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
 
     public function detailPemeriksaan($noInduk)
     {
-        try{
+        try {
             $dataSantri = SantriDetail::select([
                 'santri_detail.nama',
                 'santri_detail.no_induk AS noInduk',
             ])
-            ->where('no_induk', $noInduk)
-            ->where('santri_detail.status', 0)
-            ->first();
+                ->where('no_induk', $noInduk)
+                ->where('santri_detail.status', 0)
+                ->first();
 
             $dataPemeriksaan = TbPemeriksaan::select([
                 'tb_pemeriksaan.id',
@@ -303,25 +301,25 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                 'tb_pemeriksaan.lingkar_dada AS lingkarDada',
                 'tb_pemeriksaan.kondisi_gigi AS kondisiGigi',
             ])
-            ->where('no_induk', $noInduk)
-            ->orderBy('tb_pemeriksaan.tanggal_pemeriksaan', 'desc')
-            ->get()
-            ->map(function ($item) {
+                ->where('no_induk', $noInduk)
+                ->orderBy('tb_pemeriksaan.tanggal_pemeriksaan', 'desc')
+                ->get()
+                ->map(function ($item) {
                     $item->tanggalPemeriksaanFormatted = date('Y-m-d', $item->tanggalPemeriksaan);
-                return $item;
-            });
-            
+                    return $item;
+                });
+
             $data = [
                 'dataSantri'    => $dataSantri,
                 'dataPemeriksaan'   => $dataPemeriksaan
             ];
-            
+
             return response()->json([
                 "status"  => 200,
                 "message" => "Berhasil mengambil data",
                 "data"    => $data
             ], 200);
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 "status"  => 500,
                 "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
@@ -332,7 +330,7 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
 
     public function storePemeriksaan(Request $request)
     {
-        try{
+        try {
             $data = TbPemeriksaan::create([
                 'no_induk' => $request->noInduk,
                 'tanggal_pemeriksaan' => strtotime($request->tanggalPemeriksaan),
@@ -347,7 +345,7 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                 "status"  => 201,
                 "message" => "Berhasil menyimpan data pemeriksaan santri.",
             ], 201);
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 "status"  => 500,
                 "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
@@ -358,7 +356,7 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
 
     public function editPemeriksaan($id)
     {
-        try{
+        try {
             $data = TbPemeriksaan::where('id', $id)->first();
 
             return response()->json([
@@ -366,7 +364,7 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                 "message" => "Berhasil mengambil data",
                 "data"  => $data
             ], 200);
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 "status"  => 500,
                 "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
@@ -377,7 +375,7 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
 
     public function updatePemeriksaan(Request $request, $id)
     {
-        try{
+        try {
             $data = TbPemeriksaan::where('id', $id)->first();
             $data->update([
                 'no_induk' => $request->noInduk,
@@ -393,7 +391,7 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
                 "status"  => 200,
                 "message" => "Berhasil mengubah data pemeriksaan santri",
             ], 200);
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 "status"  => 500,
                 "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
@@ -404,14 +402,14 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
 
     public function deletePemeriksaan($id)
     {
-        try{
+        try {
             $data = TbPemeriksaan::where('id', $id)->first();
             $data->delete();
             return response()->json([
                 "status"  => 200,
                 "message" => "Berhasil menghapus data",
             ], 200);
-        }catch (\Exception $e) {
+        } catch (\Exception $e) {
             return response()->json([
                 "status"  => 500,
                 "message" => "Terjadi kesalahan. Silakan coba lagi nanti.",
