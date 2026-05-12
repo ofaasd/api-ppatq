@@ -17,6 +17,13 @@ class UangSakuController extends Controller
 {
     public function index($idUser)
     {
+        $data = [
+            'status'   => 400,
+            'message'   => 'Uang Dipindahkan ke Aplikasi Lain.',
+        ];
+
+        return response()->json($data, 400);
+
         $ta = DB::table('ref_tahun_ajaran')->where('is_aktif', 1)->first();
         $dataUser = DB::table('users')
             ->select([
