@@ -19,7 +19,7 @@ class UangSakuController extends Controller
     {
         $data = [
             'status'   => 400,
-            'message'   => 'Fitur Uang Saku Telah Dipindahkan ke Aplikasi Lain.',
+            'message'   => 'Layanan Uang Saku telah dipindahkan ke Aplikasi PSP Mobile (Informasi Uang Saku dan Syahriah). Silakan download melalui tautan berikut: https://play.google.com/store/apps/details?id=id.co.solusinegeri.pspEdmedia',
         ];
 
         return response()->json($data, 400);
