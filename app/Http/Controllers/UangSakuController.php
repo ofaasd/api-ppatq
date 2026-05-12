@@ -19,7 +19,7 @@ class UangSakuController extends Controller
     {
         $data = [
             'status'   => 400,
-            'message'   => 'Uang Dipindahkan ke Aplikasi Lain.',
+            'message'   => 'Fitur Uang Saku Telah Dipindahkan ke Aplikasi Lain.',
         ];
 
         return response()->json($data, 400);
