@@ -197,11 +197,11 @@ class WaliSantriController extends Controller
                 $hasil->access_token = $tokenData['access_token'];
                 $hasil->expires_in = $tokenData['expires_in'];
             }
-            $hasil->total_saku_masuk = $sakuMasuk->sum('jumlah');
+            $hasil->total_saku_masuk = 0;
             $hasil->saku_masuk = $sakuMasuk;
 
             $hasil->saku_keluar = $sakuKeluar;
-            $hasil->total_saku_keluar = $sakuKeluar->sum('jumlah');
+            $hasil->total_saku_keluar = 0;
 
             activity()
             ->useLog('autentikasi')
