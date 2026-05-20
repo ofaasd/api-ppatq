@@ -198,9 +198,9 @@ class WaliSantriController extends Controller
                 $hasil->expires_in = $tokenData['expires_in'];
             }
             $hasil->total_saku_masuk = 0;
-            $hasil->saku_masuk = $sakuMasuk;
+            $hasil->saku_masuk = [];
 
-            $hasil->saku_keluar = $sakuKeluar;
+            $hasil->saku_keluar = [];
             $hasil->total_saku_keluar = 0;
 
             activity()
