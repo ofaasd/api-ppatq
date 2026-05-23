@@ -28,6 +28,9 @@ class PelanggaranKetertibanController extends Controller
             ->get()
             ->map(function($item){
                 $item->tanggal = Carbon::parse($item->tanggal)->translatedFormat('d F Y');
+                $item->buangSampah = formatPelanggaranKetertiban($item->buangSampah);
+                $item->menataPeralatan = formatPelanggaranKetertiban($item->menataPeralatan);
+                $item->tidakBerseragam = formatPelanggaranKetertiban($item->tidakBerseragam);
 
                 return $item;
             });

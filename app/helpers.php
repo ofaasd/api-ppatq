@@ -39,3 +39,8 @@ function formatDateWithMonthName($date)
 
     return "{$day} {$month} {$year}";
 }
+
+function formatPelanggaranKetertiban($value)
+{
+    return $value == 1 ? 'Bagus' : 'Tidak';
+}
