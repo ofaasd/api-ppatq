@@ -97,7 +97,7 @@ class MurrobyController extends Controller
         // Tambahkan token ke resource
         $pegawai->access_token = $tokenData['access_token'];
         $pegawai->expires_in = $tokenData['expires_in'];
-        $pegawai->isWaliKelas = RefKelas::where('employee_id', $user->pegawai_id)->exists();
+        $pegawai->isWaliKelas = RefKelas::where('employee_id', $pegawai->id)->exists();
 
         $nowFormatted = Carbon::now()->translatedFormat('l d F Y, H:i');
 
