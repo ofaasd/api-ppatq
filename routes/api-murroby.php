@@ -41,4 +41,7 @@ Route::prefix('murroby')->group(function () {
     Route::get('/santri/kelengkapan/edit/{idKelengkapan}', [KelengkapanController::class, 'edit']);
     Route::put('/santri/kelengkapan/update/{idKelengkapan}', [KelengkapanController::class, 'update']);
     Route::delete('/santri/kelengkapan/{idKelengkapan}', [KelengkapanController::class, 'delete']);
+    
+    // Keamanan
+    require __DIR__ . '/api-keamanan.php';
 });
