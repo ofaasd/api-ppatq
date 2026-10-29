@@ -93,7 +93,8 @@ class KemadrasahanController extends Controller
                             'employee_new.nama AS pengampu',
                         ])
                         ->leftJoin('ref_mapel', 'ref_mapel.id', '=', 'detail_penilaian_kemadrasahan.id_mapel')
-                        ->leftJoin('employee_new', 'employee_new.id', '=', 'detail_penilaian_kemadrasahan.id_pengampu')
+                        ->leftJoin('users', 'users.id', '=', 'detail_penilaian_kemadrasahan.id_pengampu')
+                        ->leftJoin('employee_new', 'users.pegawai_id', '=', 'employee_new.id')
                         ->where('id_laporan', $item->id)
                         ->get();
                         return $item;
@@ -209,7 +210,8 @@ class KemadrasahanController extends Controller
                     'employee_new.nama AS pengampu',
                 ])
                 ->leftJoin('ref_mapel', 'ref_mapel.id', '=', 'detail_penilaian_kemadrasahan.id_mapel')
-                ->leftJoin('employee_new', 'employee_new.id', '=', 'detail_penilaian_kemadrasahan.id_pengampu')
+                ->leftJoin('users', 'users.id', '=', 'detail_penilaian_kemadrasahan.id_pengampu')
+                ->leftJoin('employee_new', 'users.pegawai_id', '=', 'employee_new.id')
                 ->where('id_laporan', $item->id)
                 ->get();
                 return $item;
