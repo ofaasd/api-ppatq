@@ -60,7 +60,7 @@ class UstadTahfidzController extends Controller
         try{
             $user = User::where('id', $idUser)->first();
             $tahfidz = Tahfidz::where('employee_id', $user->pegawai_id)->first();
-            $ta = RefTahunAjaran::where('is_aktif', 1)->first();
+            // $ta = RefTahunAjaran::where('is_aktif', 1)->first();
             $detail = DetailSantriTahfidz::select([
                 'detail_santri_tahfidz.id',
                 'detail_santri_tahfidz.bulan',
@@ -81,7 +81,7 @@ class UstadTahfidzController extends Controller
             ->leftJoin('santri_detail', 'santri_detail.no_induk', '=', 'detail_santri_tahfidz.no_induk')
             ->leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
             ->where('id_tahfidz', $tahfidz->id)
-            ->where('detail_santri_tahfidz.id_tahun_ajaran', $ta->id)
+            // ->where('detail_santri_tahfidz.id_tahun_ajaran', $ta->id)
             ->where('santri_detail.status', 0)
             ->orderBy('detail_santri_tahfidz.tanggal', 'desc')
             ->get();
@@ -217,7 +217,7 @@ class UstadTahfidzController extends Controller
     public function detailSantri(int $noInduk)
     {
         try{
-            $ta = RefTahunAjaran::where('is_aktif', 1)->first();
+            // $ta = RefTahunAjaran::where('is_aktif', 1)->first();
             $getData = DetailSantriTahfidz::select([
                 'detail_santri_tahfidz.bulan',
                 'detail_santri_tahfidz.tahun',
@@ -234,7 +234,7 @@ class UstadTahfidzController extends Controller
                 'detail_santri_tahfidz.ghorib',
             ])
             ->leftJoin('kode_juz', 'kode_juz.kode', '=', 'detail_santri_tahfidz.kode_juz_surah')
-            ->where('detail_santri_tahfidz.id_tahun_ajaran', $ta->id)
+            // ->where('detail_santri_tahfidz.id_tahun_ajaran', $ta->id)
             ->where('detail_santri_tahfidz.no_induk', $noInduk)
             ->orderBy('detail_santri_tahfidz.tahun', 'desc')
             ->orderBy('detail_santri_tahfidz.bulan', 'desc')
